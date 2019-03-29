@@ -19,7 +19,6 @@ def reload():
 
 
 a = annot.AnnotationTable(keep_annotators = True)
-a.load()
 
 # there is a boolean array representing the membership of proteins
 # in each category; rows are protein, columns are categories
