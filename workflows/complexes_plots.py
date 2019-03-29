@@ -12,6 +12,10 @@ import pandas as pd
 import pypath
 from pypath import complex
 
+# Colors!
+cg = (87/255, 171/255, 39/255)
+cb = (0/255, 84/255, 159/255)
+
 if os.getcwd().endswith('omnipath2'):
     os.chdir('workflows')
 
@@ -57,11 +61,12 @@ print('Out of %d complexes, %d are homomultimers (%.2f %%) and %d '
 fig, ax = plt.subplots()
 ax.pie([homomultimer, heteromultimer],
        labels=['Homomultimers', 'Heteromultimers'],
-       autopct='%.2f %%')
+       autopct='%.2f %%',
+       colors=[cg, cb])
 ax.set_title('Complex types')
 fig.tight_layout()
 fig.savefig('../figures/complex_types.svg')
-
+fig
 print('There are a total of %d unique references' % len(unique_refs))
 
 # Complexes by resource
@@ -75,7 +80,7 @@ for c in co.complexes.values():
 comp_by_res = pd.Series(comp_by_res).sort_values(ascending=False)
 rng = range(len(comp_by_res))
 fig, ax = plt.subplots()
-ax.bar(rng, comp_by_res.values)
+ax.bar(rng, comp_by_res.values, color=cb)
 ax.set_xticks(rng)
 ax.set_xticklabels(comp_by_res.index, rotation=90)
 ax.set_xlabel('Resource')
