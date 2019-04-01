@@ -16,13 +16,15 @@ from pypath import complex
 cg = (87/255, 171/255, 39/255)
 cb = (0/255, 84/255, 159/255)
 
+cachedir = '~/pypath_cache'
+
 if os.getcwd().endswith('omnipath2'):
     os.chdir('workflows')
 
-if not os.path.exists('new_cache'):
-    os.makedirs('new_cache')
+if not os.path.exists(cachedir):
+    os.makedirs(cachedir)
 
-pypath.settings.setup(cachedir='new_cache')
+pypath.settings.setup(cachedir=cachedir)
 co = complex.ComplexAggregator()
 
 # Number of complexes
