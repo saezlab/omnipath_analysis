@@ -16,7 +16,7 @@ from pypath import annot
 cg = (87/255, 171/255, 39/255)
 cb = (0/255, 84/255, 159/255)
 
-cachedir = '~/pypath_cache'
+cachedir = '/home/nico/pypath_cache'
 
 if os.getcwd().endswith('omnipath2'):
     os.chdir('workflows')
