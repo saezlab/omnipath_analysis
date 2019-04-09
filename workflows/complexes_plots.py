@@ -79,6 +79,7 @@ for c in co.complexes.values():
         comp_by_res[s] += 1
 
 comp_by_res = pd.Series(comp_by_res).sort_values(ascending=True)
+
 #================================= PLOTTING ==================================#
 
 # 1) Complex types
