@@ -4,15 +4,18 @@
 # turei.denes@gmail.com
 
 import imp
+import pprint
 
 from pypath import mapping
 from pypath import dataio
+from pypath import intercell_annot
 from pypath import annot
 from pypath import intercell
 
 
 def reload():
     
+    imp.reload(intercell_annot)
     imp.reload(annot)
     imp.reload(intercell)
 
@@ -22,5 +25,10 @@ def reload():
 # and provide reports for plotting
 i = intercell.IntercellAnnotation()
 
-len(i.receptors)
-[(k, len(v)) for k, v in i.receptors_by_resource.items()]
+pprint.pprint([(k, len(v)) for k, v in i.classes.items()])
+
+i.export(
+    fname = 'intercell_classes_20190411.tsv',
+    sep = '\t',
+    index = False,
+)
