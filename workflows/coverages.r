@@ -1,46 +1,57 @@
+#!/usr/bin/env Rscript
+
+# Denes Turei
+# turei.denes@gmail.com
+
 
 require(dplyr)
 require(ggplot2)
 require(readr)
 
-maincov <- read_tsv('main_coverage.tsv') %>%
+maincov <- read_tsv('data/main_coverage.tsv') %>%
     mutate(cov = omnipath / total * 100) %>%
     arrange(desc(total)) %>%
     mutate(cls = factor(cls, levels = cls, ordered = TRUE))
 
 p <- ggplot(
-    maincov, aes(x = cls, total)
-) +
-geom_col(fill = 'black') +
-xlab('Classes') +
-ylab('Number of proteins') +
-theme_bw() +
-theme(
-    text = element_text(family = 'DINPro'),
-    axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)
-)
+        maincov, aes(x = cls, total)
+    ) +
+    geom_col(fill = 'black') +
+    xlab('Classes') +
+    ylab('Number of proteins') +
+    theme_bw() +
+    theme(
+        text = element_text(family = 'DINPro'),
+        axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)
+    )
 
-ggsave('class_sizes.pdf', device = cairo_pdf, width = 5, height = 4)
+ggsave('figures/class_sizes.pdf', device = cairo_pdf, width = 5, height = 4)
 
 
 
 p <- ggplot(
-    maincov, aes(x = cls, cov)
+        maincov,
+        aes(x = cls, cov)
     ) +
-geom_col(fill = 'black') +
-xlab('Classes') +
-ylab('Covered in OmniPath') +
-theme_bw() +
-theme(
-    text = element_text(family = 'DINPro'),
+    geom_col(fill = 'black') +
+    xlab('Classes') +
+    ylab('Covered in OmniPath') +
+    theme_bw() +
+    theme(
+        text = element_text(family = 'DINPro'),
         axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)
-        )
+    )
 
-ggsave('class_coverage.pdf', device = cairo_pdf, width = 5, height = 4)
+ggsave(
+    'figures/class_coverage.pdf',
+    device = cairo_pdf,
+    width = 5,
+    height = 4
+)
 
 
 
-cat_overlaps <- read_tsv('category_overlaps.tsv') %>%
+cat_overlaps <- read_tsv('data/category_overlaps.tsv') %>%
     mutate(poverlap = overlap / pmin(size0, size1) * 100) %>%
     filter(cat0 != cat1)
 
@@ -58,11 +69,17 @@ p <- ggplot(cat_overlaps, aes(x = cat0, y = cat1, size = poverlap)) +
         axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)
     )
 
-ggsave('category_overlaps.pdf', device = cairo_pdf, width = 6, height = 5)
+ggsave(
+    'figures/category_overlaps.pdf',
+    device = cairo_pdf,
+    width = 6,
+    height = 5
+)
 
 
+# connections between categories
 dens <- 0.00040319772927432604
-connections <- read_tsv('connections.tsv')
+connections <- read_tsv('data/connections.tsv')
 
 connections <- bind_rows(
     connections,
@@ -84,7 +101,12 @@ p <- ggplot(connections, aes(x = cat0, y = cat1, size = conn)) +
         axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)
     )
 
-ggsave('numof_connections.pdf', device = cairo_pdf, width = 6, height = 5)
+ggsave(
+    'figures/numof_connections.pdf',
+    device = cairo_pdf,
+    width = 6,
+    height = 5
+)
 
 
 p <- ggplot(connections, aes(x = cat0, y = cat1, size = econn)) +
@@ -101,5 +123,9 @@ p <- ggplot(connections, aes(x = cat0, y = cat1, size = econn)) +
         axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)
     )
 
-ggsave('enrich_connections.pdf', device = cairo_pdf, width = 6, height = 5)
-
+ggsave(
+    'figures/enrich_connections.pdf',
+    device = cairo_pdf,
+    width = 6,
+    height = 5
+)

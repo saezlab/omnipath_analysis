@@ -36,7 +36,7 @@ n = network.Network.from_igraph(pa)
 pprint.pprint([(k, len(v)) for k, v in i.classes.items()])
 
 i.export(
-    fname = 'intercell_classes_20190411.tsv',
+    fname = 'data/intercell_classes_20190411.tsv',
     sep = '\t',
     index = False,
 )
@@ -62,7 +62,7 @@ for typ, ccls in intercell_annot.class_types.items():
         ])
 
 
-with open('main_coverage.tsv', 'w') as fp:
+with open('data/main_coverage.tsv', 'w') as fp:
     _ = fp.write('\t'.join(cov_hdr))
     _ = fp.write('\n')
     for l in coverages:
@@ -148,7 +148,7 @@ for c0, c1 in itertools.combinations_with_replacement(i.class_names, 2):
         ncon,
     ])
 
-with open('connections.tsv', 'w') as fp:
+with open('data/connections.tsv', 'w') as fp:
     _ = fp.write('\t'.join(conn_hdr))
     _ = fp.write('\n')
     for conn in connections:
@@ -170,7 +170,7 @@ for c0, c1 in itertools.product(i.class_names, i.class_names):
         len(i.classes[c0] & i.classes[c1]),
     ])
 
-with open('category_overlaps.tsv', 'w') as fp:
+with open('data/category_overlaps.tsv', 'w') as fp:
     _ = fp.write('\t'.join(cat_overlap_hdr))
     _ = fp.write('\n')
     for c_ol in category_overlaps:
