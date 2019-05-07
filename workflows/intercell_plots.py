@@ -48,8 +48,8 @@ if not os.path.exists(cachedir):
 pypath.settings.setup(cachedir=cachedir)
 
 #============================== RETRIEVING INFO ==============================#
-
-i = intercell.IntercellAnnotation()
+with pypath.curl.cache_off():
+    i = intercell.IntercellAnnotation()
 
 # List of intercellular attributes (ordered by resource)
 elems_s = [a for a in dir(i) if a.endswith('_by_resource')]
