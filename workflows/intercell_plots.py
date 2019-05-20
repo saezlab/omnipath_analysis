@@ -56,6 +56,8 @@ print([x for x in dir(i) if not x.startswith('_')])
 counts = dict((c, i.counts()[c]) for c in i.class_names)
 counts = pd.Series(counts).sort_values(ascending=False)
 
+i.class_names
+
 #================================= PLOTTING ==================================#
 # Proteins by class
 fig, ax = plt.subplots()

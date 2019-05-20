@@ -27,11 +27,23 @@ if not os.path.exists(cachedir):
 
 pypath.settings.setup(cachedir=cachedir)
 
-with pypath.curl.cache_off():
-    a = annot.AnnotationTable(keep_annotators=True)
-    a.load()
+#with pypath.curl.cache_off():
+a = annot.AnnotationTable(keep_annotators=True)
+a.load()
 
-a.to_dataframe()
+df = a.to_dataframe()
+#a.names
+df.to_csv('/home/nico/Desktop/annots.csv')
+
+
+type(a)
+
+
+
+
+
+
+
 print([x for x in dir(a) if not x.startswith('_')])
 
 ###############################################################################
