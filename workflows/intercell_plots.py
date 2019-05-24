@@ -5,7 +5,7 @@
 # nicolas.palacio@bioquant.uni-heidelberg.de
 
 import os
-import itertools
+import itertools as itt
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -15,12 +15,11 @@ import networkx as nx
 import pypath
 from pypath import intercell
 from pypath.main import PyPath
-from data_tools.plots import venn
+from data_tools.plots import venn, upset_wrap
 from data_tools.spatial import equidist_polar
 
 
 #=================================== SETUP ===================================#
-
 # Colors!
 green = (87/255, 171/255, 39/255)
 lime = (189/255, 205/255, 0/255)
@@ -48,8 +47,8 @@ if not os.path.exists(cachedir):
 pypath.settings.setup(cachedir=cachedir)
 
 #============================== RETRIEVING INFO ==============================#
-with pypath.curl.cache_off():
-    i = intercell.IntercellAnnotation()
+#with pypath.curl.cache_off():
+i = intercell.IntercellAnnotation()
 
 print([x for x in dir(i) if not x.startswith('_')])
 
@@ -109,10 +108,10 @@ fig.savefig('../figures/intercell_prots_by_class.svg')
 #interact = dict()
 
 # For all possible pairs of annotation types
-#for (a, b) in itertools.combinations(annots.keys(), 2):
+#for (a, b) in itt.combinations(annots.keys(), 2):
     # Check for edges in PPI network for any combination of proteins
 #    edges = [(1 if pa.get_edge(i, j) else 0)
-#             for (i, j) in itertools.product(annots[a], annots[b])]
+#             for (i, j) in itt.product(annots[a], annots[b])]
     # Store number of connecting edges
 #    interact[(a, b)] = sum(edges)
 
