@@ -53,21 +53,48 @@ i = intercell.IntercellAnnotation()
 print([x for x in dir(i) if not x.startswith('_')])
 
 counts = dict((c, i.counts()[c]) for c in i.class_names)
-counts = pd.Series(counts).sort_values(ascending=False)
+counts = pd.Series(counts).sort_values(ascending=True)
 
 i.class_names
+i.classes_by_entity('P05106')
+sources = set([x.split('_')[-1] for x in i.classes.keys() if
+               (x not in i.class_names and not len(x.split('_'))==1)])
+
+elems_by_source = dict()
+
+for k, v in i.classes.items():
+    s = k.split('_')[-1]
+
+    if s in sources:
+
+        if s not in elems_by_source.keys():
+            elems_by_source[s] = v
+
+        else:
+            elems_by_source[s].update(v)
+
+elems_by_source = pd.Series(map(len, elems_by_source.values()),
+                            index=elems_by_source.keys())
+elems_by_source.sort_values(inplace=True)
 
 #================================= PLOTTING ==================================#
 # Proteins by class
 fig, ax = plt.subplots()
-ax.bar(range(len(counts)), counts.values)
-ax.set_xticks(range(len(counts)))
-ax.set_xticklabels(counts.index, rotation=90)
+ax.barh(range(len(counts)), counts.values, color=blue)
+ax.set_yticks(range(len(counts)))
+ax.set_yticklabels(counts.index)#, rotation=90)
 ax.set_title('Proteins by class')
 fig.tight_layout()
 fig.savefig('../figures/intercell_prots_by_class.svg')
 
-
+# Entities by source
+fig, ax = plt.subplots(figsize=(7, 7))
+ax.barh(range(len(elems_by_source)), elems_by_source.values, color=blue)
+ax.set_yticks(range(len(elems_by_source)))
+ax.set_yticklabels(elems_by_source.index)#, rotation=90)
+ax.set_title('Entities by source')
+fig.tight_layout()
+fig.savefig('../figures/intercell_ents_by_source.svg')
 ###############################################################################
 #           vvvv       HERE ON USED FOR PREVIOUS VERSION       vvvv           #
 ###############################################################################
