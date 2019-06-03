@@ -56,20 +56,41 @@ class FiguresPreprocess(session_mod.Logger):
         
         self.omnipath_args = copy.deepcopy(self.omnipath_args_default)
         self.omnipath_args.update(omnipath_args or {})
-        
-        if omnipath_pickle and os.path.exists(omnipath_pickle):
-            
-            self.omnipath_args['pfile'] = omnipath_pickle
-        
         self.complex_args = complex_args or {}
         self.annotation_args = annotation_args or {}
         self.intercell_args = intercell_args or {}
+        
+        self.omnipath_pickle = omnipath_pickle
         self.complex_pickle = complex_pickle
         self.annotation_pickle = annotation_pickle
         self.intercell_pickle = intercell_pickle
         
         self.datadir = datadir
         self.date = time.strftime('%Y%m%d')
+    
+    
+    def reload(self):
+        """
+        Reloads the object from the module level.
+        """
+
+        modname = self.__class__.__module__
+        mod = __import__(modname, fromlist = [modname.split('.')[0]])
+        imp.reload(mod)
+        new = getattr(mod, self.__class__.__name__)
+        setattr(self, '__class__', new)
+        
+        for attr in (
+            'complex',
+            'network',
+            'igraph_network',
+            'annot',
+            'intercell',
+        ):
+            
+            if hasattr(self, attr):
+                
+                getattr(self, attr).reload()
     
     
     def main(self):
@@ -129,7 +150,15 @@ class FiguresPreprocess(session_mod.Logger):
     def load_network(self):
         
         self.igraph_network = main.PyPath()
-        self.igraph_network.load_omnipath(**self.omnipath_args)
+        
+        if self.omnipath_pickle:
+            
+            self.igraph_network.init_network(pfile = self.omnipath_pickle)
+            
+        else:
+            
+            self.igraph_network.load_omnipath(**self.omnipath_args)
+        
         self.network = network.Network.from_igraph(self.igraph_network)
     
     

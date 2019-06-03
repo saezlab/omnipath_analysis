@@ -27,7 +27,6 @@ pa.load_omnipath(
     kinase_substrate_extra = True,
     ligand_receptor_extra = True,
 )
-
 pa.save_network(pfile = omnipath_pickle)
 
 
