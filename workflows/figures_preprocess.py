@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+#-*- coding: utf-8 -*-
 
 # Denes Turei 2019
 # turei.denes@gmail.com
@@ -75,6 +76,7 @@ class FiguresPreprocess(session_mod.Logger):
         
         self.setup()
         self.load()
+        self.export_tables()
     
     
     def setup(self):
@@ -90,6 +92,14 @@ class FiguresPreprocess(session_mod.Logger):
         self.load_annot()
         self.load_intercell()
         self.load_network()
+    
+    
+    def export_tables(self):
+        
+        self.export_intercell_classes()
+        self.export_intercell_coverages()
+        self.export_connections()
+        self.export_overlaps()
     
     
     def load_complex(self):
@@ -312,7 +322,9 @@ class FiguresPreprocess(session_mod.Logger):
     def export_overlaps(self):
         
         # overlaps between categories
-        cat_overlap_hdr = ['cat0', 'cat1', 'size0', 'size1', 'total', 'overlap']
+        cat_overlap_hdr = [
+            'cat0', 'cat1', 'size0', 'size1', 'total', 'overlap'
+        ]
         self.category_overlaps = []
         
         for c0, c1 in (
