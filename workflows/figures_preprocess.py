@@ -13,6 +13,9 @@ import collections
 import itertools
 import time
 
+import numpy as np
+import pandas as pd
+
 from pypath import mapping
 from pypath import dataio
 from pypath import intercell_annot
@@ -118,7 +121,9 @@ class FiguresPreprocess(session_mod.Logger):
     def export_tables(self):
         
         self.export_intercell_classes()
+        self.collect_classes()
         self.export_intercell_coverages()
+        self.build_intercell_network()
         self.export_connections()
         self.export_overlaps()
     
@@ -191,8 +196,11 @@ class FiguresPreprocess(session_mod.Logger):
             
             for cls in ccls:
                 
-                total = len(i.classes[cls])
-                in_network = len(i.classes[cls] & set(pa.graph.vs['name']))
+                total = len(self.intercell.classes[cls])
+                in_network = len(
+                    self.intercell.classes[cls] &
+                    set(self.igraph_network.graph.vs['name'])
+                )
                 
                 self.intercell_coverages.append([
                     typ,
@@ -307,7 +315,7 @@ class FiguresPreprocess(session_mod.Logger):
         ):
             
             if (
-                self.intercell.i.class_types[c0] == 'above_main' or
+                self.intercell.class_types[c0] == 'above_main' or
                 self.intercell.class_types[c1] == 'above_main'
             ):
                 continue
@@ -328,8 +336,8 @@ class FiguresPreprocess(session_mod.Logger):
             self.connections.append([
                 c0,
                 c1,
-                len(i.classes[c0]),
-                len(i.classes[c1]),
+                len(self.intercell.classes[c0]),
+                len(self.intercell.classes[c1]),
                 numof_connections,
             ])
         
