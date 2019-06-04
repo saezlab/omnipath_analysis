@@ -52,13 +52,16 @@ i = intercell.IntercellAnnotation()
 
 print([x for x in dir(i) if not x.startswith('_')])
 
+# Number of proteins by class
 counts = dict((c, i.counts()[c]) for c in i.class_names)
 counts = pd.Series(counts).sort_values(ascending=True)
 
-i.class_names
-i.classes_by_entity('P05106')
+# Overlapping proteins across classes
+
+
+# Entities by source
 sources = set([x.split('_')[-1] for x in i.classes.keys() if
-               (x not in i.class_names and not len(x.split('_'))==1)])
+(x not in i.class_names and not len(x.split('_'))==1)])
 
 elems_by_source = dict()
 
@@ -95,6 +98,7 @@ ax.set_yticklabels(elems_by_source.index)#, rotation=90)
 ax.set_title('Entities by source')
 fig.tight_layout()
 fig.savefig('../figures/intercell_ents_by_source.svg')
+
 ###############################################################################
 #           vvvv       HERE ON USED FOR PREVIOUS VERSION       vvvv           #
 ###############################################################################

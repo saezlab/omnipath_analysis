@@ -28,19 +28,20 @@ if not os.path.exists(cachedir):
 pypath.settings.setup(cachedir=cachedir)
 
 #with pypath.curl.cache_off():
-a = annot.AnnotationTable(keep_annotators=True)
+a = annot.AnnotationTable(keep_annotators=True, create_dataframe=True)
 a.load()
 
 df = a.to_dataframe()
 #a.names
 df.to_csv('/home/nico/Desktop/annots.csv')
 
+len(a.names)
 
-type(a)
+dir(a)
 
 
 
-
+a.annots
 
 
 
