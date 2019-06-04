@@ -33,6 +33,10 @@ pypath.settings.setup(cachedir=cachedir)
 #============================== RETRIEVING INFO ==============================#
 
 co = complex.ComplexAggregator()
+[i for i in dir(co) if not i.startswith('_')]
+
+dir(co.complexes[list(co.complexes.keys())[0]])
+len(co.complexes[list(co.complexes.keys())[0]].components)
 
 # Number of complexes
 total = len(co.complexes)
@@ -50,9 +54,9 @@ unique_refs = set()
 for k, v in co.complexes.items():
     unique_sources.update(v.sources)
     unique_refs.update(v.references)
-    aux = k.split('-')
+    #aux = k.split('-')
 
-    if len(aux) == 1:
+    if len(v.components) == 1:
         homomultimer += 1
 
     else:

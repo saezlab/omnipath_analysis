@@ -5,7 +5,7 @@
 # nicolas.palacio@bioquant.uni-heidelberg.de
 
 import os
-import itertools
+import itertools as itt
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -15,12 +15,11 @@ import networkx as nx
 import pypath
 from pypath import intercell
 from pypath.main import PyPath
-from data_tools.plots import venn
+from data_tools.plots import venn, upset_wrap
 from data_tools.spatial import equidist_polar
 
 
 #=================================== SETUP ===================================#
-
 # Colors!
 green = (87/255, 171/255, 39/255)
 lime = (189/255, 205/255, 0/255)
@@ -48,25 +47,54 @@ if not os.path.exists(cachedir):
 pypath.settings.setup(cachedir=cachedir)
 
 #============================== RETRIEVING INFO ==============================#
-with pypath.curl.cache_off():
-    i = intercell.IntercellAnnotation()
+#with pypath.curl.cache_off():
+i = intercell.IntercellAnnotation()
 
 print([x for x in dir(i) if not x.startswith('_')])
 
 counts = dict((c, i.counts()[c]) for c in i.class_names)
-counts = pd.Series(counts).sort_values(ascending=False)
+counts = pd.Series(counts).sort_values(ascending=True)
+
+i.class_names
+i.classes_by_entity('P05106')
+sources = set([x.split('_')[-1] for x in i.classes.keys() if
+               (x not in i.class_names and not len(x.split('_'))==1)])
+
+elems_by_source = dict()
+
+for k, v in i.classes.items():
+    s = k.split('_')[-1]
+
+    if s in sources:
+
+        if s not in elems_by_source.keys():
+            elems_by_source[s] = v
+
+        else:
+            elems_by_source[s].update(v)
+
+elems_by_source = pd.Series(map(len, elems_by_source.values()),
+                            index=elems_by_source.keys())
+elems_by_source.sort_values(inplace=True)
 
 #================================= PLOTTING ==================================#
 # Proteins by class
 fig, ax = plt.subplots()
-ax.bar(range(len(counts)), counts.values)
-ax.set_xticks(range(len(counts)))
-ax.set_xticklabels(counts.index, rotation=90)
+ax.barh(range(len(counts)), counts.values, color=blue)
+ax.set_yticks(range(len(counts)))
+ax.set_yticklabels(counts.index)#, rotation=90)
 ax.set_title('Proteins by class')
 fig.tight_layout()
 fig.savefig('../figures/intercell_prots_by_class.svg')
 
-
+# Entities by source
+fig, ax = plt.subplots(figsize=(7, 7))
+ax.barh(range(len(elems_by_source)), elems_by_source.values, color=blue)
+ax.set_yticks(range(len(elems_by_source)))
+ax.set_yticklabels(elems_by_source.index)#, rotation=90)
+ax.set_title('Entities by source')
+fig.tight_layout()
+fig.savefig('../figures/intercell_ents_by_source.svg')
 ###############################################################################
 #           vvvv       HERE ON USED FOR PREVIOUS VERSION       vvvv           #
 ###############################################################################
@@ -107,10 +135,10 @@ fig.savefig('../figures/intercell_prots_by_class.svg')
 #interact = dict()
 
 # For all possible pairs of annotation types
-#for (a, b) in itertools.combinations(annots.keys(), 2):
+#for (a, b) in itt.combinations(annots.keys(), 2):
     # Check for edges in PPI network for any combination of proteins
 #    edges = [(1 if pa.get_edge(i, j) else 0)
-#             for (i, j) in itertools.product(annots[a], annots[b])]
+#             for (i, j) in itt.product(annots[a], annots[b])]
     # Store number of connecting edges
 #    interact[(a, b)] = sum(edges)
 
