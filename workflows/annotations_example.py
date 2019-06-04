@@ -18,13 +18,16 @@ def reload():
     imp.reload(annot)
 
 
-a = annot.AnnotationTable(keep_annotators = True)
+a = annot.AnnotationTable(
+    keep_annotators = True,
+    create_dataframe = True, # this increases execution time by 8 min
+)
 a.load()
 # there is a boolean array representing the membership of proteins
 # in each category; rows are protein, columns are categories
 a.data # the array
 a.names # the categories (columns)
-a.uniprots # the proteins (rows)
+a.reference_set # the proteins or complexes (rows)
 
 # the individual resources are here:
 a.annots

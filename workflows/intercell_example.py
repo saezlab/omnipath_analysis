@@ -6,7 +6,6 @@
 import imp
 import pprint
 import collections
-import iteritems
 
 from pypath import mapping
 from pypath import dataio
