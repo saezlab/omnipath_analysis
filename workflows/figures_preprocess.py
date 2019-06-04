@@ -123,6 +123,7 @@ class FiguresPreprocess(session_mod.Logger):
         self.export_intercell_classes()
         self.collect_classes()
         self.export_intercell_coverages()
+        self.export_intercell_coverages_by_resource()
         self.build_intercell_network()
         self.export_connections()
         self.export_overlaps()
@@ -239,49 +240,163 @@ class FiguresPreprocess(session_mod.Logger):
         )
     
     
-    def export_intercell_coverages2(self):
-        """
-        I have no idea why 2 methods
-        """
+    def export_stats_by_resource(self):
         
-        cov_hdr = ['typ', 'mainclass', 'cls', 'total', 'omnipath']
-        self.coverages_all = []
-        annot_resource_overlaps = collections.defaultdict(dict)
+        def add_stats_record(
+                stats,
+                cls0,
+                cls1,
+                elements0,
+                elements1,
+                reference_set,
+                typ,
+            ):
+        
+            parent0 = self.intercell.parents[cls0]
+            parent1 = self.intercell.parents[cls1]
+            
+            cls0_elements = elements0 & reference_set
+            cls1_elements = elements1 & reference_set
+            
+            overlap = cls0_elements & cls1_elements
+            
+            parent0_elements = classes[parent0] if parent0 else set()
+            parent1_elements = classes[parent1] if parent1 else set()
+            
+            parent0_elements = parent0_elements & reference_set
+            parent1_elements = parent1_elements & reference_set
+            
+            omnipath0 = cls0_elements & omnipath
+            omnipath1 = cls1_elements & omnipath
+            
+            degree0 = np.mean([
+                v.degree()
+                for v in self.igraph_network.vs
+                if v['name'] in cls0_elements]
+            ) if typ == 'protein' else np.nan
+            degree1 = np.mean([
+                v.degree()
+                for v in self.igraph_network.vs
+                if v['name'] in cls1_elements]
+            ) if typ == 'protein' else np.nan
+            
+            stats.append([
+                cls0,
+                cls1,
+                labels[cls0] if cls0 in labels else '',
+                labels[cls1] if cls1 in labels else '',
+                class_types[cls0] if cls0 in class_types else 'sub',
+                class_types[cls1] if cls1 in class_types else 'sub',
+                typ,
+                len(reference_set),
+                len(omnipath) if typ == 'protein' else 0,
+                parent0,
+                parent1,
+                len(cls0_elements),
+                len(cls1_elements),
+                len(overlap),
+                len(omnipath0),
+                len(omnipath1),
+                len(parent0_elements),
+                len(parent1_elements),
+                degree0,
+                degree1,
+            ] + [np.nan] * 9)
+        
+        hdr = [
+            'name_cls0',
+            'name_cls1',
+            'label0',
+            'label1',
+            'typ_cls0',
+            'typ_cls1',
+            'entity',
+            'total',
+            'omnipath',
+            'parent0',
+            'parent1',
+            'size_cls0',
+            'size_cls1',
+            'overlap',
+            'omnipath0',
+            'omnipath1',
+            'size_parent0',
+            'size_parent1',
+            'degree0',
+            'degree1',
+            'con_all',
+            'con_0to1',
+            'con_0to1_stim',
+            'con_0to1_inh',
+            'con_1to0',
+            'con_1to0_stim',
+            'con_1to0_inh',
+            'con_in0',
+            'con_in1',
+        ]
+        
+        stats = []
         
         path = os.path.join(
             self.datadir,
-            'main_coverage_2_%s.tsv' % self.date,
+            'stats_by_resource_%s.tsv' % self.date,
         )
         
-        for cls, cls_proteins in i.classes.items():
+        proteins = set(self.annot.proteins)
+        complexes = set(self.annot.complexes)
+        classes = self.intercell.classes
+        labels = self.intercell.labels
+        omnipath = set(self.igraph_network.vs['name'])
+        class_types = self.intercell.class_types
+        
+        for (
+            (cls0, cls0_elements),
+            (cls1, cls1_elements),
+        ) in (
+            itertools.product(
+                classes.items(),
+                classes.items(),
+            )
+        ):
             
-            cls_split = cls.split('_')
-            mainclass = None
+            add_stats_record(
+                stats,
+                cls0,
+                cls1,
+                cls0_elements,
+                cls1_elements,
+                proteins,
+                'protein',
+            )
             
-            for j in range(len(cls_split)):
-                
-                this_part = '_'.join(cls_split[:j])
-                
-                if this_part in class_names:
-                    
-                    mainclass = this_part
-            
-            self.coverages_all.append([
-                (
-                    class_types[mainclass]
-                        if mainclass in class_types else
-                    class_types[cls]
-                        if cls in class_types else
-                    ''
-                ),
-                mainclass or '',
-                cls,
-                len(cls_proteins),
-                len(cls_proteins & set(pa.graph.vs['name'])),
-            ])
+            add_stats_record(
+                stats,
+                cls0,
+                cls1,
+                cls0_elements,
+                cls1_elements,
+                complexes,
+                'complex',
+            )
+        
+        self.stats = pd.DataFrame(
+            stats,
+            columns = hdr,
+        )
+        
+        self.stats.to_csv(path, index = False, sep = '\t')
     
     
     def build_intercell_network(self):
+        
+        self.network.records.drop(['full_name_a', 'full_name_b'])
+        
+        self.network.records['pair'] = (
+            self.network.records[['id_a', 'id_b']].apply(
+                lambda p: ';'.join(sorted(p)),
+                axis = 1,
+            )
+        )
         
         self.intercell_network = pd.merge(
             self.network.records,
@@ -300,6 +415,18 @@ class FiguresPreprocess(session_mod.Logger):
             left_on = 'id_b',
             right_on = 'uniprot',
         )
+        
+        self.intercell_network['class_pair'] = (
+            self.intercell_network[['category_a', 'category_b']].apply(
+                lambda p: ';'.join(sorted(p)),
+                axis = 1,
+            )
+        )
+    
+    
+    def add_intercell_network_stats(self):
+        
+        self.intercell_network.groupby(by = 'pair')
     
     
     def export_connections(self):
