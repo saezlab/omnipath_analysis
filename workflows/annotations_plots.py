@@ -9,7 +9,6 @@ import os
 import matplotlib.pyplot as plt
 import pandas as pd
 
-#================================ WORKAROUND =================================#
 import pypath
 from pypath import annot
 
@@ -30,23 +29,10 @@ pypath.settings.setup(cachedir=cachedir)
 #with pypath.curl.cache_off():
 a = annot.AnnotationTable(keep_annotators=True, create_dataframe=True)
 a.load()
-
-df = a.to_dataframe()
-#a.names
-df.to_csv('/home/nico/Desktop/annots.csv')
-
-len(a.names)
-
-dir(a)
-
-
-
-a.annots
-
-
-
+a.to_dataframe()
 print([x for x in dir(a) if not x.startswith('_')])
 
+#================================ WORKAROUND =================================#
 ###############################################################################
 #           vvvv       HERE ON USES INFO FROM WEBSERVICE       vvvv           #
 ###############################################################################
