@@ -47,8 +47,8 @@ if not os.path.exists(cachedir):
 pypath.settings.setup(cachedir=cachedir)
 
 #============================== RETRIEVING INFO ==============================#
-#with pypath.curl.cache_off():
-i = intercell.IntercellAnnotation()
+with pypath.curl.cache_off():
+    i = intercell.IntercellAnnotation()
 
 print([x for x in dir(i) if not x.startswith('_')])
 
@@ -135,8 +135,9 @@ fig.savefig('../figures/intercell_ents_by_source.svg')
 annots = i.classes#dict(zip(elems, [getattr(i, e) for e in elems]))
 
 # 4) Interactions between annotation types
-pa = PyPath()
-pa.init_network()
+with pypath.curl.cache_off():
+    pa = PyPath()
+    pa.init_network(redownload=True)
 
 interact = dict()
 
