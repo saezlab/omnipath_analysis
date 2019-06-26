@@ -31,8 +31,9 @@ if not os.path.exists(cachedir):
 pypath.settings.setup(cachedir=cachedir)
 
 #============================== RETRIEVING INFO ==============================#
+with pypath.curl.cache_off():
+    co = complex.ComplexAggregator()
 
-co = complex.ComplexAggregator()
 [i for i in dir(co) if not i.startswith('_')]
 
 dir(co.complexes[list(co.complexes.keys())[0]])
