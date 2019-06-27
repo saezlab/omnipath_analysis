@@ -470,6 +470,42 @@ class FiguresPreprocess(session_mod.Logger):
         ).shape[0]
     
     
+    def all_connections_between_categories(self, cat_a, cat_b):
+        
+        return (
+            self.count_connections_between_categories(cat_a, cat_b) +
+            self.count_connections_between_categories(cat_b, cat_a) +
+            self.count_connections_between_categories(
+                cat_a = cat_a,
+                cat_b = cat_b,
+                directed = False,
+            )
+        )
+    
+    
+    def connections_a_to_b(self, cat_a, cat_b):
+        
+        return self.count_connections_between_categories(cat_a, cat_b)
+    
+    
+    def a_stimulates_b(self, cat_a, cat_b):
+        
+        return self.count_connections_between_categories(
+            cat_a = cat_a,
+            cat_b = cat_b,
+            effect = 1,
+        )
+    
+    
+    def a_inhibits_b(self, cat_a, cat_b):
+        
+        return self.count_connections_between_categories(
+            cat_a = cat_a,
+            cat_b = cat_b,
+            effect = -1,
+        )
+    
+    
     def add_intercell_network_stats(self):
         
         self.intercell_network.groupby(by = 'pair')
