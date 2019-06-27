@@ -414,6 +414,46 @@ class FiguresPreprocess(session_mod.Logger):
         )
     
     
+    def connections_between_categories(
+            self,
+            cat_a,
+            cat_b,
+            directed = True,
+            effect = None,
+        ):
+        
+        
+        idx = np.logical_and(
+            np.logical_and(
+                self.intercell_network.category_a == cat_a,
+                self.intercell_network.category_b == cat_b,
+            ),
+            self.intercell_network.directed == directed,
+        )
+        
+        if not directed:
+            
+            idx = np.logical_or(
+                idx,
+                np.logical_and(
+                    np.logical_and(
+                        self.intercell_network.category_a == cat_b,
+                        self.intercell_network.category_b == cat_a,
+                    ),
+                    self.intercell_network.directed == 0,
+                )
+            )
+            
+        elif effect is not None:
+            
+            idx = np.logical_and(
+                idx,
+                self.intercell_network.effect == effect,
+            )
+        
+        return self.intercell_network[idx]
+    
+    
     def add_intercell_network_stats(self):
         
         self.intercell_network.groupby(by = 'pair')
