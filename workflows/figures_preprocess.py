@@ -116,6 +116,7 @@ class FiguresPreprocess(session_mod.Logger):
         self.load_annot()
         self.load_intercell()
         self.load_network()
+        self.build_intercell_network()
     
     
     def export_tables(self):
