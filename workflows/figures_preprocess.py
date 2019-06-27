@@ -454,6 +454,22 @@ class FiguresPreprocess(session_mod.Logger):
         return self.intercell_network[idx]
     
     
+    def count_connections_between_categories(
+            self,
+            cat_a,
+            cat_b,
+            directed = True,
+            effect = None,
+        ):
+        
+        return self.connections_between_categories(
+            cat_a = cat_a,
+            cat_b = cat_b,
+            directed = directed,
+            effect = effect,
+        ).shape[0]
+    
+    
     def add_intercell_network_stats(self):
         
         self.intercell_network.groupby(by = 'pair')
