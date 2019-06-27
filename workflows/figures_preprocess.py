@@ -389,15 +389,6 @@ class FiguresPreprocess(session_mod.Logger):
     
     def build_intercell_network(self):
         
-        self.network.records.drop(['full_name_a', 'full_name_b'])
-        
-        self.network.records['pair'] = (
-            self.network.records[['id_a', 'id_b']].apply(
-                lambda p: ';'.join(sorted(p)),
-                axis = 1,
-            )
-        )
-        
         self.intercell_network = pd.merge(
             self.network.records,
             self.intercell.df,
@@ -405,6 +396,9 @@ class FiguresPreprocess(session_mod.Logger):
             how = 'inner',
             left_on = 'id_a',
             right_on = 'uniprot',
+        )
+        self.intercell_network.id_a = (
+            self.intercell_network.id_a.astype('category')
         )
         
         self.intercell_network = pd.merge(
@@ -415,12 +409,8 @@ class FiguresPreprocess(session_mod.Logger):
             left_on = 'id_b',
             right_on = 'uniprot',
         )
-        
-        self.intercell_network['class_pair'] = (
-            self.intercell_network[['category_a', 'category_b']].apply(
-                lambda p: ';'.join(sorted(p)),
-                axis = 1,
-            )
+        self.intercell_network.id_b = (
+            self.intercell_network.id_b.astype('category')
         )
     
     
