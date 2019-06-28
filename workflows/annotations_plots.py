@@ -26,10 +26,11 @@ if not os.path.exists(cachedir):
 
 pypath.settings.setup(cachedir=cachedir)
 
-#with pypath.curl.cache_off():
-a = annot.AnnotationTable(keep_annotators=True, create_dataframe=True)
-a.load()
-a.to_dataframe()
+with pypath.curl.cache_off():
+    a = annot.AnnotationTable(keep_annotators=True, create_dataframe=True)
+    a.load()
+
+df = a.to_dataframe()
 print([x for x in dir(a) if not x.startswith('_')])
 
 #================================ WORKAROUND =================================#

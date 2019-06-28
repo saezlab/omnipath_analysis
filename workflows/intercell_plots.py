@@ -132,31 +132,31 @@ fig.savefig('../figures/intercell_ents_by_source.svg')
 
 #elems = ['ecm_proteins', 'receptors', 'ligands']
 
-annots = i.classes#dict(zip(elems, [getattr(i, e) for e in elems]))
+#annots = i.classes#dict(zip(elems, [getattr(i, e) for e in elems]))
 
 # 4) Interactions between annotation types
-with pypath.curl.cache_off():
-    pa = PyPath()
-    pa.init_network(redownload=True)
+#with pypath.curl.cache_off():
+#    pa = PyPath()
+#    pa.init_network(redownload=True)
 
-interact = dict()
+#interact = dict()
 
 # For all possible pairs of annotation types
-for (a, b) in itt.combinations(annots.keys(), 2):
+#for (a, b) in itt.combinations(annots.keys(), 2):
     # Check for edges in PPI network for any combination of proteins
-    edges = [(1 if pa.get_edge(i, j) else 0)
-             for (i, j) in itt.product(annots[a], annots[b])]
+#    edges = [(1 if pa.get_edge(i, j) else 0)
+#             for (i, j) in itt.product(annots[a], annots[b])]
     # Store number of connecting edges
-    interact[(a, b)] = sum(edges)
+#    interact[(a, b)] = sum(edges)
 
 # Make a graph
-G = nx.Graph()
+#G = nx.Graph()
 
-for (i, (k, v)) in enumerate(annots.items()):
-    G.add_node(k, size=len(v), color=cseq2[i])
+#for (i, (k, v)) in enumerate(annots.items()):
+#    G.add_node(k, size=len(v), color=cseq2[i])
 
-for ((a, b), v) in interact.items():
-    G.add_edge(a, b, weight=v)
+#for ((a, b), v) in interact.items():
+#    G.add_edge(a, b, weight=v)
 
 #================================= PLOTTING ==================================#
 
@@ -196,23 +196,23 @@ for ((a, b), v) in interact.items():
 #            c=cseq2, filename='../figures/intercell_annots.svg')
 
 # 4) Interactions between annotation types
-nsizes = [G.nodes[n]['size'] * 2 for n in G.nodes]
-ncolor = [G.nodes[n]['color'] for n in G.nodes]
-esizes = [G.edges[e]['weight'] / 100 for e in G.edges]
+#nsizes = [G.nodes[n]['size'] * 2 for n in G.nodes]
+#ncolor = [G.nodes[n]['color'] for n in G.nodes]
+#esizes = [G.edges[e]['weight'] / 100 for e in G.edges]
 
-fig, ax = plt.subplots(figsize=(7, 7))
+#fig, ax = plt.subplots(figsize=(7, 7))
 
 # Get equidistant positions
-pos = dict(zip(annots.keys(), equidist_polar(len(annots), r=0.25)))
+#pos = dict(zip(annots.keys(), equidist_polar(len(annots), r=0.25)))
 
-nx.draw_networkx_edges(G, pos, width=esizes, ax=ax, alpha=0.5)
-nx.draw_networkx_nodes(G, pos, node_color=ncolor, node_size=nsizes, ax=ax)
-nx.draw_networkx_labels(G, pos, ax=ax)
-nx.draw_networkx_edge_labels(G, pos, ax=ax,
-                             edge_labels=dict(zip(G.edges,
-                                                  [int(100 * e)
-                                                   for e in esizes])))
-ax.set_axis_off()
-fig.tight_layout()
+#nx.draw_networkx_edges(G, pos, width=esizes, ax=ax, alpha=0.5)
+#nx.draw_networkx_nodes(G, pos, node_color=ncolor, node_size=nsizes, ax=ax)
+#nx.draw_networkx_labels(G, pos, ax=ax)
+#nx.draw_networkx_edge_labels(G, pos, ax=ax,
+#                             edge_labels=dict(zip(G.edges,
+#                                                  [int(100 * e)
+#                                                   for e in esizes])))
+#ax.set_axis_off()
+#fig.tight_layout()
 
-fig.savefig('../figures/intercel_edges.svg')
+#fig.savefig('../figures/intercel_edges.svg')
