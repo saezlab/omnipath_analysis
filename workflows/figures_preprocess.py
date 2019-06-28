@@ -26,6 +26,7 @@ from pypath import main
 from pypath import network
 from pypath import session_mod
 from pypath import settings
+from pypath import progress
 
 
 def reload():
@@ -53,6 +54,7 @@ class FiguresPreprocess(session_mod.Logger):
             annotation_args = None,
             intercell_args = None,
             datadir = None,
+            keep_igraph = False,
         ):
         
         session_mod.Logger.__init__(self, name = 'figures_preproc')
@@ -70,6 +72,8 @@ class FiguresPreprocess(session_mod.Logger):
         
         self.datadir = datadir
         self.date = time.strftime('%Y%m%d')
+        
+        self.keep_igraph = keep_igraph
     
     
     def reload(self):
@@ -117,6 +121,8 @@ class FiguresPreprocess(session_mod.Logger):
         self.load_intercell()
         self.load_network()
         self.build_intercell_network()
+        self.count_connections()
+        self.count_connections_pairwise()
     
     
     def export_tables(self):
@@ -132,6 +138,7 @@ class FiguresPreprocess(session_mod.Logger):
     
     def load_complex(self):
         
+        self._log('Loading the complex database.')
         self.complex = complex.get_db(
             pickle_file = self.complex_pickle,
             **self.complex_args
@@ -140,6 +147,7 @@ class FiguresPreprocess(session_mod.Logger):
     
     def load_annot(self):
         
+        self._log('Loading the annotation database.')
         self.annot = annot.get_db(
             pickle_file = self.annotation_pickle,
             **self.annotation_args
@@ -148,6 +156,7 @@ class FiguresPreprocess(session_mod.Logger):
     
     def load_intercell(self):
         
+        self._log('Loading the intercell annotation database.')
         self.intercell = intercell.IntercellAnnotation(
             pickle_file = self.intercell_pickle,
             **self.intercell_args
@@ -155,6 +164,8 @@ class FiguresPreprocess(session_mod.Logger):
     
     
     def load_network(self):
+        
+        self._log('Loading the signaling network.')
         
         self.igraph_network = main.PyPath()
         
@@ -167,6 +178,10 @@ class FiguresPreprocess(session_mod.Logger):
             self.igraph_network.load_omnipath(**self.omnipath_args)
         
         self.network = network.Network.from_igraph(self.igraph_network)
+        
+        if not self.keep_igraph:
+            
+            delattr(self, 'igraph_network')
     
     
     def print_intercell_classes(self):
@@ -241,7 +256,149 @@ class FiguresPreprocess(session_mod.Logger):
         )
     
     
-    def export_stats_by_resource(self):
+    def count_connections(self):
+        """
+        Counts the overall number of connections for each category.
+        """
+        
+        def count(df, undirected = False, in_out = 'IN'):
+            
+            sorter = sorted if undirected else lambda x: x
+            
+            query = (
+                'category_a == "{}" | category_b == "{}"'
+                    if undirected else
+                'category_a == "{}"'
+                    if in_out == 'OUT' else
+                'category_b == "{}"'
+            )
+            
+            return collections.defaultdict(
+                int,
+                dict(
+                    (
+                        cls,
+                        len(
+                            set(
+                                map(
+                                    tuple,
+                                    map(
+                                        sorter,
+                                        zip(
+                                            df.query(
+                                                query.format(
+                                                    *(cls,) *
+                                                    query.count('{}')
+                                                )
+                                            ).id_a,
+                                            df.query(
+                                                query.format(
+                                                    *(cls,) *
+                                                    query.count('{}')
+                                                )
+                                            ).id_b,
+                                        )
+                                    )
+                                )
+                            )
+                        )
+                    )
+                    for cls in self.intercell.class_names
+                )
+            )
+        
+        
+        self.degree_total = count(
+            self.intercell_network,
+            undirected = True,
+        )
+        
+        self.degree_undirected = count(
+            self.intercell_network[
+                np.logical_not(self.intercell_network.directed)
+            ],
+            undirected = True,
+        )
+        
+        for mode in ('IN', 'OUT'):
+            
+            setattr(
+                self,
+                'degree_%s' % mode.lower(),
+                count(
+                    self.intercell_network[
+                        self.intercell_network.directed
+                    ],
+                    in_out = mode,
+                ),
+            )
+            
+            setattr(
+                self,
+                'degree_%s_stim' % mode.lower(),
+                count(
+                    self.intercell_network[
+                        self.intercell_network.effect == 1
+                    ],
+                    in_out = mode,
+                ),
+            )
+            
+            setattr(
+                self,
+                'degree_%s_inh' % mode.lower(),
+                count(
+                    self.intercell_network[
+                        self.intercell_network.effect == -1
+                    ],
+                    in_out = mode,
+                ),
+            )
+    
+    
+    def count_connections_pairwise(self):
+        """
+        Counts the connections between categories pairwise.
+        """
+        
+        def count(df, undirected = False):
+            
+            con = zip(df.category_a, df.category_b)
+            
+            if undirected:
+                
+                con = itertools.chain(
+                    con,
+                    zip(df.category_b, df.category_a),
+                )
+            
+            return collections.defaultdict(
+                int,
+                collections.Counter(con).items(),
+            )
+        
+        
+        self.con_directed    = count(
+            self.intercell_network[self.intercell_network.directed]
+        )
+        self.con_stimulation = count(
+            self.intercell_network[self.intercell_network.effect ==  1]
+        )
+        self.con_inhibition  = count(
+            self.intercell_network[self.intercell_network.effect == -1]
+        )
+        self.con_undirected  = count(
+            self.intercell_network[
+                np.logical_not(self.intercell_network.directed)
+            ],
+            undirected = True,
+        )
+    
+    
+    def export_stats_by_category_pairs(self):
+        """
+        Exports a number of statistics for all pairs of categories.
+        """
         
         def add_stats_record(
                 stats,
@@ -270,16 +427,8 @@ class FiguresPreprocess(session_mod.Logger):
             omnipath0 = cls0_elements & omnipath
             omnipath1 = cls1_elements & omnipath
             
-            degree0 = np.mean([
-                v.degree()
-                for v in self.igraph_network.vs
-                if v['name'] in cls0_elements]
-            ) if typ == 'protein' else np.nan
-            degree1 = np.mean([
-                v.degree()
-                for v in self.igraph_network.vs
-                if v['name'] in cls1_elements]
-            ) if typ == 'protein' else np.nan
+            cls01 = (cls0, cls1)
+            cls10 = (cls1, cls0)
             
             stats.append([
                 cls0,
@@ -300,9 +449,35 @@ class FiguresPreprocess(session_mod.Logger):
                 len(omnipath1),
                 len(parent0_elements),
                 len(parent1_elements),
-                degree0,
-                degree1,
-            ] + [np.nan] * 9)
+            ] +
+            [
+                self.con_undirected[cls01] + self.con_directed[cls01],
+                self.con_directed[cls01],
+                self.con_stimulation[cls01],
+                self.con_inhibition[cls01],
+                self.con_directed[cls10],
+                self.con_stimulation[cls10],
+                self.con_inhibition[cls10],
+            ] +
+            [
+                self.degree_total[cls0],
+                self.degree_total[cls1],
+                self.degree_undirected[cls0],
+                self.degree_undirected[cls1],
+                self.degree_in[cls0],
+                self.degree_in[cls1],
+                self.degree_out[cls0],
+                self.degree_out[cls1],
+                self.degree_in_stim[cls0],
+                self.degree_in_stim[cls1],
+                self.degree_out_stim[cls0],
+                self.degree_out_stim[cls1],
+                self.degree_in_inh[cls0],
+                self.degree_in_inh[cls1],
+                self.degree_out_inh[cls0],
+                self.degree_out_inh[cls1],
+            ]
+        )
         
         hdr = [
             'name_cls0',
@@ -323,8 +498,6 @@ class FiguresPreprocess(session_mod.Logger):
             'omnipath1',
             'size_parent0',
             'size_parent1',
-            'degree0',
-            'degree1',
             'con_all',
             'con_0to1',
             'con_0to1_stim',
@@ -332,8 +505,22 @@ class FiguresPreprocess(session_mod.Logger):
             'con_1to0',
             'con_1to0_stim',
             'con_1to0_inh',
-            'con_in0',
-            'con_in1',
+            'deg_total0',
+            'deg_total1',
+            'deg_undir0',
+            'deg_undir1',
+            'deg_in0',
+            'deg_in1',
+            'deg_out0',
+            'deg_out1',
+            'deg_in0_stim',
+            'deg_in1_stim',
+            'deg_out0_stim',
+            'deg_out1_stim',
+            'deg_in0_inh',
+            'deg_in1_inh',
+            'deg_out0_inh',
+            'deg_out1_inh',
         ]
         
         stats = []
@@ -347,18 +534,29 @@ class FiguresPreprocess(session_mod.Logger):
         complexes = set(self.annot.complexes)
         classes = self.intercell.classes
         labels = self.intercell.labels
-        omnipath = set(self.igraph_network.vs['name'])
+        omnipath = (
+            set(self.network.records.id_a) |
+            set(self.network.records.id_b)
+        )
         class_types = self.intercell.class_types
+        
+        prg = progress.Progress(
+            len(classes.items()) ** 2 / 2,
+            'Collecting intercell categories stats',
+            1,
+            off = False,
+        )
+        
+        i_ = 0
         
         for (
             (cls0, cls0_elements),
             (cls1, cls1_elements),
-        ) in (
-            itertools.product(
-                classes.items(),
-                classes.items(),
-            )
-        ):
+        ) in itertools.combinations_with_replacement(classes.items(), 2):
+            
+            i_ += 1
+            
+            prg.step()
             
             add_stats_record(
                 stats,
@@ -379,6 +577,13 @@ class FiguresPreprocess(session_mod.Logger):
                 complexes,
                 'complex',
             )
+            
+            if i_ == 10:
+                
+                pass
+                # break
+        
+        prg.terminate()
         
         self.stats = pd.DataFrame(
             stats,
@@ -389,6 +594,8 @@ class FiguresPreprocess(session_mod.Logger):
     
     
     def build_intercell_network(self):
+        
+        self._log('Building the intercell communication network.')
         
         self.intercell_network = pd.merge(
             self.network.records,
@@ -413,6 +620,75 @@ class FiguresPreprocess(session_mod.Logger):
         self.intercell_network.id_b = (
             self.intercell_network.id_b.astype('category')
         )
+        
+        self.intercell_network.set_index(
+            'id_a',
+            drop = False,
+            inplace = True,
+        )
+        #self.intercell_network = dd.from_pandas(
+            #self.intercell_network,
+            #100000,
+        #)
+    
+    
+    def connections_of_category(
+            self,
+            category,
+            directed = True,
+            in_out = None,
+            count = False,
+        ):
+        
+        idx = np.array([False] * self.intercell_network.shape[0])
+        
+        if not directed or in_out != 'IN':
+            
+            idx = np.logical_or(
+                idx,
+                self.intercell_network.category_a == category,
+            )
+        
+        if not directed or in_out == 'IN':
+            
+            idx = np.logical_or(
+                idx,
+                self.intercell_network.category_b == category,
+            )
+        
+        return idx.sum() if count else self.intercell_network[idx]
+    
+    
+    def count_connections_of_category(
+            self,
+            category,
+            directed = True,
+            in_out = None,
+        ):
+        
+        edges = self.connections_of_category(
+            category = category,
+            directed = directed,
+            in_out = in_out,
+        )
+        
+        return sum(edges.groupby('id_a').nunique('id_b'))
+    
+    
+    def category_out(self, category):
+        
+        return self.count_connections_of_category(
+            category = category,
+            in_out = 'OUT',
+        )
+    
+    
+    def category_in(self, category):
+        
+        return self.count_connections_of_category(
+            category = category,
+            in_out = 'IN',
+        )
     
     
     def connections_between_categories(
@@ -421,8 +697,8 @@ class FiguresPreprocess(session_mod.Logger):
             cat_b,
             directed = True,
             effect = None,
+            count = False,
         ):
-        
         
         idx = np.logical_and(
             np.logical_and(
@@ -452,7 +728,7 @@ class FiguresPreprocess(session_mod.Logger):
                 self.intercell_network.effect == effect,
             )
         
-        return self.intercell_network[idx]
+        return idx.sum() if count else self.intercell_network[idx]
     
     
     def count_connections_between_categories(
@@ -468,7 +744,8 @@ class FiguresPreprocess(session_mod.Logger):
             cat_b = cat_b,
             directed = directed,
             effect = effect,
-        ).shape[0]
+            count = True,
+        )
     
     
     def all_connections_between_categories(self, cat_a, cat_b):
