@@ -120,8 +120,9 @@ class FiguresPreprocess(session_mod.Logger):
         self.load_annot()
         self.load_intercell()
         self.load_network()
-        self.build_intercell_network()
         self.count_connections()
+        self.build_intercell_network()
+        self.count_connections_groupwise()
         self.count_connections_pairwise()
     
     
@@ -131,7 +132,6 @@ class FiguresPreprocess(session_mod.Logger):
         self.collect_classes()
         self.export_intercell_coverages()
         self.export_intercell_coverages_by_resource()
-        self.build_intercell_network()
         self.export_connections()
         self.export_overlaps()
     
@@ -182,6 +182,31 @@ class FiguresPreprocess(session_mod.Logger):
         if not self.keep_igraph:
             
             delattr(self, 'igraph_network')
+    
+    
+    def count_connections(self):
+        
+        self.con_omnipath = len(
+            set(
+                map(
+                    tuple,
+                    map(
+                        sorted,
+                        zip(
+                            self.network.records.id_a,
+                            self.network.records.id_b,
+                        )
+                    )
+                )
+            )
+        )
+        self.con_omnipath_undir = (
+            np.logical_not(self.network.records.directed).sum()
+        )
+        directed = self.network.records[self.network.records.directed]
+        self.con_omnipath_dir = len(set(zip(directed.id_a, directed.id_b)))
+        self.con_omnipath_stim = (self.network.records.effect == 1).sum()
+        self.con_omnipath_inh = (self.network.records.effect == -1).sum()
     
     
     def print_intercell_classes(self):
@@ -256,7 +281,7 @@ class FiguresPreprocess(session_mod.Logger):
         )
     
     
-    def count_connections(self):
+    def count_connections_groupwise(self):
         """
         Counts the overall number of connections for each category.
         """
@@ -476,6 +501,11 @@ class FiguresPreprocess(session_mod.Logger):
                 self.degree_in_inh[cls1],
                 self.degree_out_inh[cls0],
                 self.degree_out_inh[cls1],
+                self.con_omnipath,
+                self.con_omnipath_undir,
+                self.con_omnipath_dir,
+                self.con_omnipath_stim,
+                self.con_omnipath_inh,
             ]
         )
         
@@ -521,6 +551,11 @@ class FiguresPreprocess(session_mod.Logger):
             'deg_in1_inh',
             'deg_out0_inh',
             'deg_out1_inh',
+            'con_omnipath',
+            'con_omnipath_undir',
+            'con_omnipath_dir',
+            'con_omnipath_stim',
+            'con_omnipath_inh',
         ]
         
         stats = []
