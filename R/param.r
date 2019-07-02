@@ -18,9 +18,17 @@
 #
 
 
-omnipath2_default_param <- list(
-    typeface = 'DINPro',
-    dir_figures = 'figures',
-    dir_data = 'data',
-    add_titles = TRUE
-)
+get_default_param <- function(){
+    
+    list(
+        
+        typeface = 'DINPro',
+        dir_figures = 'figures',
+        dir_data = 'data',
+        dir_misc = 'misc',
+        add_titles = TRUE,
+        theme = theme_bw
+        
+    )
+    
+}

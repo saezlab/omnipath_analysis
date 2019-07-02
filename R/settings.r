@@ -54,7 +54,19 @@ Settings <- R6::R6Class(
         
         reset = function(...){
             
-            self$settings <- modifyList(self$defaults, list(...))
+            self$settings <- modifyList(get_default_param(), list(...))
+            
+        },
+        
+        print = function(){
+            
+            cat('Current settings:\n')
+            
+            for(key in names(self$settings)){
+                
+                cat(sprintf('\t%s\t\t%s\n', key, self$settings[[key]]))
+                
+            }
             
         }
         

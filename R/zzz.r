@@ -17,5 +17,8 @@
 #  Website: http://pypath.omnipathdb.org/
 #
 
-
-omnipath2_settings <- Settings()
+.onLoad <- function(libname, pkgname){
+    
+    omnipath2_settings <<- Settings$new()
+    
+}
