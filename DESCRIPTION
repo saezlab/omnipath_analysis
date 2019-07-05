@@ -1,0 +1,26 @@
+Type: Package
+Package: omnipath2
+Version: 0.1.0
+Title: Visualizations for the OmniPath 2 paper
+Description: This package built primarily on dplyr and ggplot to post-
+    process and visualize data compiled and exported by pypath and the
+    Python workflow scripts of OmniPath 2.
+Authors@R: c(
+    person("Dénes", "Türei", , "turei.denes@gmail.com", c("aut", "cre")))
+URL: https://github.com/saezlab/omnipath2
+BugReports: turei.denes@gmail.com
+Encoding: UTF-8
+Depends: R (>= 3.1.2)
+Imports: dplyr, readr, ggplot2,  
+    qgraph, tidygraph, ggraph, igraph,
+    R6
+Suggests:
+VignetteBuilder: knitr
+LazyData: true
+License: GPLv3 + file LICENSE
+RoxygenNote: 6.0.1.9000
+NeedsCompilation: no
+Author: Dénes Türei [aut, cre]
+Maintainer: Dénes Türei <turei.denes@gmail.com>
+Repository:
+Date/Publication: 2019-07-01
