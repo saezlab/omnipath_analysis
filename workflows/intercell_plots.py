@@ -59,7 +59,6 @@ counts = pd.Series(counts).sort_values(ascending=True)
 # Overlapping proteins across classes
 
 
-type(list(i.classes.values())[1])
 # Entities by source
 sources = set([x.split('_')[-1] for x in i.classes.keys() if
                (x not in i.class_names and not len(x.split('_'))==1)])
@@ -89,6 +88,7 @@ ax.set_yticks(range(len(counts)))
 ax.set_yticklabels(counts.index)#, rotation=90)
 ax.set_title('Proteins by class')
 ax.set_xscale('log')
+ax.set_ylim(-1, len(counts))
 fig.tight_layout()
 fig.savefig('../figures/intercell_prots_by_class.svg')
 
@@ -99,9 +99,12 @@ ax.set_yticks(range(len(elems_by_source)))
 ax.set_yticklabels(elems_by_source.index)#, rotation=90)
 ax.set_title('Entities by source')
 ax.set_xscale('log')
+ax.set_ylim(-1, len(elems_by_source))
 fig.tight_layout()
 fig.savefig('../figures/intercell_ents_by_source.svg')
-elems_by_source
+
+# Some are empty!
+i.classes['ligand_kirouac']
 ###############################################################################
 #           vvvv       HERE ON USED FOR PREVIOUS VERSION       vvvv           #
 ###############################################################################

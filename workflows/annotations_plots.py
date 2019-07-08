@@ -40,7 +40,26 @@ df = a.to_dataframe()
 df.to_csv('../../../../../../home/nico/Desktop/annot_df.csv')
 print([x for x in dir(a) if not x.startswith('_')])
 
-annots_per_prot = [sum(a.df.iloc[i, :].values) for i in range(len(a.df))]
+df.shape
+
+# Number of annotations per protein/complex
+annots_per_prot = [sum(df.iloc[i, :].values) for i in range(len(df))]
+
+# Number of proteins by resource
+prots_by_res = dict()
+
+for c in df.columns:
+    source = c.split('__')[0]
+    prots = set(df.index[df[c]])
+
+    if source not in prots_by_res.keys():
+        prots_by_res[source] = prots
+
+    else:
+        prots_by_res[source].update(prots)
+
+prots_by_res = pd.Series(list(map(len, prots_by_res.values())),
+                         index=prots_by_res.keys()).sort_values()
 
 # Number of annotation subclasses per resource
 all_keys = np.array([i[0] for i in a.cols.keys()])
@@ -73,6 +92,22 @@ ax.set_ylabel('Proteins/complexes')
 ax.set_xlim([-1, max(annots_per_prot)])
 fig.tight_layout()
 fig.savefig('../figures/annot_per_prot.svg')
+
+# Proteins/complexes by resource
+fig, ax = plt.subplots(figsize=(7, 6))
+ax.grid(True, axis='x')
+rng = range(len(prots_by_res))
+ax.barh(rng, prots_by_res.values, color=cb)
+ax.set_title('Proteins/complexes by resource')
+ax.set_ylabel('Resource')
+ax.set_xlabel('Number of proteins/complexes')
+
+ax.set_ylim(-1, len(prots_by_res))
+ax.set_yticks(rng)
+ax.set_yticklabels(prots_by_res.index)
+ax.set_xscale('log')
+fig.tight_layout()
+fig.savefig('../figures/annot_prot_by_source.svg')
 
 a
 #================================ WORKAROUND =================================#
