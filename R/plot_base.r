@@ -51,15 +51,15 @@ SinglePlot <- R6::R6Class(
             
             self$main()
             
-            invisible(self$plt)
+            invisible(self)
         },
         
         main = function(){
             
+            private$setup()
             do.call(self$preprocess, self$preproc_args)
             do.call(self$plot, self$plot_args)
-            private$set_typeface()
-            private$set_theme()
+            private$post_plot()
             self$save()
             
         },
@@ -91,6 +91,23 @@ SinglePlot <- R6::R6Class(
     ),
     
     private = list(
+        
+        setup = function(){
+            
+            invisible(self)
+            
+        },
+        
+        
+        post_plot = function(){
+            
+            private$set_typeface()
+            private$set_theme()
+            
+            invisible(self)
+            
+        },
+        
         
         set_typeface = function(){
             
