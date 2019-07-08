@@ -473,8 +473,22 @@ class FiguresPreprocess(session_mod.Logger):
                 ClassesPairwiseRecord(
                     name_cls0 = cls0,
                     name_cls1 = cls1,
-                    label0 = labels[cls0] if cls0 in labels else '',
-                    label1 = labels[cls1] if cls1 in labels else '',
+                    class_label0 = (
+                        class_labels[cls0] if cls0 in class_labels else ''
+                    ),
+                    class_label1 = (
+                        class_labels[cls1] if cls1 in class_labels else ''
+                    ),
+                    resource_label0 = (
+                        resource_labels[cls0]
+                            if cls0 in resource_labels else
+                        ''
+                    ),
+                    resource_label1 = (
+                        resource_labels[cls1]
+                            if cls1 in resource_labels else
+                        ''
+                    ),
                     typ_cls0 = (
                         class_types[cls0] if cls0 in class_types else 'sub'
                     ),
@@ -594,7 +608,8 @@ class FiguresPreprocess(session_mod.Logger):
         proteins = set(self.annot.proteins)
         complexes = set(self.annot.complexes)
         classes = self.intercell.classes
-        labels = self.intercell.labels
+        class_labels = self.intercell.class_labels
+        resource_labels = self.intercell.resource_labels
         omnipath = (
             set(self.network.records.id_a) |
             set(self.network.records.id_b)
