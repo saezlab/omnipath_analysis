@@ -8,6 +8,7 @@ import os
 
 import matplotlib.pyplot as plt
 import pandas as pd
+import numpy as np
 
 import pypath
 from pypath import annot
@@ -33,6 +34,34 @@ with pypath.curl.cache_off():
 df = a.to_dataframe()
 print([x for x in dir(a) if not x.startswith('_')])
 
+# Number of annotation subclasses per resource
+all_keys = np.array([i[0] for i in a.cols.keys()])
+unique_keys = list(set(all_keys))
+len(all_keys)
+subclasses = pd.Series([sum(all_keys == x) for x in unique_keys],
+                        index=unique_keys).sort_values()
+rng = range(len(subclasses))
+fig, ax = plt.subplots(figsize=(9, 7))
+
+ax.barh(rng, subclasses.values)
+ax.set_yticks(rng)
+ax.set_yticklabels(subclasses.index)
+ax.set_ylim(-1, len(subclasses))
+ax.set_xlabel('Number of annotation classes')
+ax.set_xscale('log')
+fig.tight_layout()
+fig.savefig('../figures/annot_classes_by_source.svg')
+
+
+
+
+
+
+
+
+
+
+a
 #================================ WORKAROUND =================================#
 ###############################################################################
 #           vvvv       HERE ON USES INFO FROM WEBSERVICE       vvvv           #
