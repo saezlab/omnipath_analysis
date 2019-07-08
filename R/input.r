@@ -71,8 +71,8 @@ Reader <- R6::R6Class(
             
             self$data <- self$data %>%
                 mutate(
-                    omnipath_covers_cls0 = size_cls0 / omnipath0 * 100,
-                    omnipath_covers_cls1 = size_cls1 / omnipath1 * 100,
+                    omnipath_covers_cls0 = size_cls0 / in_omnipath_cls0 * 100,
+                    omnipath_covers_cls1 = size_cls1 / in_omnipath_cls1 * 100,
                     pct_of_parent_cls0 = size_cls0 / size_parent0 * 100,
                     pct_of_parent_cls1 = size_cls1 / size_parent1 * 100
                 ) %>%
