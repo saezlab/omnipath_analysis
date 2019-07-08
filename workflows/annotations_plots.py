@@ -42,7 +42,6 @@ print([x for x in dir(a) if not x.startswith('_')])
 
 annots_per_prot = [sum(a.df.iloc[i, :].values) for i in range(len(a.df))]
 
-
 # Number of annotation subclasses per resource
 all_keys = np.array([i[0] for i in a.cols.keys()])
 unique_keys = list(set(all_keys))
@@ -64,7 +63,16 @@ ax.set_xscale('log')
 fig.tight_layout()
 fig.savefig('../figures/annot_classes_by_source.svg')
 
-
+# Annotations per protein/complex
+fig, ax = plt.subplots()
+ax.hist(annots_per_prot, bins=100, color=cb)
+ax.set_title('Annotations per protein/complex')
+ax.set_xlabel('Number of annotations')
+ax.set_ylabel('Proteins/complexes')
+#ax.set_yscale('log')
+ax.set_xlim([-1, max(annots_per_prot)])
+fig.tight_layout()
+fig.savefig('../figures/annot_per_prot.svg')
 
 a
 #================================ WORKAROUND =================================#
