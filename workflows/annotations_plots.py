@@ -42,8 +42,8 @@ subclasses = pd.Series([sum(all_keys == x) for x in unique_keys],
                         index=unique_keys).sort_values()
 rng = range(len(subclasses))
 fig, ax = plt.subplots(figsize=(9, 7))
-
-ax.barh(rng, subclasses.values)
+ax.grid(True, axis='x')
+ax.barh(rng, subclasses.values, color=cb)
 ax.set_yticks(rng)
 ax.set_yticklabels(subclasses.index)
 ax.set_ylim(-1, len(subclasses))
@@ -51,15 +51,6 @@ ax.set_xlabel('Number of annotation classes')
 ax.set_xscale('log')
 fig.tight_layout()
 fig.savefig('../figures/annot_classes_by_source.svg')
-
-
-
-
-
-
-
-
-
 
 a
 #================================ WORKAROUND =================================#
