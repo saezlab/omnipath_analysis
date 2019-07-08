@@ -473,18 +473,18 @@ class FiguresPreprocess(session_mod.Logger):
                 ClassesPairwiseRecord(
                     name_cls0 = cls0,
                     name_cls1 = cls1,
-                    class_label0 = (
+                    cls_label0 = (
                         class_labels[cls0] if cls0 in class_labels else ''
                     ),
-                    class_label1 = (
+                    cls_label1 = (
                         class_labels[cls1] if cls1 in class_labels else ''
                     ),
-                    resource_label0 = (
+                    src_label0 = (
                         resource_labels[cls0]
                             if cls0 in resource_labels else
                         ''
                     ),
-                    resource_label1 = (
+                    src_label1 = (
                         resource_labels[cls1]
                             if cls1 in resource_labels else
                         ''
@@ -542,7 +542,7 @@ class FiguresPreprocess(session_mod.Logger):
                     con_omnipath_dir = self.con_omnipath_dir,
                     con_omnipath_stim = self.con_omnipath_stim,
                     con_omnipath_inh = self.con_omnipath_inh,
-                ]
+                )
             )
         
         
@@ -551,8 +551,10 @@ class FiguresPreprocess(session_mod.Logger):
             [
                 'name_cls0',
                 'name_cls1',
-                'label0',
-                'label1',
+                'cls_label0',
+                'cls_label1',
+                'src_label0',
+                'src_label1',
                 'typ_cls0',
                 'typ_cls1',
                 'entity',
@@ -562,9 +564,9 @@ class FiguresPreprocess(session_mod.Logger):
                 'parent1',
                 'size_cls0',
                 'size_cls1',
-                'overlap',
-                'omnipath0',
-                'omnipath1',
+                'overlap_cls01',
+                'in_omnipath_cls0',
+                'in_omnipath_cls1',
                 'size_parent0',
                 'size_parent1',
                 'con_all',

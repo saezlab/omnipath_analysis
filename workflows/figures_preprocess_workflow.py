@@ -38,7 +38,7 @@ proc = figpreproc.FiguresPreprocess(
 
 proc.setup()
 proc.load()
-
+proc.export_stats_by_category_pairs()
 
 # testing memory usage of joins:
 
@@ -79,5 +79,5 @@ i_n_i.info(memory_usage = 'deep')
 
 p = profile.Profile()
 p.enable()
-proc.export_stats_by_resource()
+proc.export_stats_by_category_pairs()
 p.disable()

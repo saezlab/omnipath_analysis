@@ -30,7 +30,7 @@ get_default_param <- function(){
         dir_misc = 'misc',
         add_titles = TRUE,
         theme = theme_minimal,
-        input_intercell_cat_pairwise = 'stats_by_resource_20190702.tsv'
+        input_intercell_cat_pairwise = 'stats_by_resource_20190708.tsv'
         
     )
     
