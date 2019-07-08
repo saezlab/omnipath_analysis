@@ -64,7 +64,18 @@ Settings <- R6::R6Class(
             
             for(key in names(self$settings)){
                 
-                cat(sprintf('\t%s\t\t%s\n', key, self$settings[[key]]))
+                value <- self$settings[[key]]
+                
+                value <- `if`(
+                    is_closure(value),
+                    sprintf(
+                        '<closure from env %s>',
+                        environment(value)$.__NAMESPACE__.$spec[['name']]
+                    ),
+                    value
+                )
+                
+                cat(sprintf('\t%s\t\t%s\n', key, value))
                 
             }
             

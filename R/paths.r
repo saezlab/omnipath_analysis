@@ -30,13 +30,15 @@ Path <- R6::R6Class(
         
         initialize = function(
             name,
-            ext = NA,
-            type = NA
+            ext = NULL,
+            type = NULL,
+            add_timestamp = TRUE
         ){
             
             self$name <- name
             self$type <- type
-            self$ext <- `if`(is.na(ext), '', sprintf('.%s', ext))
+            self$ext <- `if`(is.null(ext), '', sprintf('.%s', ext))
+            self$add_timestamp <- add_timestamp
             
             private$set_dir()
             private$set_fname()
@@ -52,7 +54,7 @@ Path <- R6::R6Class(
         
         get_timestamp = function(){
             
-            Sys.Date()
+            `if`(self$add_timestamp, Sys.Date(), '')
             
         },
         
@@ -65,7 +67,13 @@ Path <- R6::R6Class(
                 NA ~ omnipath2_settings$get(dir_misc),
             )
             
-            dir.create(self$dir, showWarnings = FALSE)
+            if(self$add_timestamp){
+                
+                self$dir <- file.path(self$dir, private$get_timestamp())
+                
+            }
+            
+            dir.create(self$dir, showWarnings = FALSE, recursive = TRUE)
             
             invisible(self)
             
@@ -74,8 +82,9 @@ Path <- R6::R6Class(
         set_fname = function(){
             
             self$fname <- sprintf(
-                '%s__%s%s',
+                '%s%s%s%s',
                 self$name,
+                `if`(self$add_timestamp, '__', ''),
                 private$get_timestamp(),
                 self$ext
             )
@@ -93,6 +102,33 @@ Path <- R6::R6Class(
         }
         
     )
+)
+
+
+InputPath <- R6::R6Class(
+    
+    'InputPath',
+    
+    inherit = Path,
+    
+    lock_objects = FALSE,
+    
+    public = list(
+        
+        initialize = function(name){
+            
+            super$initialize(
+                name = name,
+                type = 'data',
+                add_timestamp = FALSE
+            )
+            
+            invisible(self)
+            
+        }
+        
+    )
+    
 )
 
 

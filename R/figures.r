@@ -19,86 +19,12 @@
 
 require(dplyr)
 require(ggplot2)
-require(readr)
 require(igraph)
 require(qgraph)
 require(ggraph)
 require(tidygraph)
 require(R6)
 
-
-SinglePlot <- R6::R6Class(
-    
-    'SinglePlot',
-    
-    inherit = FigurePath,
-    
-    lock_objects = FALSE,
-    
-    public = list(
-        
-        initialize = function(
-            plt,
-            name,
-            typeface = NA,
-            width = 4,
-            height = 3
-        ){
-            
-            super$initialize(name = name)
-            
-            self$plt <- plt
-            self$width <- width
-            self$height <- height
-            
-            self$main()
-            
-            invisible(self$plt)
-        },
-        
-        main = function(
-            
-        ){
-            
-            self$set_typeface()
-            self$set_theme()
-            self$save()
-            
-        },
-        
-        save = function(){
-            
-            cairo_pdf(self$path, width = self$width, height = self$height)
-            
-            print(self$plt)
-            
-            dev.off()
-            
-        }
-        
-    ),
-    
-    private = list(
-        
-        set_typeface = function(){
-            
-            if(is.na(self$typeface)){
-                
-                self$typeface <- settings$get(typeface)
-                
-            }
-        },
-        
-        set_theme = function(){
-            
-            self$plt <- self$plt +
-                omnipath2_settings$get(theme)() +
-                theme(text = element_text(family = self$typeface))
-            
-        }
-        
-    )
-)
 
 
 if(FALSE){
