@@ -11,6 +11,7 @@ import pandas as pd
 import numpy as np
 
 import pypath
+from pypath.main import PyPath
 from pypath import annot
 
 # Colors!
@@ -25,14 +26,22 @@ if os.getcwd().endswith('omnipath2'):
 if not os.path.exists(cachedir):
     os.makedirs(cachedir)
 
+#============================== RETRIEVING INFO ==============================#
 pypath.settings.setup(cachedir=cachedir)
 
+pa = PyPath()
+
 with pypath.curl.cache_off():
+    pa.init_network()
     a = annot.AnnotationTable(keep_annotators=True, create_dataframe=True)
     a.load()
 
 df = a.to_dataframe()
+df.to_csv('../../../../../../home/nico/Desktop/annot_df.csv')
 print([x for x in dir(a) if not x.startswith('_')])
+
+annots_per_prot = [sum(a.df.iloc[i, :].values) for i in range(len(a.df))]
+
 
 # Number of annotation subclasses per resource
 all_keys = np.array([i[0] for i in a.cols.keys()])
@@ -40,6 +49,9 @@ unique_keys = list(set(all_keys))
 len(all_keys)
 subclasses = pd.Series([sum(all_keys == x) for x in unique_keys],
                         index=unique_keys).sort_values()
+a.annots.keys()
+#================================= PLOTTING ==================================#
+# Annotation classes by resource
 rng = range(len(subclasses))
 fig, ax = plt.subplots(figsize=(9, 7))
 ax.grid(True, axis='x')
@@ -51,6 +63,8 @@ ax.set_xlabel('Number of annotation classes')
 ax.set_xscale('log')
 fig.tight_layout()
 fig.savefig('../figures/annot_classes_by_source.svg')
+
+
 
 a
 #================================ WORKAROUND =================================#
