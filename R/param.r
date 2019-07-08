@@ -17,6 +17,8 @@
 #  Website: http://pypath.omnipathdb.org/
 #
 
+require(ggplot2)
+
 
 get_default_param <- function(){
     
@@ -27,7 +29,8 @@ get_default_param <- function(){
         dir_data = 'data',
         dir_misc = 'misc',
         add_titles = TRUE,
-        theme = theme_bw
+        theme = theme_minimal,
+        input_intercell_cat_pairwise = 'stats_by_resource_20190702.tsv'
         
     )
     

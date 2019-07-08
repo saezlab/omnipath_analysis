@@ -476,9 +476,9 @@ class FiguresPreprocess(session_mod.Logger):
                     # sizes
                     size_cls0 = len(cls0_elements),
                     size_cls1 = len(cls1_elements),
-                    overlap = len(overlap),
-                    omnipath0 = len(omnipath0),
-                    omnipath1 = len(omnipath1),
+                    overlap_cls01 = len(overlap),
+                    in_omnipath_cls0 = len(omnipath0),
+                    in_omnipath_cls1 = len(omnipath1),
                     size_parent0 = len(parent0_elements),
                     size_parent1 = len(parent1_elements),
                     # connections

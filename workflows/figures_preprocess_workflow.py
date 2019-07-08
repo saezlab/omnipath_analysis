@@ -4,6 +4,8 @@
 # Denes Turei 2019
 # turei.denes@gmail.com
 
+import cProfile as profile
+
 import numpy as np
 import pandas as pd
 
@@ -22,6 +24,9 @@ proc = figpreproc.FiguresPreprocess(
 
 proc.setup()
 proc.load()
+
+
+# testing memory usage of joins:
 
 n = proc.network.records
 i = proc.intercell.df
@@ -56,3 +61,9 @@ i_n_i.id_b = i_n_i.id_b.astype('category')
 
 i_n_i.info(memory_usage = 'deep')
 
+# profiling connection stats:
+
+p = profile.Profile()
+p.enable()
+proc.export_stats_by_resource()
+p.disable()
