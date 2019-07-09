@@ -51,7 +51,7 @@ with pypath.curl.cache_off():
     i = intercell.IntercellAnnotation()
 
 print([x for x in dir(i) if not x.startswith('_')])
-
+counts
 # Number of proteins by class
 counts = dict((c, i.counts()[c]) for c in i.class_names)
 counts = pd.Series(counts).sort_values(ascending=True)
@@ -61,7 +61,7 @@ counts = pd.Series(counts).sort_values(ascending=True)
 
 # Entities by source
 sources = set([x.split('_')[-1] for x in i.classes.keys() if
-(x not in i.class_names and not len(x.split('_'))==1)])
+               (x not in i.class_names and not len(x.split('_'))==1)])
 
 elems_by_source = dict()
 
@@ -87,6 +87,8 @@ ax.barh(range(len(counts)), counts.values, color=blue)
 ax.set_yticks(range(len(counts)))
 ax.set_yticklabels(counts.index)#, rotation=90)
 ax.set_title('Proteins by class')
+ax.set_xscale('log')
+ax.set_ylim(-1, len(counts))
 fig.tight_layout()
 fig.savefig('../figures/intercell_prots_by_class.svg')
 
@@ -96,9 +98,13 @@ ax.barh(range(len(elems_by_source)), elems_by_source.values, color=blue)
 ax.set_yticks(range(len(elems_by_source)))
 ax.set_yticklabels(elems_by_source.index)#, rotation=90)
 ax.set_title('Entities by source')
+ax.set_xscale('log')
+ax.set_ylim(-1, len(elems_by_source))
 fig.tight_layout()
 fig.savefig('../figures/intercell_ents_by_source.svg')
 
+# Some are empty!
+i.classes['ligand_kirouac']
 ###############################################################################
 #           vvvv       HERE ON USED FOR PREVIOUS VERSION       vvvv           #
 ###############################################################################

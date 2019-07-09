@@ -89,11 +89,13 @@ comp_by_res = pd.Series(comp_by_res).sort_values(ascending=True)
 
 # 1) Complex types
 fig, ax = plt.subplots()
-ax.pie([homomultimer, heteromultimer],
-       labels=['Homomultimers\n%.2f %%' % homopt,
-               'Heteromultimers\n%.2f %%' % heteropt],
-       colors=[green, blue])
+ax.bar([0, 1], [homomultimer, heteromultimer], color=blue)
 ax.set_title('Complex types')
+ax.set_xticks([0, 1])
+ax.set_xticklabels(['Homomultimers\n%.2f %%' % homopt,
+                    'Heteromultimers\n%.2f %%' % heteropt])
+ax.text(0, 2000, '%d' % homomultimer, color='w', ha='center')
+ax.text(1, 9000, '%d' % heteromultimer, color='w', ha='center')
 fig.tight_layout()
 fig.savefig('../figures/complex_types.svg')
 
@@ -105,5 +107,6 @@ ax.set_yticks(rng)
 ax.set_yticklabels(comp_by_res.index)
 ax.set_ylabel('Resource')
 ax.set_xlabel('Number of complexes')
+ax.set_xscale('log')
 fig.tight_layout()
 fig.savefig('../figures/complex_by_source.svg')

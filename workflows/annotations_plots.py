@@ -11,6 +11,7 @@ import pandas as pd
 import numpy as np
 
 import pypath
+from pypath.main import PyPath
 from pypath import annot
 
 # Colors!
@@ -25,14 +26,40 @@ if os.getcwd().endswith('omnipath2'):
 if not os.path.exists(cachedir):
     os.makedirs(cachedir)
 
+#============================== RETRIEVING INFO ==============================#
 pypath.settings.setup(cachedir=cachedir)
 
+pa = PyPath()
+
 with pypath.curl.cache_off():
+    pa.init_network()
     a = annot.AnnotationTable(keep_annotators=True, create_dataframe=True)
     a.load()
 
 df = a.to_dataframe()
+df.to_csv('../../../../../../home/nico/Desktop/annot_df.csv')
 print([x for x in dir(a) if not x.startswith('_')])
+
+df.shape
+
+# Number of annotations per protein/complex
+annots_per_prot = [sum(df.iloc[i, :].values) for i in range(len(df))]
+
+# Number of proteins by resource
+prots_by_res = dict()
+
+for c in df.columns:
+    source = c.split('__')[0]
+    prots = set(df.index[df[c]])
+
+    if source not in prots_by_res.keys():
+        prots_by_res[source] = prots
+
+    else:
+        prots_by_res[source].update(prots)
+
+prots_by_res = pd.Series(list(map(len, prots_by_res.values())),
+                         index=prots_by_res.keys()).sort_values()
 
 # Number of annotation subclasses per resource
 all_keys = np.array([i[0] for i in a.cols.keys()])
@@ -40,10 +67,13 @@ unique_keys = list(set(all_keys))
 len(all_keys)
 subclasses = pd.Series([sum(all_keys == x) for x in unique_keys],
                         index=unique_keys).sort_values()
+a.annots.keys()
+#================================= PLOTTING ==================================#
+# Annotation classes by resource
 rng = range(len(subclasses))
 fig, ax = plt.subplots(figsize=(9, 7))
-
-ax.barh(rng, subclasses.values)
+ax.grid(True, axis='x')
+ax.barh(rng, subclasses.values, color=cb)
 ax.set_yticks(rng)
 ax.set_yticklabels(subclasses.index)
 ax.set_ylim(-1, len(subclasses))
@@ -52,14 +82,32 @@ ax.set_xscale('log')
 fig.tight_layout()
 fig.savefig('../figures/annot_classes_by_source.svg')
 
+# Annotations per protein/complex
+fig, ax = plt.subplots()
+ax.hist(annots_per_prot, bins=100, color=cb)
+ax.set_title('Annotations per protein/complex')
+ax.set_xlabel('Number of annotations')
+ax.set_ylabel('Proteins/complexes')
+#ax.set_yscale('log')
+ax.set_xlim([-1, max(annots_per_prot)])
+fig.tight_layout()
+fig.savefig('../figures/annot_per_prot.svg')
 
+# Proteins/complexes by resource
+fig, ax = plt.subplots(figsize=(7, 6))
+ax.grid(True, axis='x')
+rng = range(len(prots_by_res))
+ax.barh(rng, prots_by_res.values, color=cb)
+ax.set_title('Proteins/complexes by resource')
+ax.set_ylabel('Resource')
+ax.set_xlabel('Number of proteins/complexes')
 
-
-
-
-
-
-
+ax.set_ylim(-1, len(prots_by_res))
+ax.set_yticks(rng)
+ax.set_yticklabels(prots_by_res.index)
+ax.set_xscale('log')
+fig.tight_layout()
+fig.savefig('../figures/annot_prot_by_source.svg')
 
 a
 #================================ WORKAROUND =================================#
