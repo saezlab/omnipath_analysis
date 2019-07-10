@@ -38,11 +38,13 @@ Settings <- R6::R6Class(
             
         },
         
-        get = function(key){
+        get = function(key, default = NULL){
             
             key <- quo_name(enquo(key))
             
-            self$settings[[key]]
+            value <- self$settings[[key]]
+            
+            `if`(is.null(value), default, value)
             
         },
         
