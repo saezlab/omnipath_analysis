@@ -20,5 +20,6 @@
 .onLoad <- function(libname, pkgname){
     
     omnipath2_settings <<- Settings$new()
+    do.call(options, omnipath2_settings$get(console_settings))
     
 }
