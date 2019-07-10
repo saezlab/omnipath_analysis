@@ -38,15 +38,25 @@ Settings <- R6::R6Class(
             
         },
         
-        get = function(key, default = NULL){
+        get = function(key, override = NULL, default = NULL){
             
             key <- quo_name(enquo(key))
             
             value <- self$settings[[key]]
             
-            `if`(is.null(value), default, value)
+            `if`(
+                is.null(override),
+                `if`(
+                    is.null(value),
+                    default,
+                    value
+                ),
+                override
+            )
             
         },
+        
+        get
         
         set = function(...){
             
