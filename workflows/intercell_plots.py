@@ -19,6 +19,8 @@ import pandas as pd
 import pypath
 from pypath import intercell
 from pypath.main import PyPath
+reload(data_tools)
+reload(data_tools.plots)
 import data_tools
 from data_tools.iterables import subsets
 from data_tools.spatial import equidist_polar
