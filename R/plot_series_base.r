@@ -62,6 +62,8 @@ PlotSeries <- R6::R6Class(
             
             #self$plot()
             
+            invisible(self)
+            
         },
         
         

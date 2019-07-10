@@ -32,13 +32,23 @@ CategorySizes <- R6::R6Class(
     
     public = list(
         
-        initialize = function(data, name = NULL, ...){
+        initialize = function(data, name = NULL, theme_args = list(), ...){
             
             name <- `if`(is.null(name), 'sizes', name)
+            theme_args <- modifyList(
+                list(
+                    axis.text.x = element_text(
+                        angle = 45, vjust = 1, hjust = 1
+                    )
+                ),
+                theme_args
+            )
+            #private$set_width()
             
             super$initialize(
                 data = data,
                 name = name,
+                theme_args = theme_args,
                 ...
             )
             
@@ -51,7 +61,7 @@ CategorySizes <- R6::R6Class(
                 group_by(name_cls0) %>%
                 summarize_all(first) %>%
                 mutate(
-                    label0 = ifelse(is.na(label0), 'Total', label0)
+                    label0 = ifelse(is.na(src_label0), 'Total', src_label0)
                 ) %>%
                 arrange(desc(size_cls0)) %>%
                 mutate(

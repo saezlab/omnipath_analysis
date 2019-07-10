@@ -24,21 +24,25 @@ get_default_param <- function(){
     
     list(
         
-        typeface = 'DINPro',
+        typeface = 'HelveticaNeueLT Std Cn',
+        font_style = 'bold',
         dir_figures = 'figures',
         dir_data = 'data',
         dir_misc = 'misc',
         add_titles = TRUE,
         theme = theme_minimal,
-        input_intercell_cat_pairwise = 'stats_by_resource_20190708.tsv'
+        input_intercell_cat_pairwise = 'stats_by_resource_20190708.tsv',
         graph_plot_defaults = list(
             vertex.frame.color = NA,
             vertex.color = '#FDC70F',
             edge.color = '#4C4B6B33',
             vertex.label.color = '#4C4B6B'
         ),
-        graph_layout_default = 'fr'
-        
+        graph_layout_default = 'fr',
+        console_settings = list(
+            width = 270,
+            dplyr.width = 270
+        )
     )
     
 }

@@ -38,7 +38,8 @@ SinglePlot <- R6::R6Class(
             width = 4,
             height = 3,
             preproc_args = list(),
-            plot_args = list()
+            plot_args = list(),
+            theme_args = list()
         ){
             
             super$initialize(name = name)
@@ -48,6 +49,7 @@ SinglePlot <- R6::R6Class(
             self$height <- height
             self$preproc_args <- preproc_args
             self$plot_args <- plot_args
+            self$theme_args <- theme_args
             
             self$main()
             
@@ -113,7 +115,10 @@ SinglePlot <- R6::R6Class(
             
             if(is.null(self$typeface)){
                 
-                self$typeface <- omnipath2_settings$get(typeface)
+                self$typeface <- list(
+                    family = omnipath2_settings$get(typeface),
+                    face = omnipath2_settings$get(font_style)
+                )
                 
             }
         },
@@ -122,7 +127,8 @@ SinglePlot <- R6::R6Class(
             
             self$plt <- self$plt +
                 omnipath2_settings$get(theme)() +
-                theme(text = element_text(family = self$typeface))
+                do.call(theme, self$theme_args) +
+                theme(text = do.call(element_text, self$typeface))
             
         }
         

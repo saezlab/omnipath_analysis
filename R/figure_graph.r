@@ -88,6 +88,13 @@ GraphPlot <- R6::R6Class(
         },
         
         
+        circle_layout = function(g){
+            
+            layout_in_circle(g)
+            
+        },
+        
+        
         preprocess = function(...){
             
             invisible(self)
@@ -97,7 +104,7 @@ GraphPlot <- R6::R6Class(
         
         plot = function(...){
             
-            self$plot_args['layout'] <- self$layout
+            self$plot_args[['layout']] <- self$layout
             
             cairo_pdf(self$path, width = self$width, height = self$height)
             
@@ -117,7 +124,7 @@ GraphPlot <- R6::R6Class(
             
             invisible(self)
             
-        },
+        }
         
     ),
     
@@ -136,7 +143,7 @@ GraphPlot <- R6::R6Class(
             )
             private$set_layout()
             private$set_typeface()
-            self$plot_args <- modifylist(
+            self$plot_args <- modifyList(
                 list(
                     vertex.label.family = self$typeface,
                     edge.label.family = self$typeface,
@@ -153,7 +160,7 @@ GraphPlot <- R6::R6Class(
         ensure_graph = function(){
             
             self$graph <- `if`(
-                class(self$data) == 'igraph',
+                is.igraph(self$data),
                 self$data,
                 private$build_graph()
             )
@@ -181,13 +188,13 @@ GraphPlot <- R6::R6Class(
             
             self$layout <- `if`(
                 (
-                    !is.null(dim(self$layout)) &
+                    !is.null(dim(self$layout)) &&
                     dim(self$layout)[1] == vcount(self$graph)
                 ),
                 self$layout,
                 self[[
                     sprintf(
-                        'set_%s_layout',
+                        '%s_layout',
                         `if`(
                             (
                                 is.character(self$layout) &
@@ -200,7 +207,7 @@ GraphPlot <- R6::R6Class(
                             omnipath2_settings$get(graph_layout_default)
                         )
                     )
-                ]]()
+                ]](self$graph)
             )
             
             invisible(self)
@@ -227,7 +234,7 @@ ConnectionGraph <- R6::R6Class(
             private$ensure_data(data)
             
             super$initialize(
-                data = data,
+                data = self$data,
                 name = 'intercell-classes-graph',
                 layout = layout,
                 ...
@@ -262,7 +269,8 @@ ConnectionGraph <- R6::R6Class(
                 select(
                     name_cls0, name_cls1, con_all, size_cls0, size_cls1
                 ) %>%
-                filter(size_cls0 > 0 & size_cls1 > 0)
+                filter(size_cls0 > 0 & size_cls1 > 0) %>%
+                mutate(name_cls0 = as.character(name_cls0))
             
             vertices <- bind_rows(
                     edges %>% select(name = name_cls0, size = size_cls0),
