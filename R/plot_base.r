@@ -49,7 +49,10 @@ SinglePlot <- R6::R6Class(
             self$height <- height
             self$preproc_args <- preproc_args
             self$plot_args <- plot_args
-            self$theme_args <- theme_args
+            self$theme_args <- modifyList(
+                omnipath2_settings$get(theme_defaults),
+                theme_args
+            )
             
             self$main()
             
@@ -121,13 +124,16 @@ SinglePlot <- R6::R6Class(
                 )
                 
             }
+            
         },
+        
         
         set_theme = function(){
             
             self$plt <- self$plt +
                 omnipath2_settings$get(theme)() +
                 do.call(theme, self$theme_args) +
+                do.call(theme, omnipath2_settings$get(theme_defaults)) +
                 theme(text = do.call(element_text, self$typeface))
             
         }

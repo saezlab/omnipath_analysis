@@ -38,11 +38,12 @@ CategorySizes <- R6::R6Class(
             theme_args <- modifyList(
                 list(
                     axis.text.x = element_text(
-                        angle = 45, vjust = 1, hjust = 1
+                        angle = 45, vjust = 1, hjust = 1, color = '#000000'
                     )
                 ),
                 theme_args
             )
+            
             #private$set_width()
             
             super$initialize(
@@ -81,11 +82,6 @@ CategorySizes <- R6::R6Class(
                 geom_col(fill = 'black') +
                 xlab('Resources') +
                 ylab('Number of proteins') +
-                theme(
-                    axis.text.x = element_text(
-                        angle = 90, vjust = 0.5, hjust = 1
-                    )
-                ) +
                 ggtitle(
                     sprintf(
                         'Resources: %s',

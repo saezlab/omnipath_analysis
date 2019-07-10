@@ -671,6 +671,53 @@ class FiguresPreprocess(session_mod.Logger):
         self.stats.to_csv(path, index = False, sep = '\t')
     
     
+    def export_annotations_by_entity(self):
+        
+        all_proteins = set(dataio.all_uniprots(swissprot = True))
+        all_complexes = set(self.complex.complexes.keys())
+        annotations = list(self.intercell.classes.keys())
+        
+        AnnotationRecord = collections.namedtuple(
+            'AnnotationRecord',
+            [
+                'entity_id',
+                'entity_type',
+            ] + annotations
+        )
+        
+        tbl = []
+        
+        path = os.path.join(
+            self.datadir,
+            'annotations_by_entity_%s.tsv' % self.date,
+        )
+        
+        for entity_type, entity_id in itertools.chain(
+            zip(iter(lambda: 'protein', 0), all_proteins),
+            zip(iter(lambda: 'complex', 0), all_complexes),
+        ):
+            
+            tbl.append(
+                AnnotationRecord(
+                    entity_id = entity_id,
+                    entity_type = entity_type,
+                    **dict(
+                        (
+                            annot_label,
+                            entity_id in self.intercell.classes[annot_label]
+                        )
+                        for annot_label in annotations
+                    )
+                )
+            )
+        
+        df = pd.DataFrame(tbl, columns = AnnotationRecord._fields)
+        
+        df.to_csv(path, index = False, sep = '\t')
+        
+        self.annotations_by_entity = df
+    
+    
     def build_intercell_network(self):
         
         self._log('Building the intercell communication network.')

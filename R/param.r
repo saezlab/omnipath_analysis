@@ -31,6 +31,10 @@ get_default_param <- function(){
         dir_misc = 'misc',
         add_titles = TRUE,
         theme = theme_minimal,
+        theme_defaults = list(
+            axis.text.x = element_text(color = '#000000'),
+            axis.text.y = element_text(color = '#000000')
+        ),
         input_intercell_cat_pairwise = 'stats_by_resource_20190708.tsv',
         graph_plot_defaults = list(
             vertex.frame.color = NA,
