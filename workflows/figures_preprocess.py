@@ -18,6 +18,8 @@
 #  Website: http://pypath.omnipathdb.org/
 #
 
+from future.utils import iteritems
+
 import imp
 import os
 import sys
@@ -41,6 +43,8 @@ from pypath import network
 from pypath import session_mod
 from pypath import settings
 from pypath import progress
+from pypath import data_formats
+from pypath import intera
 
 
 def reload():
@@ -676,13 +680,17 @@ class FiguresPreprocess(session_mod.Logger):
         all_proteins = set(dataio.all_uniprots(swissprot = True))
         all_complexes = set(self.complex.complexes.keys())
         annotations = list(self.intercell.classes.keys())
+        resources = list(self.network.resources)
         
         AnnotationRecord = collections.namedtuple(
             'AnnotationRecord',
             [
                 'entity_id',
-                'entity_type',
-            ] + annotations
+                'is_complex',
+                'cls',
+                'parent',
+                'class_type',
+            ]
         )
         
         tbl = []
@@ -692,30 +700,86 @@ class FiguresPreprocess(session_mod.Logger):
             'annotations_by_entity_%s.tsv' % self.date,
         )
         
-        for entity_type, entity_id in itertools.chain(
-            zip(iter(lambda: 'protein', 0), all_proteins),
-            zip(iter(lambda: 'complex', 0), all_complexes),
-        ):
+        for cls, elements in iteritems(self.intercell.classes):
             
-            tbl.append(
-                AnnotationRecord(
-                    entity_id = entity_id,
-                    entity_type = entity_type,
-                    **dict(
-                        (
-                            annot_label,
-                            entity_id in self.intercell.classes[annot_label]
-                        )
-                        for annot_label in annotations
+            for elem in elements:
+                
+                tbl.append(
+                    AnnotationRecord(
+                        entity_id = elem.__str__(),
+                        is_complex = isinstance(elem, intera.Complex),
+                        cls = cls,
+                        parent = self.intercell.parents[cls],
+                        class_type = self.get_class_type(cls),
                     )
                 )
-            )
         
         df = pd.DataFrame(tbl, columns = AnnotationRecord._fields)
         
         df.to_csv(path, index = False, sep = '\t')
         
         self.annotations_by_entity = df
+    
+    
+    def export_resources_by_entity(self):
+        
+        ResourceRecord = collections.namedtuple(
+            'ResourceRecord',
+            [
+                'entity_id',
+                'resource',
+                'is_complex',
+                'resource_class',
+            ]
+        )
+        
+        
+        all_entities = set(
+            itertools.chain(
+                *self.network.records[['id_a', 'id_b']].values
+            )
+        )
+        
+        entities_by_resource = self.network.entities_by_resource()
+        
+        tbl = []
+        
+        path = os.path.join(
+            self.datadir,
+            'resources_by_entity_%s.tsv' % self.date,
+        )
+        
+        for resource, entities in iteritems(entities_by_resource):
+            
+            for entity_id in entities:
+                
+                tbl.append(
+                    ResourceRecord(
+                        entity_id = entity_id,
+                        resource = resource,
+                        is_complex = entity_id.startswith('COMPLEX'),
+                        resource_class = (
+                            data_formats.categories[resource]
+                                if resource in data_formats.categories else
+                            'z'
+                        ),
+                    )
+                )
+        
+        df = pd.DataFrame(tbl, columns = ResourceRecord._fields)
+        
+        df.to_csv(path, index = False, sep = '\t')
+        
+        self.resources_by_entity = df
+    
+    
+    def get_class_type(self, cls):
+        
+        return (
+            self.intercell.class_types[cls]
+                if cls in self.intercell.class_types else
+            'sub'
+        )
     
     
     def build_intercell_network(self):
