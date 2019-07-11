@@ -41,6 +41,7 @@ get_default_param <- function(){
             'annotations_by_entity_20190710.tsv'
         ),
         input_resource_by_entity = 'resources_by_entity_20190710.tsv',
+        input_complexes_by_resource = 'complexes_by_resource_20190710.tsv',
         graph_plot_defaults = list(
             vertex.frame.color = NA,
             vertex.color = '#FDC70F',

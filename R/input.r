@@ -208,3 +208,32 @@ ResourceByEntity <- R6::R6Class(
     )
     
 )
+
+
+ComplexesByResource <- R6::R6Class(
+    
+    'ComplexesByResource',
+    
+    inherit = Reader,
+    
+    lock_objects = FALSE,
+    
+    public = list(
+        
+        initialize = function(fname = NULL){
+            
+            self$fname <- `if`(
+                is.null(fname),
+                omnipath2_settings$get(input_complexes_by_resource),
+                fname
+            )
+            
+            super$initialize(name = self$fname)
+            
+            invisible(self)
+            
+        }
+        
+    )
+    
+)

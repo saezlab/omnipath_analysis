@@ -74,7 +74,8 @@ SinglePlot <- R6::R6Class(
             cairo_pdf(
                 self$path,
                 width = omnipath2_settings$get(width, self$width),
-                height = omnipath2_settings$get(height, self$height)
+                height = omnipath2_settings$get(height, self$height),
+                family = omnipath2_settings$get(typeface)
             )
             
             print(self$plt)
