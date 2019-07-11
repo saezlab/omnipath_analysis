@@ -689,6 +689,8 @@ class FiguresPreprocess(session_mod.Logger):
                 'is_complex',
                 'cls',
                 'parent',
+                'resource_label',
+                'class_label',
                 'class_type',
             ],
         )
@@ -710,6 +712,8 @@ class FiguresPreprocess(session_mod.Logger):
                         is_complex = isinstance(elem, intera.Complex),
                         cls = cls,
                         parent = self.intercell.parents[cls],
+                        resource_label = self.get_resource_label(cls),
+                        class_label = self.get_class_label(cls),
                         class_type = self.get_class_type(cls),
                     )
                 )
@@ -814,6 +818,24 @@ class FiguresPreprocess(session_mod.Logger):
             self.intercell.class_types[cls]
                 if cls in self.intercell.class_types else
             'sub'
+        )
+    
+    
+    def get_resource_label(self, cls):
+        
+        return (
+            self.intercell.resource_labels[cls]
+                if cls in self.intercell.resource_labels else
+            ''
+        )
+    
+    
+    def get_class_label(self, cls):
+        
+        return (
+            self.intercell.class_labels[cls]
+                if cls in self.intercell.class_labels else
+            ''
         )
     
     
