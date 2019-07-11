@@ -237,6 +237,8 @@ ConnectionGraph <- R6::R6Class(
                 data = self$data,
                 name = 'intercell-classes-graph',
                 layout = layout,
+                width = 4,
+                height = 3,
                 ...
             )
             

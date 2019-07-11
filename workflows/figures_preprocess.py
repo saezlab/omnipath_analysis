@@ -206,15 +206,9 @@ class FiguresPreprocess(session_mod.Logger):
         
         self.con_omnipath = len(
             set(
-                map(
-                    tuple,
-                    map(
-                        sorted,
-                        zip(
-                            self.network.records.id_a,
-                            self.network.records.id_b,
-                        )
-                    )
+                zip(
+                    self.network.records.id_a,
+                    self.network.records.id_b,
                 )
             )
         )
@@ -399,14 +393,19 @@ class FiguresPreprocess(session_mod.Logger):
             )
     
     
-    def count_connections_pairwise(self):
+    def count_connections_pairwise_old(self):
         """
         Counts the connections between categories pairwise.
         """
         
         def count(df, undirected = False):
             
-            con = zip(df.category_a, df.category_b)
+            #sorter = sorted if undirected else lambda x: x
+            
+            con = zip(
+                df.category_a,
+                df.category_b
+            )
             
             if undirected:
                 
@@ -421,20 +420,96 @@ class FiguresPreprocess(session_mod.Logger):
             )
         
         
-        self.con_directed    = count(
+        self.con_directed_o    = count(
             self.intercell_network[self.intercell_network.directed]
         )
-        self.con_stimulation = count(
+        self.con_stimulation_o = count(
             self.intercell_network[self.intercell_network.effect ==  1]
         )
-        self.con_inhibition  = count(
+        self.con_inhibition_o  = count(
             self.intercell_network[self.intercell_network.effect == -1]
         )
-        self.con_undirected  = count(
+        self.con_undirected_o  = count(
             self.intercell_network[
                 np.logical_not(self.intercell_network.directed)
             ],
             undirected = True,
+        )
+    
+    
+    def count_connections_pairwise(self):
+        """
+        Counts the connections between categories pairwise.
+        """
+        
+        undirected = collections.defaultdict(set)
+        directed = collections.defaultdict(set)
+        stimulation = collections.defaultdict(set)
+        inhibition = collections.defaultdict(set)
+        
+        prg = progress.Progress(
+            self.intercell_network.shape[0],
+            'Counting connections',
+            1000,
+        )
+        
+        for i in self.intercell_network.itertuples():
+            
+            prg.step()
+            
+            if not i.directed:
+                
+                undirected[(i.category_a, i.category_b)].add((i.id_a, i.id_b))
+                undirected[(i.category_b, i.category_a)].add((i.id_b, i.id_a))
+                
+            else:
+                
+                directed[(i.category_a, i.category_b)].add((i.id_a, i.id_b))
+                
+                if i.effect == 1:
+                    
+                    stimulation[(i.category_a, i.category_b)].add(
+                        (i.id_a, i.id_b)
+                    )
+                    
+                elif i.effect == -1:
+                    
+                    inhibition[(i.category_a, i.category_b)].add(
+                        (i.id_a, i.id_b)
+                    )
+        
+        prg.terminate()
+        
+        self.con_undirected = collections.defaultdict(
+            int,
+            dict(
+                (cats, len(elements))
+                for cats, elements in undirected.items()
+            )
+        )
+        
+        self.con_directed = collections.defaultdict(
+            int,
+            dict(
+                (cats, len(elements))
+                for cats, elements in directed.items()
+            )
+        )
+        
+        self.con_stimulation = collections.defaultdict(
+            int,
+            dict(
+                (cats, len(elements))
+                for cats, elements in stimulation.items()
+            )
+        )
+        
+        self.con_inhibition = collections.defaultdict(
+            int,
+            dict(
+                (cats, len(elements))
+                for cats, elements in inhibition.items()
+            )
         )
     
     

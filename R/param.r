@@ -36,7 +36,7 @@ get_default_param <- function(){
             axis.text.y = element_text(color = '#000000'),
             panel.grid.major.x = element_blank()
         ),
-        input_intercell_cat_pairwise = 'stats_by_resource_20190710.tsv',
+        input_intercell_cat_pairwise = 'stats_by_resource_20190711.tsv',
         input_intercell_annotation_by_entity = (
             'annotations_by_entity_20190710.tsv'
         ),
