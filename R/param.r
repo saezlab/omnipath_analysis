@@ -35,7 +35,7 @@ get_default_param <- function(){
             axis.text.x = element_text(color = '#000000'),
             axis.text.y = element_text(color = '#000000')
         ),
-        input_intercell_cat_pairwise = 'stats_by_resource_20190708.tsv',
+        input_intercell_cat_pairwise = 'stats_by_resource_20190710.tsv',
         graph_plot_defaults = list(
             vertex.frame.color = NA,
             vertex.color = '#FDC70F',
@@ -46,7 +46,9 @@ get_default_param <- function(){
         console_settings = list(
             width = 270,
             dplyr.width = 270
-        )
+        ),
+        width = 4,
+        height = 3
     )
     
 }

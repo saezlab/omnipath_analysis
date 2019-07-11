@@ -38,6 +38,7 @@ Settings <- R6::R6Class(
             
         },
         
+        
         get = function(key, override = NULL, default = NULL){
             
             key <- quo_name(enquo(key))
@@ -56,7 +57,6 @@ Settings <- R6::R6Class(
             
         },
         
-        get
         
         set = function(...){
             
@@ -64,11 +64,13 @@ Settings <- R6::R6Class(
             
         },
         
+        
         reset = function(...){
             
             self$settings <- modifyList(get_default_param(), list(...))
             
         },
+        
         
         print = function(){
             

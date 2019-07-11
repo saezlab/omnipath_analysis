@@ -35,8 +35,8 @@ SinglePlot <- R6::R6Class(
             data,
             name,
             typeface = NA,
-            width = 4,
-            height = 3,
+            width = NULL,
+            height = NULL,
             preproc_args = list(),
             plot_args = list(),
             theme_args = list()
@@ -71,7 +71,11 @@ SinglePlot <- R6::R6Class(
         
         save = function(){
             
-            cairo_pdf(self$path, width = self$width, height = self$height)
+            cairo_pdf(
+                self$path,
+                width = omnipath2_settings$get(width, self$width),
+                height = omnipath2_settings$get(height, self$height)
+            )
             
             print(self$plt)
             

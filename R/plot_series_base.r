@@ -37,7 +37,10 @@ PlotSeries <- R6::R6Class(
             plot_args = list(),
             label_mapping = NULL,
             exclude_levels = NULL,
-            label_levels = NULL
+            label_levels = NULL,
+            width_by = NULL,
+            width_min = NULL,
+            width_step = NULL
         ){
             
             self$data <- data
@@ -47,6 +50,10 @@ PlotSeries <- R6::R6Class(
             self$label_levels <- label_levels
             self$plotter <- plotter
             self$plot_args <- plot_args
+            self$width_by <- enquo(width_by)
+            self$width_min <- width_min
+            self$width_step <- width_step
+            self$width <- plot_args$width
             
             self$main()
             
@@ -118,6 +125,8 @@ PlotSeries <- R6::R6Class(
                     self$slice <- self$data %>%
                         filter(!!self$slice_var == level)
                     
+                    private$set_width()
+                    
                 }else{
                     
                     self$level <- NULL
@@ -179,6 +188,30 @@ PlotSeries <- R6::R6Class(
                     ),
                     self$plot_args
                 )
+            )
+            
+        },
+        
+        
+        set_width = function(){
+            
+            self$plot_args$width <- `if`(
+                is.null(self$width),
+                private$get_width(),
+                self$width
+            )
+            
+        },
+        
+        
+        get_width = function(){
+            
+            (
+                self$width_min +
+                self$width_step *
+                self$slice %>%
+                    select(!!self$width_by) %>%
+                    unique %>% unlist %>% length
             )
             
         }

@@ -19,6 +19,7 @@
 
 require(dplyr)
 require(ggplot2)
+require(stringr)
 require(R6)
 
 
@@ -82,12 +83,7 @@ CategorySizes <- R6::R6Class(
                 geom_col(fill = 'black') +
                 xlab('Resources') +
                 ylab('Number of proteins') +
-                ggtitle(
-                    sprintf(
-                        'Resources: %s',
-                        toupper(first(self$data$parent0))
-                    )
-                )
+                ggtitle(first(str_to_title(self$data$parent0)))
             
             invisible(self)
             
@@ -115,6 +111,9 @@ CategorySizesSeries <- R6::R6Class(
                 slice_var = parent0,
                 plotter = CategorySizes,
                 name = 'sizes',
+                width_by = src_label0,
+                width_min = .7,
+                width_step = .23,
                 ...
             )
             
