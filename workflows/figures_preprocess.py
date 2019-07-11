@@ -690,7 +690,7 @@ class FiguresPreprocess(session_mod.Logger):
                 'cls',
                 'parent',
                 'class_type',
-            ]
+            ],
         )
         
         tbl = []
@@ -730,7 +730,7 @@ class FiguresPreprocess(session_mod.Logger):
                 'resource',
                 'is_complex',
                 'resource_class',
-            ]
+            ],
         )
         
         
@@ -771,6 +771,41 @@ class FiguresPreprocess(session_mod.Logger):
         df.to_csv(path, index = False, sep = '\t')
         
         self.resources_by_entity = df
+    
+    
+    def export_complexes_by_resource(self):
+        
+        ComplexRecord = collections.namedtuple(
+            'ComplexRecord',
+            [
+                'complex_id',
+                'resource',
+            ],
+        )
+        
+        tbl = []
+        
+        path = os.path.join(
+            self.datadir,
+            'complexes_by_resource_%s.tsv' % self.date,
+        )
+        
+        for cplex_name, cplex in iteritems(self.complex.complexes):
+            
+            for resource in cplex.sources:
+                
+                tbl.append(
+                    ComplexRecord(
+                        complex_id = cplex.__str__(),
+                        resource = resource,
+                    )
+                )
+        
+        df = pd.DataFrame(tbl, columns = ComplexRecord._fields)
+        
+        df.to_csv(path, index = False, sep = '\t')
+        
+        self.complexes_by_resource = df
     
     
     def get_class_type(self, cls):
