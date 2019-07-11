@@ -33,7 +33,8 @@ get_default_param <- function(){
         theme = theme_minimal,
         theme_defaults = list(
             axis.text.x = element_text(color = '#000000'),
-            axis.text.y = element_text(color = '#000000')
+            axis.text.y = element_text(color = '#000000'),
+            panel.grid.major.x = element_blank()
         ),
         input_intercell_cat_pairwise = 'stats_by_resource_20190710.tsv',
         graph_plot_defaults = list(

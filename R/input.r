@@ -64,26 +64,9 @@ Reader <- R6::R6Class(
         },
         
         
-        #' Here we add some more columns which are easy to calculate
-        #' over the entire data frame. Also we sort the data frame by
-        #' the size of the first category.
         preprocess = function(...){
             
-            self$data <- self$data %>%
-                mutate(
-                    omnipath_covers_cls0 = size_cls0 / in_omnipath_cls0 * 100,
-                    omnipath_covers_cls1 = size_cls1 / in_omnipath_cls1 * 100,
-                    pct_of_parent_cls0 = size_cls0 / size_parent0 * 100,
-                    pct_of_parent_cls1 = size_cls1 / size_parent1 * 100
-                ) %>%
-                arrange(desc(size_cls0)) %>%
-                mutate(
-                    name_cls0 = factor(
-                        name_cls0,
-                        levels = unique(name_cls0),
-                        ordered = TRUE
-                    )
-                )
+            invisible(self)
             
         }
         
@@ -113,6 +96,30 @@ IntercellCategoriesPairwise <- R6::R6Class(
             super$initialize(name = self$fname)
             
             invisible(self)
+            
+        },
+        
+        
+        #' Here we add some more columns which are easy to calculate
+        #' over the entire data frame. Also we sort the data frame by
+        #' the size of the first category.
+        preprocess = function(...){
+            
+            self$data <- self$data %>%
+                mutate(
+                    omnipath_covers_cls0 = size_cls0 / in_omnipath_cls0 * 100,
+                    omnipath_covers_cls1 = size_cls1 / in_omnipath_cls1 * 100,
+                    pct_of_parent_cls0 = size_cls0 / size_parent0 * 100,
+                    pct_of_parent_cls1 = size_cls1 / size_parent1 * 100
+                ) %>%
+                arrange(desc(size_cls0)) %>%
+                mutate(
+                    name_cls0 = factor(
+                        name_cls0,
+                        levels = unique(name_cls0),
+                        ordered = TRUE
+                    )
+                )
             
         }
         
