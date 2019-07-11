@@ -37,6 +37,10 @@ get_default_param <- function(){
             panel.grid.major.x = element_blank()
         ),
         input_intercell_cat_pairwise = 'stats_by_resource_20190710.tsv',
+        input_intercell_annotation_by_entity = (
+            'annotations_by_entity_20190710.tsv'
+        ),
+        input_resource_by_entity = 'resources_by_entity_20190710.tsv',
         graph_plot_defaults = list(
             vertex.frame.color = NA,
             vertex.color = '#FDC70F',

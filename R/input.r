@@ -126,3 +126,85 @@ IntercellCategoriesPairwise <- R6::R6Class(
     )
     
 )
+
+
+IntercellAnnotationByEntity <- R6::R6Class(
+    
+    'IntercellAnnotationByEntity',
+    
+    inherit = Reader,
+    
+    lock_objects = FALSE,
+    
+    public = list(
+        
+        initialize = function(fname = NULL){
+            
+            self$fname <- `if`(
+                is.null(fname),
+                omnipath2_settings$get(input_intercell_annotation_by_entity),
+                fname
+            )
+            
+            super$initialize(name = self$fname)
+            
+            invisible(self)
+            
+        },
+        
+        
+        preprocess = function(...){
+            
+            self$data <- self$data %>%
+                mutate(
+                    is_complex = is_complex == 'True'
+                )
+            
+            invisible(self)
+            
+        }
+        
+    )
+    
+)
+
+
+ResourceByEntity <- R6::R6Class(
+    
+    'ResourceByEntity',
+    
+    inherit = Reader,
+    
+    lock_objects = FALSE,
+    
+    public = list(
+        
+        initialize = function(fname = NULL){
+            
+            self$fname <- `if`(
+                is.null(fname),
+                omnipath2_settings$get(input_resource_by_entity),
+                fname
+            )
+            
+            super$initialize(name = self$fname)
+            
+            invisible(self)
+            
+        },
+        
+        
+        preprocess = function(...){
+            
+            self$data <- self$data %>%
+                mutate(
+                    is_complex = is_complex == 'True'
+                )
+            
+            invisible(self)
+            
+        }
+        
+    )
+    
+)
