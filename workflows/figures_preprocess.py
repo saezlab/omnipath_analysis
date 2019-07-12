@@ -442,6 +442,18 @@ class FiguresPreprocess(session_mod.Logger):
         Counts the connections between categories pairwise.
         """
         
+        def counts_dict(sets_dict):
+            
+            return collections.defaultdict(
+                int,
+                dict(
+                    (cats, len(elements))
+                    for cats, elements in sets_dict.items()
+                )
+            )
+        
+        
+        con_all = collections.defaultdict(set)
         undirected = collections.defaultdict(set)
         directed = collections.defaultdict(set)
         stimulation = collections.defaultdict(set)
@@ -457,10 +469,12 @@ class FiguresPreprocess(session_mod.Logger):
             
             prg.step()
             
+            sorted_tuple = tuple(sorted((i.id_a, i.id_b)))
+            
             if not i.directed:
                 
-                undirected[(i.category_a, i.category_b)].add((i.id_a, i.id_b))
-                undirected[(i.category_b, i.category_a)].add((i.id_b, i.id_a))
+                undirected[(i.category_a, i.category_b)].add(sorted_tuple)
+                undirected[(i.category_b, i.category_a)].add(sorted_tuple)
                 
             else:
                 
@@ -477,40 +491,18 @@ class FiguresPreprocess(session_mod.Logger):
                     inhibition[(i.category_a, i.category_b)].add(
                         (i.id_a, i.id_b)
                     )
+            
+            con_all[(i.category_a, i.category_b)].add(sorted_tuple)
+            con_all[(i.category_b, i.category_a)].add(sorted_tuple)
+            
         
         prg.terminate()
         
-        self.con_undirected = collections.defaultdict(
-            int,
-            dict(
-                (cats, len(elements))
-                for cats, elements in undirected.items()
-            )
-        )
-        
-        self.con_directed = collections.defaultdict(
-            int,
-            dict(
-                (cats, len(elements))
-                for cats, elements in directed.items()
-            )
-        )
-        
-        self.con_stimulation = collections.defaultdict(
-            int,
-            dict(
-                (cats, len(elements))
-                for cats, elements in stimulation.items()
-            )
-        )
-        
-        self.con_inhibition = collections.defaultdict(
-            int,
-            dict(
-                (cats, len(elements))
-                for cats, elements in inhibition.items()
-            )
-        )
+        self.con_undirected = counts_dict(undirected)
+        self.con_directed = counts_dict(directed)
+        self.con_stimulation = counts_dict(stimulation)
+        self.con_inhibition = counts_dict(inhibition)
+        self.con_all = counts_dict(con_all)
     
     
     def export_stats_by_category_pairs(self):
@@ -589,10 +581,7 @@ class FiguresPreprocess(session_mod.Logger):
                     size_parent0 = len(parent0_elements),
                     size_parent1 = len(parent1_elements),
                     # connections
-                    con_all = (
-                        self.con_undirected[cls01] +
-                        self.con_directed[cls01]
-                    ),
+                    con_all = self.con_all,
                     con_0to1 = self.con_directed[cls01],
                     con_0to1_stim = self.con_stimulation[cls01],
                     con_0to1_inh = self.con_inhibition[cls01],
