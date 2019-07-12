@@ -108,6 +108,8 @@ GraphPlot <- R6::R6Class(
             
             cairo_pdf(self$path, width = self$width, height = self$height)
             
+            par(mar = c(0, 0, 0, 0) + .1)
+            
             do.call(
                 plot,
                 c(list(self$graph), self$plot_args)
@@ -142,11 +144,11 @@ GraphPlot <- R6::R6Class(
                 self$plot_args
             )
             private$set_layout()
-            private$set_typeface()
+            
             self$plot_args <- modifyList(
                 list(
-                    vertex.label.family = self$typeface,
-                    edge.label.family = self$typeface,
+                    vertex.label.family = omnipath2_settings$get(typeface),
+                    edge.label.family = omnipath2_settings$get(font_style),
                     layout = self$layout
                 ),
                 self$plot_args
@@ -269,19 +271,19 @@ ConnectionGraph <- R6::R6Class(
             edges <- self$data %>%
                 filter(typ_cls0 == 'main' & typ_cls1 == 'main') %>%
                 select(
-                    name_cls0, name_cls1, con_all, size_cls0, size_cls1
+                    cls_label0, cls_label1, con_all, size_cls0, size_cls1
                 ) %>%
                 filter(size_cls0 > 0 & size_cls1 > 0) %>%
-                mutate(name_cls0 = as.character(name_cls0))
+                mutate(cls_label0 = as.character(cls_label0))
             
             vertices <- bind_rows(
-                    edges %>% select(name = name_cls0, size = size_cls0),
-                    edges %>% select(name = name_cls1, size = size_cls1)
+                    edges %>% select(name = cls_label0, size = size_cls0),
+                    edges %>% select(name = cls_label1, size = size_cls1)
                 ) %>%
                 group_by(name) %>%
                 summarize_all(first)
             
-            edges <- edges %>% select(name_cls0, name_cls1, con_all)
+            edges <- edges %>% select(cls_label0, cls_label1, con_all)
             
             g <- graph_from_data_frame(
                 edges,
