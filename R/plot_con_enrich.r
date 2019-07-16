@@ -36,9 +36,12 @@ ConnectionEnrichment <- R6::R6Class(
             data = NULL,
             theme_args = list(),
             exclude = c('sub', 'misc'),
+            entity_type = 'protein',
+            cluster = TRUE,
             ...
         ){
             
+            self$entity_type <- entity_type
             self$exclude <- exclude
             private$ensure_data(data)
             
@@ -66,12 +69,8 @@ ConnectionEnrichment <- R6::R6Class(
         plot = function(){
             
             self$plt <- ggplot(
-                self$data %>%
-                    mutate(
-                        enrichment = ifelse(enrichment > 4, 4, enrichment)
-                    ) %>%
-                    filter(!is.infinite(enrichment)),
-                aes(x = cls_label0, y = cls_label1, fill = log2(enrichment))
+                self$data,
+                aes(x = cls_label0, y = cls_label1, fill = enrichment_log2)
             ) +
             geom_tile() +
             scale_fill_viridis_c(
@@ -88,6 +87,7 @@ ConnectionEnrichment <- R6::R6Class(
         }
         
     ),
+    
     
     private = list(
         
@@ -112,7 +112,15 @@ ConnectionEnrichment <- R6::R6Class(
                         enrichment,
                         -1 / enrichment
                     )
-                )
+                ) %>%
+                mutate(
+                    enrichment_log2 = ifelse(
+                        abs(log2(enrichment)) > 2,
+                        sign(enrichment) * 4,
+                        enrichment
+                    )
+                ) %>%
+                filter(!is.infinite(enrichment_log2))
             
             self$data <- bind_rows(
                 self$data,
@@ -131,7 +139,9 @@ ConnectionEnrichment <- R6::R6Class(
             
             self$data <- `if`(
                 is.null(data),
-                IntercellCategoriesPairwise$new()$data,
+                IntercellCategoriesPairwise$new(
+                    entity_type = self$entity_type
+                )$data,
                 data
             )
             
