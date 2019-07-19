@@ -6,11 +6,9 @@
 
 import os
 import itertools
+import shutil
 
 import numpy as np
-import matplotlib
-
-matplotlib.use('SVG')
 
 import matplotlib.pyplot as plt
 from matplotlib.tight_layout import get_renderer
@@ -19,13 +17,14 @@ import pandas as pd
 import pypath
 from pypath import intercell
 from pypath.main import PyPath
-reload(data_tools)
-reload(data_tools.plots)
+#reload(data_tools)
+#reload(data_tools.plots)
 import data_tools
 from data_tools.iterables import subsets
 from data_tools.spatial import equidist_polar
 from data_tools.iterables import similarity
 from data_tools.plots import cluster_hmap
+from data_tools.plots import chordplot
 
 
 #=================================== SETUP ===================================#
@@ -46,6 +45,8 @@ cseq2 = [blue, green, orange, red, purple] # More contrasted
 
 # Setting up the working environment
 cachedir = '/home/nico/pypath_cache'
+dest_dir = '../figures'
+latex_dir = '../../omnipath2_latex/figures'
 
 if os.getcwd().endswith('omnipath2'):
     os.chdir('workflows')
@@ -61,9 +62,12 @@ with pypath.curl.cache_off():
 
 print([x for x in dir(i) if not x.startswith('_')])
 i.class_names
-
 df = i.df
 df.head()
+
+pa = PyPath()
+pa.init_network()
+
 
 # Elements by class
 elem_by_class = dict()
@@ -118,7 +122,7 @@ ax.set_title('Proteins by class')
 ax.set_xscale('log')
 ax.set_ylim(-1, len(counts))
 fig.tight_layout()
-fig.savefig('../figures/intercell_prots_by_class.svg')
+fig.savefig(os.path.join(dist_dir, 'intercell_prots_by_class.pdf'))
 
 # Number of elements by class
 fig, ax = plt.subplots()
@@ -131,7 +135,7 @@ ax.set_title('Number of elements per intercell class')
 ax.set_xscale('log')
 ax.set_ylim(-1, len(elem_counts_by_class))
 fig.tight_layout()
-fig.savefig('../figures/intercell_prots_by_class2.svg')
+fig.savefig(os.path.join(dist_dir, 'intercell_prots_by_class2.pdf'))
 
 # Overlaps between major classes
 ### UpSetPlot prep
@@ -149,7 +153,7 @@ series.dropna(inplace=True)
 
 plot = UpSet(series, sort_by='cardinality').plot()
 #plot.keys()
-plot['matrix'].figure.savefig('../figures/intercell_overlaps.svg')
+plot['matrix'].figure.savefig(os.path.join(dist_dir, 'intercell_overlaps.pdf'))
 
 # By similarity
 groups = list(elem_by_class.values())
@@ -162,7 +166,8 @@ sims = np.array(sims).reshape(len(groups), len(groups))
 
 cluster_hmap(sims, xlabels=elem_by_class.keys(), ylabels=elem_by_class.keys(),
              title='Szymkiewicz–Simpson similarity of major intercellular clas'
-             + 'ses', filename='../figures/intercell_similarity.pdf')
+             + 'ses', filename=os.path.join(dist_dir,
+                                            'intercell_similarity.pdf'))
 
 # Entities by source
 fig, ax = plt.subplots(figsize=(7, 7))
@@ -173,11 +178,19 @@ ax.set_title('Entities by source')
 ax.set_xscale('log')
 ax.set_ylim(-1, len(elems_by_source))
 fig.tight_layout()
-fig.savefig('../figures/intercell_ents_by_source.svg')
+fig.savefig(os.path.join(dist_dir, 'intercell_ents_by_source.pdf'))
 
 # Some are empty!
 i.classes['ligand_kirouac']
+# =========================================================================== #
+# Moving files to omnipath2_latex repository
+tomove = [f for f in os.listdir(dest_dir)
+          if (f.startswith('intercell') and f.endswith('.pdf'))]
+# Remove the UpSet plot (too big)
+tomove.remove('intercell_overlaps.pdf')
 
+for f in tomove:
+    shutil.copy2(os.path.join(dist_dir, f), os.path.join(latex_dir, f))
 # =========================================================================== #
 
 # Modified version of UpSetPlot from Joel Nothman
