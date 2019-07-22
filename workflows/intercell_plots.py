@@ -9,7 +9,7 @@ import itertools
 import shutil
 
 import numpy as np
-
+import matplotlib
 import matplotlib.pyplot as plt
 from matplotlib.tight_layout import get_renderer
 import pandas as pd
@@ -25,7 +25,6 @@ from data_tools.spatial import equidist_polar
 from data_tools.iterables import similarity
 from data_tools.plots import cluster_hmap
 from data_tools.plots import chordplot
-
 
 #=================================== SETUP ===================================#
 # Colors!
@@ -112,6 +111,21 @@ elems_by_source = pd.Series(map(len, elems_by_source.values()),
                             index=elems_by_source.keys())
 elems_by_source.sort_values(inplace=True)
 
+# Connections between intercell classes
+
+combs = list(itertools.combinations_with_replacement(elem_by_class.keys(), 2))
+connections = dict((k, 0) for k in combs)
+
+for cat_a, cat_b in combs:
+    print('Counting connections between %s and %s...' % (cat_a, cat_b))
+
+    ups_a = [e for e in elem_by_class[cat_a] if not e.startswith('COMPLEX')]
+    ups_b = [e for e in elem_by_class[cat_b] if not e.startswith('COMPLEX')]
+
+    for up_a, up_b in itertools.product(ups_a, ups_b):
+        if pa.up_edge(up_a, up_b):
+            connections[(cat_a, cat_b)] += 1
+
 #================================= PLOTTING ==================================#
 # Proteins by class
 fig, ax = plt.subplots()
@@ -122,7 +136,7 @@ ax.set_title('Proteins by class')
 ax.set_xscale('log')
 ax.set_ylim(-1, len(counts))
 fig.tight_layout()
-fig.savefig(os.path.join(dist_dir, 'intercell_prots_by_class.pdf'))
+fig.savefig(os.path.join(dest_dir, 'intercell_prots_by_class.pdf'))
 
 # Number of elements by class
 fig, ax = plt.subplots()
@@ -135,7 +149,7 @@ ax.set_title('Number of elements per intercell class')
 ax.set_xscale('log')
 ax.set_ylim(-1, len(elem_counts_by_class))
 fig.tight_layout()
-fig.savefig(os.path.join(dist_dir, 'intercell_prots_by_class2.pdf'))
+fig.savefig(os.path.join(dest_dir, 'intercell_prots_by_class2.pdf'))
 
 # Overlaps between major classes
 ### UpSetPlot prep
@@ -153,7 +167,7 @@ series.dropna(inplace=True)
 
 plot = UpSet(series, sort_by='cardinality').plot()
 #plot.keys()
-plot['matrix'].figure.savefig(os.path.join(dist_dir, 'intercell_overlaps.pdf'))
+plot['matrix'].figure.savefig(os.path.join(dest_dir, 'intercell_overlaps.pdf'))
 
 # By similarity
 groups = list(elem_by_class.values())
@@ -166,7 +180,7 @@ sims = np.array(sims).reshape(len(groups), len(groups))
 
 cluster_hmap(sims, xlabels=elem_by_class.keys(), ylabels=elem_by_class.keys(),
              title='Szymkiewicz–Simpson similarity of major intercellular clas'
-             + 'ses', filename=os.path.join(dist_dir,
+             + 'ses', filename=os.path.join(dest_dir,
                                             'intercell_similarity.pdf'))
 
 # Entities by source
@@ -178,10 +192,23 @@ ax.set_title('Entities by source')
 ax.set_xscale('log')
 ax.set_ylim(-1, len(elems_by_source))
 fig.tight_layout()
-fig.savefig(os.path.join(dist_dir, 'intercell_ents_by_source.pdf'))
+fig.savefig(os.path.join(dest_dir, 'intercell_ents_by_source.pdf'))
 
 # Some are empty!
 i.classes['ligand_kirouac']
+
+# Interactions between subclasses
+
+edges = pd.DataFrame([[k[0], k[1], v] for (k, v) in connections.items()])
+nodes = dict((k, len([i for i in v if not i.startswith('complex')]))
+              for (k, v) in elem_by_class.items())
+
+cmap = matplotlib.cm.get_cmap('jet')
+colors = list(map(cmap, np.linspace(1, 0, len(nodes))))
+fig = chordplot(nodes, edges, labels=True, label_sizes=True, colors=colors)
+fig.savefig(os.path.join(dest_dir, 'intercell_interact_chordplot.pdf'))
+
+
 # =========================================================================== #
 # Moving files to omnipath2_latex repository
 tomove = [f for f in os.listdir(dest_dir)
@@ -190,7 +217,7 @@ tomove = [f for f in os.listdir(dest_dir)
 tomove.remove('intercell_overlaps.pdf')
 
 for f in tomove:
-    shutil.copy2(os.path.join(dist_dir, f), os.path.join(latex_dir, f))
+    shutil.copy2(os.path.join(dest_dir, f), os.path.join(latex_dir, f))
 # =========================================================================== #
 
 # Modified version of UpSetPlot from Joel Nothman
