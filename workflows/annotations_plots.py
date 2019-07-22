@@ -5,6 +5,7 @@
 # nicolas.palacio@bioquant.uni-heidelberg.de
 
 import os
+import shutil
 
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -19,6 +20,8 @@ cg = (87/255, 171/255, 39/255)
 cb = (0/255, 84/255, 159/255)
 
 cachedir = '/home/nico/pypath_cache'
+dest_dir = '../figures'
+latex_dir = '../../omnipath2_latex/figures'
 
 if os.getcwd().endswith('omnipath2'):
     os.chdir('workflows')
@@ -37,7 +40,7 @@ with pypath.curl.cache_off():
     a.load()
 
 df = a.to_dataframe()
-df.to_csv('../../../../../../home/nico/Desktop/annot_df.csv')
+#df.to_csv('../../../../../../home/nico/Desktop/annot_df.csv')
 print([x for x in dir(a) if not x.startswith('_')])
 
 df.shape
@@ -80,7 +83,7 @@ ax.set_ylim(-1, len(subclasses))
 ax.set_xlabel('Number of annotation classes')
 ax.set_xscale('log')
 fig.tight_layout()
-fig.savefig('../figures/annot_classes_by_source.svg')
+fig.savefig(os.path.join(dest_dir, 'annot_classes_by_source.pdf')
 
 # Annotations per protein/complex
 fig, ax = plt.subplots()
@@ -91,7 +94,7 @@ ax.set_ylabel('Proteins/complexes')
 #ax.set_yscale('log')
 ax.set_xlim([-1, max(annots_per_prot)])
 fig.tight_layout()
-fig.savefig('../figures/annot_per_prot.svg')
+fig.savefig(os.path.join(dest_dir, 'annot_per_prot.pdf')
 
 # Proteins/complexes by resource
 fig, ax = plt.subplots(figsize=(7, 6))
@@ -101,15 +104,21 @@ ax.barh(rng, prots_by_res.values, color=cb)
 ax.set_title('Proteins/complexes by resource')
 ax.set_ylabel('Resource')
 ax.set_xlabel('Number of proteins/complexes')
-
 ax.set_ylim(-1, len(prots_by_res))
 ax.set_yticks(rng)
 ax.set_yticklabels(prots_by_res.index)
 ax.set_xscale('log')
 fig.tight_layout()
-fig.savefig('../figures/annot_prot_by_source.svg')
+fig.savefig(os.path.join(dest_dir, 'annot_prot_by_source.pdf')
 
-a
+# =========================================================================== #
+# Moving files to omnipath2_latex repository
+tomove = [f for f in os.listdir(dest_dir)
+          if (f.startswith('annot') and f.endswith('.pdf'))]
+
+for f in tomove:
+    shutil.copy2(os.path.join(dest_dir, f), os.path.join(latex_dir, f))
+
 #================================ WORKAROUND =================================#
 ###############################################################################
 #           vvvv       HERE ON USES INFO FROM WEBSERVICE       vvvv           #
