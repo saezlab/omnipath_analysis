@@ -35,7 +35,11 @@ pypath.settings.setup(cachedir=cachedir)
 
 #============================== RETRIEVING INFO ==============================#
 with pypath.curl.cache_off():
-    co = complex.ComplexAggregator()
+    co = complex.ComplexAggregator()#resources=['Signor', 'Corum', 'CellPhoneDB',
+                                    #          'Havugimana', 'Compleat',
+                                    #          'ComplexPortal', 'Pdb', 'Hpmr',
+                                    #          'GuideToPharmacology'])
+                                              #, 'Humap'])
 
 co.make_df()
 sum(co.df.duplicated())
@@ -133,8 +137,8 @@ fig.savefig(os.path.join(dest_dir, 'complex_by_source.pdf'))
 
 # 3) Overlaps across resources
 help(upset_wrap)
-upset_wrap(list(comp_in_res.values()), labels=comp_in_res.keys(),
-           drop_empty=True)
+#upset_wrap(list(comp_in_res.values()), labels=comp_in_res.keys(),
+#           drop_empty=True)
 # =========================================================================== #
 # Moving files to omnipath2_latex repository
 tomove = [f for f in os.listdir(dest_dir)
