@@ -32,15 +32,21 @@ green = (87/255, 171/255, 39/255)
 lime = (189/255, 205/255, 0/255)
 blue = (0/255, 84/255, 159/255)
 blue75 = (64/255, 127/255, 183/255)
+blue50 = (142/255, 186/255, 229/255)
+yellow = (255/255, 237/255, 0/255)
 orange = (246/255, 168/255, 0/255)
 petrol = (0/255, 97/255, 101/255)
 turquoise = (0/255, 152/255, 161/255)
 red = (161/255, 16/255, 53/255)
+bordeaux = (161/255, 16/255, 53/255)
 purple = (97/255, 33/255, 88/255)
+lila = (122/255, 111/255, 172/255)
 
 # Color sequences
 cseq = [blue, blue75, petrol, turquoise, green, lime] # More gradual
 cseq2 = [blue, green, orange, red, purple] # More contrasted
+cseq3 = [blue, blue50, petrol, turquoise, green, lime, orange, red, bordeaux,
+         lila, purple]
 
 # Setting up the working environment
 cachedir = '/home/nico/pypath_cache'
@@ -198,14 +204,15 @@ fig.savefig(os.path.join(dest_dir, 'intercell_ents_by_source.pdf'))
 i.classes['ligand_kirouac']
 
 # Interactions between subclasses
-
 edges = pd.DataFrame([[k[0], k[1], v] for (k, v) in connections.items()])
 nodes = dict((k, len([i for i in v if not i.startswith('complex')]))
               for (k, v) in elem_by_class.items())
+nodes = pd.Series(nodes)
+nodes.sort_index(inplace=True)
 
 cmap = matplotlib.cm.get_cmap('jet')
 colors = list(map(cmap, np.linspace(1, 0, len(nodes))))
-fig = chordplot(nodes, edges, labels=True, label_sizes=True, colors=colors)
+fig = chordplot(nodes, edges, labels=True, label_sizes=True, alpha=0.5, colors=cseq3)#colors)
 fig.savefig(os.path.join(dest_dir, 'intercell_interact_chordplot.pdf'))
 
 
