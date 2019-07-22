@@ -118,8 +118,11 @@ ax.set_title('Complex types')
 ax.set_xticks([0, 1])
 ax.set_xticklabels(['Homomultimers\n%.2f %%' % homopt,
                     'Heteromultimers\n%.2f %%' % heteropt])
-ax.text(0, 2000, '%d' % homomultimer, color='w', ha='center')
-ax.text(1, 9000, '%d' % heteromultimer, color='w', ha='center')
+offset = 0.1 * heteromultimer
+
+ax.text(0, homomultimer - offset, '%d' % homomultimer, color='w', ha='center')
+ax.text(1, heteromultimer - offset, '%d' % heteromultimer, color='w',
+        ha='center')
 fig.tight_layout()
 fig.savefig(os.path.join(dest_dir, 'complex_types.pdf'))
 
