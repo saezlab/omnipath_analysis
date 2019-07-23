@@ -39,6 +39,8 @@ with pypath.curl.cache_off():
     a = annot.AnnotationTable(keep_annotators=True, create_dataframe=True)
     a.load()
 
+a
+
 df = a.to_dataframe()
 #df.to_csv('../../../../../../home/nico/Desktop/annot_df.csv')
 print([x for x in dir(a) if not x.startswith('_')])
@@ -83,7 +85,7 @@ ax.set_ylim(-1, len(subclasses))
 ax.set_xlabel('Number of annotation classes')
 ax.set_xscale('log')
 fig.tight_layout()
-fig.savefig(os.path.join(dest_dir, 'annot_classes_by_source.pdf')
+fig.savefig(os.path.join(dest_dir, 'annot_classes_by_source.pdf'))
 
 # Annotations per protein/complex
 fig, ax = plt.subplots()
@@ -94,7 +96,7 @@ ax.set_ylabel('Proteins/complexes')
 #ax.set_yscale('log')
 ax.set_xlim([-1, max(annots_per_prot)])
 fig.tight_layout()
-fig.savefig(os.path.join(dest_dir, 'annot_per_prot.pdf')
+fig.savefig(os.path.join(dest_dir, 'annot_per_prot.pdf'))
 
 # Proteins/complexes by resource
 fig, ax = plt.subplots(figsize=(7, 6))
@@ -109,7 +111,7 @@ ax.set_yticks(rng)
 ax.set_yticklabels(prots_by_res.index)
 ax.set_xscale('log')
 fig.tight_layout()
-fig.savefig(os.path.join(dest_dir, 'annot_prot_by_source.pdf')
+fig.savefig(os.path.join(dest_dir, 'annot_prot_by_source.pdf'))
 
 # =========================================================================== #
 # Moving files to omnipath2_latex repository
