@@ -34,12 +34,18 @@ if not os.path.exists(cachedir):
 pypath.settings.setup(cachedir=cachedir)
 
 #============================== RETRIEVING INFO ==============================#
-with pypath.curl.cache_off():
-    co = complex.ComplexAggregator()#resources=['Signor', 'Corum', 'CellPhoneDB',
+#with pypath.curl.cache_off():
+#    co = complex.ComplexAggregator()#resources=['Signor', 'Corum', 'CellPhoneDB',
                                     #          'Havugimana', 'Compleat',
                                     #          'ComplexPortal', 'Pdb', 'Hpmr',
                                     #          'GuideToPharmacology'])
                                               #, 'Humap'])
+
+#co.save_to_pickle(os.path.join(cachedir, 'complexes.pickle'))
+
+
+co = complex.ComplexAggregator(pickle_file=os.path.join(cachedir,
+                                                        'complexes.pickle'))
 
 co.make_df()
 sum(co.df.duplicated())

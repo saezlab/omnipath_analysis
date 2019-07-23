@@ -62,16 +62,29 @@ if not os.path.exists(cachedir):
 pypath.settings.setup(cachedir=cachedir)
 
 #============================== RETRIEVING INFO ==============================#
-with pypath.curl.cache_off():
-    i = intercell.IntercellAnnotation()
+#with pypath.curl.cache_off():
+#    i = intercell.IntercellAnnotation()
+
+#i.save_to_pickle(os.path.join(cachedir, 'intercell.pickle'))
+
+i = intercell.IntercellAnnotation(pickle_file=os.path.join(cachedir,
+                                                           'intercell.pickle'))
+
+pa = PyPath()
+#pa.init_network()
+
+#pa.save_network(pfile=os.path.join(cachedir, 'network.pickle'))
+pa.init_network(pfile=os.path.join(cachedir, 'network.pickle'))
+
+
 
 print([x for x in dir(i) if not x.startswith('_')])
 i.class_names
 df = i.df
+
+
 df.head()
 
-pa = PyPath()
-pa.init_network()
 
 
 # Elements by class
@@ -160,7 +173,7 @@ fig.savefig(os.path.join(dest_dir, 'intercell_prots_by_class2.pdf'))
 # Overlaps between major classes
 ### UpSetPlot prep
 ss = subsets(list(elem_by_class.values()))
-ids = [tuple([bool(int(j)) for j in i]) for i in ss.keys()]
+ids = [tuple([bool(int(y)) for y in x]) for x in ss.keys()]
 counts = list(map(len, ss.values()))
 labels = list(elem_by_class.keys())
 
@@ -205,7 +218,7 @@ i.classes['ligand_kirouac']
 
 # Interactions between subclasses
 edges = pd.DataFrame([[k[0], k[1], v] for (k, v) in connections.items()])
-nodes = dict((k, len([i for i in v if not i.startswith('complex')]))
+nodes = dict((k, len([x for x in v if not x.startswith('complex')]))
               for (k, v) in elem_by_class.items())
 nodes = pd.Series(nodes)
 nodes.sort_index(inplace=True)
@@ -325,8 +338,8 @@ def _process_data(df, sort_by, sort_categories_by, subset_size, sum_over):
     elif sort_by == 'degree':
         comb = itertools.combinations
         o = pd.DataFrame([{name: True for name in names}
-                          for i in range(agg.index.nlevels + 1)
-                          for names in comb(agg.index.names, i)],
+                          for x in range(agg.index.nlevels + 1)
+                          for names in comb(agg.index.names, x)],
                          columns=agg.index.names)
         o.fillna(False, inplace=True)
         o = o.astype(bool)
@@ -714,8 +727,8 @@ class UpSet:
 
     def plot_shading(self, ax):
         # alternating row shading (XXX: use add_patch(Rectangle)?)
-        for i in range(0, len(self.totals), 2):
-            rect = plt.Rectangle(self._swapaxes(0, i - .4),
+        for x in range(0, len(self.totals), 2):
+            rect = plt.Rectangle(self._swapaxes(0, x - .4),
                                  *self._swapaxes(*(1, .8)),
                                  facecolor='#f5f5f5', lw=0, zorder=0)
             ax.add_patch(rect)

@@ -32,17 +32,18 @@ if not os.path.exists(cachedir):
 #============================== RETRIEVING INFO ==============================#
 pypath.settings.setup(cachedir=cachedir)
 
-pa = PyPath()
+#with pypath.curl.cache_off():
+#    pa.init_network()
+#    a = annot.AnnotationTable(keep_annotators=True, create_dataframe=True)
+#    a.load()
 
-with pypath.curl.cache_off():
-    pa.init_network()
-    a = annot.AnnotationTable(keep_annotators=True, create_dataframe=True)
-    a.load()
+#a.save_to_pickle(os.path.join(cachedir, 'annot.pickle'))
 
-a
+a = annot.AnnotationTable(pickle_file=os.path.join(cachedir, 'annot.pickle'))
+
 
 df = a.to_dataframe()
-#df.to_csv('../../../../../../home/nico/Desktop/annot_df.csv')
+
 print([x for x in dir(a) if not x.startswith('_')])
 
 df.shape
