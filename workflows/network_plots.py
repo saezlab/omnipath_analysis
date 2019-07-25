@@ -1,0 +1,213 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+# Nicolàs Palacio-Escat
+# nicolas.palacio@bioquant.uni-heidelberg.de
+
+import os
+import shutil
+
+import numpy as np
+import matplotlib.pyplot as plt
+import pandas as pd
+
+import pypath
+from pypath.main import PyPath
+import data_tools
+from data_tools.plots import cluster_hmap
+from data_tools.plots import upset_wrap
+from data_tools.plots import venn
+
+#=================================== SETUP ===================================#
+
+# Colors!
+green = (87/255, 171/255, 39/255)
+lime = (189/255, 205/255, 0/255)
+blue = (0/255, 84/255, 159/255)
+blue75 = (64/255, 127/255, 183/255)
+blue50 = (142/255, 186/255, 229/255)
+yellow = (255/255, 237/255, 0/255)
+orange = (246/255, 168/255, 0/255)
+petrol = (0/255, 97/255, 101/255)
+turquoise = (0/255, 152/255, 161/255)
+red = (161/255, 16/255, 53/255)
+bordeaux = (161/255, 16/255, 53/255)
+purple = (97/255, 33/255, 88/255)
+lila = (122/255, 111/255, 172/255)
+
+# Setting up working environment
+cachedir = '/home/nico/pypath_cache'
+dest_dir = '../figures'
+latex_dir = '../../omnipath2_latex/figures'
+
+if os.getcwd().endswith('omnipath2'):
+    os.chdir('workflows')
+
+if not os.path.exists(cachedir):
+    os.makedirs(cachedir)
+
+pypath.settings.setup(cachedir=cachedir)
+
+#============================== RETRIEVING INFO ==============================#
+pa = PyPath()
+
+#pa.init_network()
+pa.init_network(pfile=os.path.join(cachedir, 'network.pickle'))
+#pa.get_directed()
+
+#pa.save_network(pfile=os.path.join(cachedir, 'network.pickle'))
+
+# Undirected graph
+pa.graph.vcount()
+pa.graph.ecount()
+
+# Edges by source
+edge_sources = dict()
+refs_per_edge = list(map(len, pa.graph.es['references']))
+
+for e in pa.graph.es:
+    for k in e['sources']:
+        if k in edge_sources.keys():
+            edge_sources[k].add(e.index)
+        else:
+            edge_sources[k] = set([e.index])
+
+edge_sources = dict((k, len(v)) for (k, v) in edge_sources.items())
+edge_sources = pd.Series(edge_sources).sort_values(ascending=True)
+
+# Nodes by source
+node_sources = dict()
+refs_per_node = list(map(len, pa.graph.vs['references']))
+
+for v in pa.graph.vs:
+    for k in v['sources']:
+        if k in node_sources.keys():
+            node_sources[k].add(v.index)
+        else:
+            node_sources[k] = set([v.index])
+
+node_sources = dict((k, len(v)) for (k, v) in node_sources.items())
+node_sources = pd.Series(node_sources).sort_values(ascending=True)
+
+# Signs and directions:
+cats = ['directed', 'undirected', 'signed', 'unsigned']
+sd = dict((k, set()) for k in cats)
+
+
+for e in pa.graph.es:
+    d = e['dirs']
+
+    if d.is_directed():
+        sd['directed'].add(e.index)
+
+    else:
+        sd['undirected'].add(e.index)
+
+    if d.has_sign():
+        sd['signed'].add(e.index)
+
+    else:
+        sd['unsigned'].add(e.index)
+
+
+# Directed graph
+pa.dgraph.vcount()
+pa.dgraph.ecount()
+
+
+# Node degrees - not very useful?
+#degree = pa.graph.degree()
+#fig, ax = plt.subplots()
+
+#ax.hist(degree, bins=100)
+#ax.set_yscale('log')
+#fig
+
+
+# Undirecred
+#degree = pa.dgraph.degree()
+#indegree = pa.dgraph.indegree()
+#outdegree = pa.dgraph.outdegree()
+
+
+#fig, ax = plt.subplots()
+
+#ax.hist(degree, bins=100, alpha=0.5)
+#ax.hist(indegree, bins=100, alpha=0.5)
+#ax.hist(outdegree, bins=100, alpha=0.5)
+#ax.set_yscale('log')
+#fig
+
+
+#================================= PLOTTING ==================================#
+# Edge sources
+fig, ax = plt.subplots(figsize=(9, 7))
+rng = range(len(edge_sources))
+ax.barh(rng, edge_sources.values, color=blue)
+ax.set_yticks(rng)
+ax.set_yticklabels(edge_sources.index)
+ax.set_ylabel('Resource')
+ax.set_xlabel('Number of edges')
+ax.set_xscale('log')
+ax.grid(True, axis='x')
+ax.set_ylim(-1, len(edge_sources))
+
+fig.tight_layout()
+fig.savefig(os.path.join(dest_dir, 'network_edges_by_source.pdf'))
+
+
+# Node sources
+fig, ax = plt.subplots(figsize=(9, 7))
+rng = range(len(node_sources))
+ax.barh(rng, node_sources.values, color=blue)
+ax.set_yticks(rng)
+ax.set_yticklabels(node_sources.index)
+ax.set_ylabel('Resource')
+ax.set_xlabel('Number of nodes')
+ax.set_xscale('log')
+ax.grid(True, axis='x')
+ax.set_ylim(-1, len(node_sources))
+
+fig.tight_layout()
+fig.savefig(os.path.join(dest_dir, 'network_nodes_by_source.pdf'))
+
+# Distribution of references by edge/node
+fig, ax = plt.subplots()
+bins = np.histogram(np.hstack([refs_per_edge, refs_per_node]), bins=100)[1]
+ax.hist(refs_per_edge, color=blue, alpha=0.5, bins=bins, label='References per edge')
+ax.hist(refs_per_node, color=green, alpha=0.5, bins=bins, label='References per node')
+ax.set_yscale('log')
+ax.legend()
+ax.set_xlabel('Number of references')
+ax.set_ylabel('Number of nodes/edges')
+fig.tight_layout()
+
+fig.savefig(os.path.join(dest_dir, 'network_refs_per_node_edge.pdf'))
+
+# Distribution of node degrees
+fig, ax = plt.subplots()
+ax.hist(pa.graph.vs.degree(), color=blue, bins=100)
+ax.set_yscale('log')
+
+ax.set_xlabel('Node degree')
+ax.set_ylabel('Number of nodes')
+fig.tight_layout()
+
+fig.savefig(os.path.join(dest_dir, 'network_node_degree.pdf'))
+
+
+# Signs and directions:
+
+venn(list(sd.values()), labels=list(sd.keys()), title='Direction and signs of'
+     + 'network edges', filename=os.path.join(dest_dir,
+                                              'network_dirs_signs.pdf'))
+
+# =========================================================================== #
+
+# Moving files to omnipath2_latex repository
+tomove = [f for f in os.listdir(dest_dir)
+if (f.startswith('network') and f.endswith('.pdf'))]
+
+for f in tomove:
+    shutil.copy2(os.path.join(dest_dir, f), os.path.join(latex_dir, f))
+# =========================================================================== #
