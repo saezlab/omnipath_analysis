@@ -82,8 +82,10 @@ for k, v in co.complexes.items():
 homopt = 100 * homomultimer / total
 heteropt = 100 * heteromultimer / total
 
+dir(co)
+
 # Unique proteins across all complexes
-print('Total number of unique proteins within complexes:', len(co.proteins))
+#print('Total number of unique proteins within complexes:', len(co.proteins))
 print('Out of %d complexes, %d are homomultimers (%.2f %%) and %d '
       'heteromultimers (%.2f %%)' % (total, homomultimer, homopt,
                                      heteromultimer, heteropt))
@@ -137,7 +139,7 @@ rng = range(len(comp_by_res))
 fig, ax = plt.subplots()
 ax.barh(rng, comp_by_res.values, color=blue)
 ax.set_yticks(rng)
-ax.set_yticklabels(comp_by_res.index)
+ax.set_yticklabels([s.replace('_', ' ') for s in comp_by_res.index])
 ax.set_ylabel('Resource')
 ax.set_xlabel('Number of complexes')
 ax.set_xscale('log')
@@ -145,7 +147,7 @@ fig.tight_layout()
 fig.savefig(os.path.join(dest_dir, 'complex_by_source.pdf'))
 
 # 3) Overlaps across resources
-help(upset_wrap)
+#help(upset_wrap)
 #upset_wrap(list(comp_in_res.values()), labels=comp_in_res.keys(),
 #           drop_empty=True)
 # =========================================================================== #

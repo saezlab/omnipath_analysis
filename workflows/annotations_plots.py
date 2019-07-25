@@ -81,7 +81,7 @@ fig, ax = plt.subplots(figsize=(9, 7))
 ax.grid(True, axis='x')
 ax.barh(rng, subclasses.values, color=cb)
 ax.set_yticks(rng)
-ax.set_yticklabels(subclasses.index)
+ax.set_yticklabels([s.replace('_', ' ') for s in subclasses.index])
 ax.set_ylim(-1, len(subclasses))
 ax.set_xlabel('Number of annotation classes')
 ax.set_xscale('log')
@@ -109,7 +109,7 @@ ax.set_ylabel('Resource')
 ax.set_xlabel('Number of proteins/complexes')
 ax.set_ylim(-1, len(prots_by_res))
 ax.set_yticks(rng)
-ax.set_yticklabels(prots_by_res.index)
+ax.set_yticklabels([s.replace('_', ' ') for s in prots_by_res.index])
 ax.set_xscale('log')
 fig.tight_layout()
 fig.savefig(os.path.join(dest_dir, 'annot_prot_by_source.pdf'))
@@ -121,60 +121,3 @@ tomove = [f for f in os.listdir(dest_dir)
 
 for f in tomove:
     shutil.copy2(os.path.join(dest_dir, f), os.path.join(latex_dir, f))
-
-#================================ WORKAROUND =================================#
-###############################################################################
-#           vvvv       HERE ON USES INFO FROM WEBSERVICE       vvvv           #
-###############################################################################
-
-#from urllib.request import urlopen
-#from urllib.request import Request as Request
-
-#from data_tools.databases import to_df
-
-#url = 'http://omnipathdb.org/annotations'
-#params = ['organisms=9606']
-#data = '&'.join(params)
-
-#req = Request(url)#'?&'.join([url, data]))
-
-#response = urlopen(req)
-#page = response.read(99999999).decode('utf-8')
-
-#df = to_df(page, header=True)
-#df.head()
-#df.shape
-#print('Total number of individual annotations:', len(set(df.record_id)))
-#print('Total number of individual proteins (UniProt):', len(set(df.uniprot)))
-#print('Total number of individual proteins (GeneSymbol):', len(set(df.genesymbol)))
-#print('Total number of individual sources:', len(set(df.source)))
-
-#ups_by_source = dict()
-
-#for n, subdf in df.groupby('source'):
-#    print(n + '\n' + '=' * len(n))
-#    annots = set(subdf.label)
-    #print(str(annots) + '\n')
-#    for a in annots:
-#        print(a)
-#        subsubdf = subdf.loc[subdf.label == a, :]
-#        print('\t' + str(set(subsubdf.value)))
-#    ups_by_source[n] = set(subdf.uniprot)
-#    print('\n')
-
-#prots_by_ref = pd.Series(list(map(len, ups_by_source.values())),
-#                         index=ups_by_source.keys())
-#prots_by_ref.sort_values(ascending=False, inplace=True)
-
-#fig, ax = plt.subplots()
-#rng = range(len(prots_by_ref))
-#ax.bar(rng, prots_by_ref, color=cb)
-
-#ax.set_xticks(rng)
-#ax.set_xticklabels(prots_by_ref.index, rotation=90)
-#ax.set_yscale('log')
-#ax.set_ylabel('Number of proteins')
-#ax.set_xlabel('Source')
-#fig.tight_layout()
-#fig.savefig('../figures/annot_prot_by_source.svg')
-#prots_by_ref
