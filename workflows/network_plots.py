@@ -199,7 +199,7 @@ fig.savefig(os.path.join(dest_dir, 'network_node_degree.pdf'))
 # Signs and directions:
 
 venn(list(sd.values()), labels=list(sd.keys()), title='Direction and signs of'
-     + 'network edges', filename=os.path.join(dest_dir,
+     + 'network edges', c=[blue, green, red, yellow], filename=os.path.join(dest_dir,
                                               'network_dirs_signs.pdf'))
 
 # =========================================================================== #
