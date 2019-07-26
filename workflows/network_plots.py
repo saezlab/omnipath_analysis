@@ -110,34 +110,34 @@ for e in pa.graph.es:
         sd['unsigned'].add(e.index)
 
 
+# SignaLink pathways
+slk_path = dict()
+
+for pws in pa.graph.vs['slk_pathways']:
+
+    for pw in pws:
+
+        # Unifying names
+        pw = pw.upper().split('(')[0].strip().split('/')[0]
+
+        if (pw == '' or pw == 'IIP'):
+            continue
+
+        elif pw == 'HH':
+            pw = 'HEDGEHOG'
+
+        if pw in slk_path.keys():
+            slk_path[pw] += 1
+
+        else:
+            slk_path[pw] = 1
+
+slk_path = pd.Series(slk_path).sort_values(ascending=True)
+pa.graph.vs.attributes()
+
 # Directed graph
-pa.dgraph.vcount()
-pa.dgraph.ecount()
-
-
-# Node degrees - not very useful?
-#degree = pa.graph.degree()
-#fig, ax = plt.subplots()
-
-#ax.hist(degree, bins=100)
-#ax.set_yscale('log')
-#fig
-
-
-# Undirecred
-#degree = pa.dgraph.degree()
-#indegree = pa.dgraph.indegree()
-#outdegree = pa.dgraph.outdegree()
-
-
-#fig, ax = plt.subplots()
-
-#ax.hist(degree, bins=100, alpha=0.5)
-#ax.hist(indegree, bins=100, alpha=0.5)
-#ax.hist(outdegree, bins=100, alpha=0.5)
-#ax.set_yscale('log')
-#fig
-
+#pa.dgraph.vcount()
+#pa.dgraph.ecount()
 
 #================================= PLOTTING ==================================#
 # Edge sources
@@ -198,10 +198,19 @@ fig.savefig(os.path.join(dest_dir, 'network_node_degree.pdf'))
 
 # Signs and directions:
 
-venn(list(sd.values()), labels=list(sd.keys()), title='Direction and signs of'
-     + 'network edges', c=[blue, green, red, yellow], filename=os.path.join(dest_dir,
-                                              'network_dirs_signs.pdf'))
-
+venn(list(sd.values()), labels=list(sd.keys()), title='Direction and signs of '
+     + 'network edges', c=[blue, green, red, yellow],
+     filename=os.path.join(dest_dir, 'network_dirs_signs.pdf'))
+# SignaLink pathways
+fig, ax = plt.subplots()
+rng = range(len(slk_path))
+ax.barh(rng, slk_path.values, color=blue)
+ax.set_yticks(rng)
+ax.set_yticklabels(slk_path.index)
+ax.set_ylabel('SignaLink pathway')
+ax.set_xlabel('Members in network')
+fig.tight_layout()
+fig.savefig(os.path.join(dest_dir, 'network_slk_pathw.pdf'))
 # =========================================================================== #
 
 # Moving files to omnipath2_latex repository
