@@ -10,6 +10,7 @@ import shutil
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
+import wordcloud
 
 import pypath
 from pypath.main import PyPath
@@ -47,6 +48,14 @@ if not os.path.exists(cachedir):
     os.makedirs(cachedir)
 
 pypath.settings.setup(cachedir=cachedir)
+
+cseq = [blue, petrol, turquoise, green, lime, yellow, orange, red, bordeaux,
+        lila, purple]
+
+def color(*args, **kwargs):
+    idx = np.random.randint(0, len(cseq))
+    aux = [val * 255 for val in cseq[idx]]
+    return "rgb({:.0f}, {:.0f}, {:.0f})".format(*aux)
 
 #============================== RETRIEVING INFO ==============================#
 pa = PyPath()
@@ -88,6 +97,8 @@ for v in pa.graph.vs:
 
 node_sources = dict((k, len(v)) for (k, v) in node_sources.items())
 node_sources = pd.Series(node_sources).sort_values(ascending=True)
+
+#upset_wrap(node_sources)
 
 # Signs and directions:
 cats = ['directed', 'undirected', 'signed', 'unsigned']
@@ -133,6 +144,7 @@ for pws in pa.graph.vs['slk_pathways']:
             slk_path[pw] = 1
 
 slk_path = pd.Series(slk_path).sort_values(ascending=True)
+
 pa.graph.vs.attributes()
 
 # Directed graph
@@ -155,6 +167,16 @@ ax.set_ylim(-1, len(edge_sources))
 fig.tight_layout()
 fig.savefig(os.path.join(dest_dir, 'network_edges_by_source.pdf'))
 
+# Edge sources - as wordcloud
+wc = wordcloud.WordCloud(background_color='white', color_func=color)
+wc.generate_from_frequencies(dict((k, np.log10(v))for (k, v) in edge_sources.iteritems()))
+
+fig, ax = plt.subplots()
+ax.imshow(wc)
+ax.set_axis_off()
+fig.tight_layout()
+fig.savefig(os.path.join(dest_dir, 'network_cloud_edges_by_source.pdf'))
+
 
 # Node sources
 fig, ax = plt.subplots(figsize=(9, 7))
@@ -170,6 +192,16 @@ ax.set_ylim(-1, len(node_sources))
 
 fig.tight_layout()
 fig.savefig(os.path.join(dest_dir, 'network_nodes_by_source.pdf'))
+
+# Node sources - as wordcloud
+wc = wordcloud.WordCloud(background_color='white', color_func=color)
+wc.generate_from_frequencies(dict((k, np.log10(v))for (k, v) in node_sources.iteritems()))
+
+fig, ax = plt.subplots()
+ax.imshow(wc)
+ax.set_axis_off()
+fig.tight_layout()
+fig.savefig(os.path.join(dest_dir, 'network_cloud_nodes_by_source.pdf'))
 
 # Distribution of references by edge/node
 fig, ax = plt.subplots()
@@ -195,12 +227,11 @@ fig.tight_layout()
 
 fig.savefig(os.path.join(dest_dir, 'network_node_degree.pdf'))
 
-
 # Signs and directions:
-
 venn(list(sd.values()), labels=list(sd.keys()), title='Direction and signs of '
      + 'network edges', c=[blue, green, red, yellow],
      filename=os.path.join(dest_dir, 'network_dirs_signs.pdf'))
+
 # SignaLink pathways
 fig, ax = plt.subplots()
 rng = range(len(slk_path))
@@ -211,12 +242,30 @@ ax.set_ylabel('SignaLink pathway')
 ax.set_xlabel('Members in network')
 fig.tight_layout()
 fig.savefig(os.path.join(dest_dir, 'network_slk_pathw.pdf'))
+
+# SignaLink pathways - as wordcloud
+wc = wordcloud.WordCloud(background_color='white', color_func=color)
+wc.generate_from_frequencies(slk_path.to_dict())
+
+fig, ax = plt.subplots()
+ax.imshow(wc)
+ax.set_axis_off()
+fig.tight_layout()
+fig.savefig(os.path.join(dest_dir, 'network_cloud_slk_pathw.pdf'))
 # =========================================================================== #
 
 # Moving files to omnipath2_latex repository
 tomove = [f for f in os.listdir(dest_dir)
-if (f.startswith('network') and f.endswith('.pdf'))]
+          if (f.startswith('network') and f.endswith('.pdf'))]
 
 for f in tomove:
     shutil.copy2(os.path.join(dest_dir, f), os.path.join(latex_dir, f))
 # =========================================================================== #
+
+
+
+
+
+pa.update_pathways()
+dir(pa)
+pa.sources_overlap()
