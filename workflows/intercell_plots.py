@@ -13,6 +13,7 @@ import matplotlib
 import matplotlib.pyplot as plt
 from matplotlib.tight_layout import get_renderer
 import pandas as pd
+import wordcloud
 
 import pypath
 from pypath import intercell
