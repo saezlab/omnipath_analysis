@@ -62,7 +62,7 @@ pa = PyPath()
 
 #pa.init_network()
 pa.init_network(pfile=os.path.join(cachedir, 'network.pickle'))
-#pa.get_directed()
+pa.get_directed()
 
 #pa.save_network(pfile=os.path.join(cachedir, 'network.pickle'))
 
@@ -103,7 +103,6 @@ node_sources = pd.Series(node_sources).sort_values(ascending=True)
 # Signs and directions:
 cats = ['directed', 'undirected', 'signed', 'unsigned']
 sd = dict((k, set()) for k in cats)
-
 
 for e in pa.graph.es:
     d = e['dirs']
@@ -261,11 +260,3 @@ tomove = [f for f in os.listdir(dest_dir)
 for f in tomove:
     shutil.copy2(os.path.join(dest_dir, f), os.path.join(latex_dir, f))
 # =========================================================================== #
-
-
-
-
-
-pa.update_pathways()
-dir(pa)
-pa.sources_overlap()

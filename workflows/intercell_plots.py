@@ -25,6 +25,7 @@ from data_tools.iterables import subsets
 from data_tools.spatial import equidist_polar
 from data_tools.iterables import similarity
 from data_tools.plots import cluster_hmap
+from data_tools.plots import upset_wrap
 from data_tools.plots import chordplot
 
 #=================================== SETUP ===================================#
@@ -82,11 +83,6 @@ print([x for x in dir(i) if not x.startswith('_')])
 i.class_names
 df = i.df
 
-
-df.head()
-
-
-
 # Elements by class
 elem_by_class = dict()
 
@@ -103,7 +99,7 @@ for c in set(df.mainclass):
         elem_by_class[c].update(elems)
 
 elem_counts_by_class = pd.Series(map(len, elem_by_class.values()),
-                          index=elem_by_class.keys()).sort_values()
+                                 index=elem_by_class.keys()).sort_values()
 
 # Number of proteins by class
 counts = dict((c, i.counts()[c]) for c in i.class_names)
@@ -139,8 +135,6 @@ aux.remove('secreted')
 
 combs = list(itertools.combinations_with_replacement(aux, 2))
 connections = dict((k, 0) for k in combs)
-
-
 
 for cat_a, cat_b in combs:
     print('Counting connections between %s and %s...' % (cat_a, cat_b))
