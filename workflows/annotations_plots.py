@@ -15,6 +15,8 @@ import pypath
 from pypath.main import PyPath
 from pypath import annot
 
+from data_tools.plots import venn
+
 # Colors!
 cg = (87/255, 171/255, 39/255)
 cb = (0/255, 84/255, 159/255)
@@ -41,8 +43,16 @@ pypath.settings.setup(cachedir=cachedir)
 
 a = annot.AnnotationTable(pickle_file=os.path.join(cachedir, 'annot.pickle'))
 
+pa = PyPath()
+#pa.init_network()
+
+#pa.save_network(pfile=os.path.join(cachedir, 'network.pickle'))
+pa.init_network(pfile=os.path.join(cachedir, 'network.pickle'))
+
 
 df = a.to_dataframe()
+
+
 
 print([x for x in dir(a) if not x.startswith('_')])
 
@@ -113,6 +123,12 @@ ax.set_yticklabels([s.replace('_', ' ') for s in prots_by_res.index])
 ax.set_xscale('log')
 fig.tight_layout()
 fig.savefig(os.path.join(dest_dir, 'annot_prot_by_source.pdf'))
+
+# Overlap between annotation and network
+
+plot = venn([set(df.index), set(pa.graph.vs['name'])],
+            labels=['annot', 'network'], c=[cb, cg],
+            filename=os.path.join(dest_dir, 'annot_overlap_network.pdf'))
 
 # =========================================================================== #
 # Moving files to omnipath2_latex repository
