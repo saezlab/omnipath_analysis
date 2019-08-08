@@ -6,6 +6,7 @@
 
 import os
 import shutil
+from collections import Counter
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -18,6 +19,7 @@ import data_tools
 from data_tools.plots import cluster_hmap
 from data_tools.plots import upset_wrap
 from data_tools.plots import venn
+from data_tools.models import PowerLaw
 
 #=================================== SETUP ===================================#
 
@@ -150,6 +152,9 @@ pa.graph.vs.attributes()
 #pa.dgraph.vcount()
 #pa.dgraph.ecount()
 
+# Node degrees and frequency - dict: keys = degree, values = counts
+degrees = Counter(pa.graph.vs.degree())
+
 #================================= PLOTTING ==================================#
 # Edge sources
 fig, ax = plt.subplots(figsize=(9, 7))
@@ -199,7 +204,7 @@ wc.generate_from_frequencies(dict((k, np.log10(v))for (k, v) in node_sources.ite
 fig, ax = plt.subplots()
 ax.imshow(wc)
 ax.set_axis_off()
-fig.tight_layout()
+fig.tight_layout()pa.graph.vs.degree()
 fig.savefig(os.path.join(dest_dir, 'network_cloud_nodes_by_source.pdf'))
 
 # Distribution of references by edge/node
@@ -251,6 +256,20 @@ ax.imshow(wc)
 ax.set_axis_off()
 fig.tight_layout()
 fig.savefig(os.path.join(dest_dir, 'network_cloud_slk_pathw.pdf'))
+
+# Node degrees vs. frequency
+
+model = PowerLaw(list(degrees.keys()), list(degrees.values()))
+fig = model.plot()
+ax = fig.gca()
+fmt_a = ('%.2E' % model.a).split('E')
+
+ax.text(10, 1e4, r'$y= %s\times 10^{%d} x^{%.2f}$' % (fmt_a[0], int(fmt_a[1]), np.round(model.k, 2)), size=15)
+ax.set_xlabel('Node degree')
+ax.set_ylabel('Frequency')
+
+fig.savefig(os.path.join(dest_dir, 'network_powerlaw.pdf'))
+
 # =========================================================================== #
 
 # Moving files to omnipath2_latex repository

@@ -212,7 +212,8 @@ labels = [s.replace('_', ' ') for s in nodes.index]
 
 #cmap = matplotlib.cm.get_cmap('jet')
 #colors = list(map(cmap, np.linspace(1, 0, len(nodes))))
-fig = chordplot(nodes, edges, labels=labels, label_sizes=True, alpha=0.5, colors=cseq3)#colors)
+fig = chordplot(nodes, edges, labels=labels, label_sizes=True, alpha=0.5,
+                colors=cseq3)#colors)
 fig.savefig(os.path.join(dest_dir, 'intercell_interact_chordplot.pdf'))
 # =========================================================================== #
 # Moving files to omnipath2_latex repository

@@ -6,6 +6,7 @@
 
 import os
 import shutil
+from collections import Counter
 
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -49,10 +50,7 @@ pa = PyPath()
 #pa.save_network(pfile=os.path.join(cachedir, 'network.pickle'))
 pa.init_network(pfile=os.path.join(cachedir, 'network.pickle'))
 
-
 df = a.to_dataframe()
-
-
 
 print([x for x in dir(a) if not x.startswith('_')])
 
