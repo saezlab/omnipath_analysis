@@ -65,6 +65,7 @@ pa = PyPath()
 #pa.init_network()
 pa.init_network(pfile=os.path.join(cachedir, 'network.pickle'))
 pa.get_directed()
+pa.load_all_pathways()
 
 #pa.save_network(pfile=os.path.join(cachedir, 'network.pickle'))
 
@@ -125,7 +126,7 @@ for e in pa.graph.es:
 # SignaLink pathways
 slk_path = dict()
 
-for pws in pa.graph.vs['slk_pathways']:
+for pws in pa.graph.vs['signalink_pathways']:
 
     for pw in pws:
 
@@ -146,7 +147,19 @@ for pws in pa.graph.vs['slk_pathways']:
 
 slk_path = pd.Series(slk_path).sort_values(ascending=True)
 
-pa.graph.vs.attributes()
+# Signor pathways
+sgr_path = dict()
+for pws in pa.graph.es['signor_pathways']:
+
+    for pw in pws:
+
+        if pw in sgr_path.keys():
+            sgr_path[pw] += 1
+
+        else:
+            sgr_path[pw] = 1
+
+sgr_path = pd.Series(sgr_path).sort_values(ascending=True)
 
 # Directed graph
 #pa.dgraph.vcount()
@@ -204,7 +217,7 @@ wc.generate_from_frequencies(dict((k, np.log10(v))for (k, v) in node_sources.ite
 fig, ax = plt.subplots()
 ax.imshow(wc)
 ax.set_axis_off()
-fig.tight_layout()pa.graph.vs.degree()
+fig.tight_layout()
 fig.savefig(os.path.join(dest_dir, 'network_cloud_nodes_by_source.pdf'))
 
 # Distribution of references by edge/node
@@ -246,6 +259,18 @@ ax.set_ylabel('SignaLink pathway')
 ax.set_xlabel('Members in network')
 fig.tight_layout()
 fig.savefig(os.path.join(dest_dir, 'network_slk_pathw.pdf'))
+
+# Signor pathways
+fig, ax = plt.subplots(figsize=(7, 8))
+rng = range(len(sgr_path))
+ax.barh(rng, sgr_path.values, color=blue)
+ax.set_yticks(rng)
+ax.set_yticklabels(sgr_path.index)
+ax.set_ylim(-1, len(sgr_path))
+ax.set_ylabel('Signor pathway')
+ax.set_xlabel('Members in network')
+fig.tight_layout()
+fig.savefig(os.path.join(dest_dir, 'network_sgr_pathw.pdf'))
 
 # SignaLink pathways - as wordcloud
 wc = wordcloud.WordCloud(background_color='white', color_func=color)
