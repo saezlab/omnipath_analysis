@@ -581,7 +581,7 @@ class FiguresPreprocess(session_mod.Logger):
                     size_parent0 = len(parent0_elements),
                     size_parent1 = len(parent1_elements),
                     # connections
-                    con_all = self.con_all,
+                    con_all = self.con_all[cls01],
                     con_0to1 = self.con_directed[cls01],
                     con_0to1_stim = self.con_stimulation[cls01],
                     con_0to1_inh = self.con_inhibition[cls01],

@@ -35,8 +35,8 @@ ClusteringBase <- R6::R6Class(
         initialize = function(
             data,
             key_var = NULL,
-            value_var = NULL,
             row_var = NULL,
+            value_var = NULL,
             hclust_args = list(),
             from_tidy = TRUE,
             ...

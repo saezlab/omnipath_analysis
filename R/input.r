@@ -85,13 +85,14 @@ IntercellCategoriesPairwise <- R6::R6Class(
     
     public = list(
         
-        initialize = function(fname = NULL){
+        initialize = function(fname = NULL, entity_type = NULL, ...){
             
             self$fname <- `if`(
                 is.null(fname),
                 omnipath2_settings$get(input_intercell_cat_pairwise),
                 fname
             )
+            self$entity_type <- entity_type
             
             super$initialize(name = self$fname)
             
@@ -106,6 +107,11 @@ IntercellCategoriesPairwise <- R6::R6Class(
         preprocess = function(...){
             
             self$data <- self$data %>%
+                {`if`(
+                    is.null(self$entity_type),
+                    .,
+                    filter(., entity == self$entity_type)
+                )} %>%
                 mutate(
                     omnipath_covers_cls0 = size_cls0 / in_omnipath_cls0 * 100,
                     omnipath_covers_cls1 = size_cls1 / in_omnipath_cls1 * 100,

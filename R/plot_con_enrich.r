@@ -43,14 +43,15 @@ ConnectionEnrichment <- R6::R6Class(
             
             self$entity_type <- entity_type
             self$exclude <- exclude
+            self$cluster <- cluster
             private$ensure_data(data)
             
             theme_args <- modifyList(
-                list(
-                    axis.text.x = element_text(
-                        angle = 90, vjust = .5, hjust = 1, color = '#000000'
-                    ),
-                    panel.grid.major.y = element_blank()
+                c(
+                    x_vertical_labels(),
+                    list(
+                        panel.grid.major.y = element_blank()
+                    )
                 ),
                 theme_args
             )
@@ -111,13 +112,14 @@ ConnectionEnrichment <- R6::R6Class(
                         enrichment > 1,
                         enrichment,
                         -1 / enrichment
-                    )
+                    ),
+                    enrichment_log2 = log2(enrichment)
                 ) %>%
                 mutate(
                     enrichment_log2 = ifelse(
-                        abs(log2(enrichment)) > 2,
-                        sign(enrichment) * 4,
-                        enrichment
+                        abs(enrichment_log2) > 2,
+                        sign(enrichment_log2) * 2,
+                        enrichment_log2
                     )
                 ) %>%
                 filter(!is.infinite(enrichment_log2))
@@ -131,6 +133,18 @@ ConnectionEnrichment <- R6::R6Class(
                     ) %>%
                     filter(cls_label0 != cls_label1)
             )
+            
+            if(self$cluster){
+                
+                self$clustering <- ClusteringBase$new(
+                    self$data,
+                    cls_label0,
+                    cls_label1,
+                    enrichment_log2
+                )
+                self$data <- self$clustering$get_ordered()
+                
+            }
             
         },
         

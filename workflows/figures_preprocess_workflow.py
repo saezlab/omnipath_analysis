@@ -39,8 +39,8 @@ proc = figpreproc.FiguresPreprocess(
 proc.setup()
 proc.load()
 proc.export_stats_by_category_pairs()
-proc.export_annotation_by_entity()
-proc.export_resource_by_entity()
+proc.export_annotations_by_entity()
+proc.export_resources_by_entity()
 proc.export_complexes_by_resource()
 
 # testing memory usage of joins:
