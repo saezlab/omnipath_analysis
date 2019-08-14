@@ -5,13 +5,14 @@
 # nicolas.palacio@bioquant.uni-heidelberg.de
 
 import os
+import shutil
 
 import matplotlib.pyplot as plt
 import pandas as pd
 
 import pypath
 from pypath import complex
-
+from data_tools.plots import upset_wrap
 
 #=================================== SETUP ===================================#
 
@@ -21,6 +22,8 @@ blue = (0/255, 84/255, 159/255)
 
 # Setting up working environment
 cachedir = '/home/nico/pypath_cache'
+dest_dir = '../figures'
+latex_dir = '../../omnipath2_latex/figures'
 
 if os.getcwd().endswith('omnipath2'):
     os.chdir('workflows')
@@ -31,8 +34,21 @@ if not os.path.exists(cachedir):
 pypath.settings.setup(cachedir=cachedir)
 
 #============================== RETRIEVING INFO ==============================#
-with pypath.curl.cache_off():
-    co = complex.ComplexAggregator()
+#with pypath.curl.cache_off():
+#    co = complex.ComplexAggregator()#resources=['Signor', 'Corum', 'CellPhoneDB',
+                                    #          'Havugimana', 'Compleat',
+                                    #          'ComplexPortal', 'Pdb', 'Hpmr',
+                                    #          'GuideToPharmacology'])
+                                              #, 'Humap'])
+
+#co.save_to_pickle(os.path.join(cachedir, 'complexes.pickle'))
+
+
+co = complex.ComplexAggregator(pickle_file=os.path.join(cachedir,
+                                                        'complexes.pickle'))
+
+co.make_df()
+sum(co.df.duplicated())
 
 [i for i in dir(co) if not i.startswith('_')]
 
@@ -66,8 +82,10 @@ for k, v in co.complexes.items():
 homopt = 100 * homomultimer / total
 heteropt = 100 * heteromultimer / total
 
+dir(co)
+
 # Unique proteins across all complexes
-print('Total number of unique proteins within complexes:', len(co.proteins))
+#print('Total number of unique proteins within complexes:', len(co.proteins))
 print('Out of %d complexes, %d are homomultimers (%.2f %%) and %d '
       'heteromultimers (%.2f %%)' % (total, homomultimer, homopt,
                                      heteromultimer, heteropt))
@@ -85,6 +103,20 @@ for c in co.complexes.values():
 
 comp_by_res = pd.Series(comp_by_res).sort_values(ascending=True)
 
+# 3) Overlaps across resources
+
+len(co.df.components) == len(set(co.df.components))
+
+comp_in_res = dict()
+row_srcs = [r.split(';') for r in co.df.sources]
+
+for i, srcs in enumerate(row_srcs):
+    for s in srcs:
+        if s not in comp_in_res.keys():
+            comp_in_res[s] = set([i])
+        else:
+            comp_in_res[s].add(i)
+
 #================================= PLOTTING ==================================#
 
 # 1) Complex types
@@ -94,19 +126,35 @@ ax.set_title('Complex types')
 ax.set_xticks([0, 1])
 ax.set_xticklabels(['Homomultimers\n%.2f %%' % homopt,
                     'Heteromultimers\n%.2f %%' % heteropt])
-ax.text(0, 2000, '%d' % homomultimer, color='w', ha='center')
-ax.text(1, 9000, '%d' % heteromultimer, color='w', ha='center')
+offset = 0.1 * heteromultimer
+
+ax.text(0, homomultimer - offset, '%d' % homomultimer, color='w', ha='center')
+ax.text(1, heteromultimer - offset, '%d' % heteromultimer, color='w',
+        ha='center')
 fig.tight_layout()
-fig.savefig('../figures/complex_types.svg')
+fig.savefig(os.path.join(dest_dir, 'complex_types.pdf'))
 
 # 2) Complexes by resource
 rng = range(len(comp_by_res))
 fig, ax = plt.subplots()
 ax.barh(rng, comp_by_res.values, color=blue)
 ax.set_yticks(rng)
-ax.set_yticklabels(comp_by_res.index)
+ax.set_yticklabels([s.replace('_', ' ') for s in comp_by_res.index])
 ax.set_ylabel('Resource')
 ax.set_xlabel('Number of complexes')
 ax.set_xscale('log')
 fig.tight_layout()
-fig.savefig('../figures/complex_by_source.svg')
+fig.savefig(os.path.join(dest_dir, 'complex_by_source.pdf'))
+
+# 3) Overlaps across resources
+#help(upset_wrap)
+#upset_wrap(list(comp_in_res.values()), labels=comp_in_res.keys(),
+#           drop_empty=True)
+# =========================================================================== #
+# Moving files to omnipath2_latex repository
+tomove = [f for f in os.listdir(dest_dir)
+          if (f.startswith('complex') and f.endswith('.pdf'))]
+
+for f in tomove:
+    shutil.copy2(os.path.join(dest_dir, f), os.path.join(latex_dir, f))
+# =========================================================================== #
