@@ -42,6 +42,7 @@ ConnectionEnrichment <- R6::R6Class(
             directed = FALSE,
             sign = NULL,
             order_by_undirected = TRUE,
+            ordering_only = FALSE,
             ...
         ){
             
@@ -51,6 +52,7 @@ ConnectionEnrichment <- R6::R6Class(
             self$directed <- directed
             self$sign <- sign
             self$order_by_undirected <- order_by_undirected
+            self$ordering_only <- ordering_only
             private$ensure_data(data)
             private$set_name()
             
@@ -77,6 +79,22 @@ ConnectionEnrichment <- R6::R6Class(
             )
             
         },
+        
+        
+        main = function(){
+            
+            if(self$ordering_only){
+                
+                private$setup()
+                
+            }else{
+                
+                super$main()
+                
+            }
+            
+        },
+        
         
         plot = function(){
             
