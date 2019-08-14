@@ -21,9 +21,9 @@ require(dplyr)
 require(R6)
 
 
-Enrich <- R6::R6Class(
+Enrichment <- R6::R6Class(
     
-    'Enrich',
+    'Enrichment',
     
     lock_objects = FALSE,
     
@@ -38,7 +38,7 @@ Enrich <- R6::R6Class(
             universe,
             directed = TRUE,
             exclude = NULL,
-            enrich_var = NULL
+            enrich_var = NULL,
             expected_var = NULL
         ){
             
@@ -104,8 +104,10 @@ Enrich <- R6::R6Class(
                     !!self$expected_var := (
                         as.numeric(!!self$side0) *
                         as.numeric(!!self$side1) /
-                        con_omnipath
-                    ),
+                        !!self$observed
+                    )
+                )%>%
+                mutate(
                     !!self$enrich_var := (
                         !!self$universe /
                         !!self$expected_var
@@ -155,3 +157,5 @@ Enrich <- R6::R6Class(
         
         
     )
+    
+)

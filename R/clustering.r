@@ -86,7 +86,19 @@ ClusteringBase <- R6::R6Class(
         
         rearrange = function(){
             
-            self$data <- self$data %>%
+            self$data <- self$get_ordered()
+            
+            invisible(self)
+            
+        },
+        
+        
+        get_ordered = function(data = NULL){
+            
+            data <- `if`(is.null(data), self$data, data)
+            
+            (
+                data %>%
                 mutate(
                     !!self$key_var := factor(
                         !!self$key_var,
@@ -100,17 +112,10 @@ ClusteringBase <- R6::R6Class(
                     )
                 ) %>%
                 arrange(!!self$key_var, !!self$row_var)
-            
-            invisible(self)
-            
-        },
+            )
         
-        
-        get_ordered = function(){
-            
-            return(self$data)
-            
         }
+        
         
     ),
     
@@ -119,7 +124,11 @@ ClusteringBase <- R6::R6Class(
         
         preprocess = function(){
             
+            
             self$data_wide <- self$data %>%
+                group_by(!!self$row_var, !!self$key_var) %>%
+                summarize_all(first) %>%
+                ungroup() %>%
                 {`if`(
                     self$from_tidy,
                     select(
