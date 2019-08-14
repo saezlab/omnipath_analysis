@@ -18,6 +18,7 @@
 #
 
 require(ggplot2)
+require(ggnewscale)
 require(dplyr)
 require(R6)
 
@@ -57,13 +58,15 @@ ConnectionEnrichment <- R6::R6Class(
                 c(
                     x_vertical_labels(),
                     list(
-                        panel.grid.major.y = element_blank()
+                        panel.grid.major.y = element_blank(),
+                        legend.title = element_text(size = 10),
+                        legend.justification = 'bottom',
+                        legend.text = element_text(size = 7, hjust = 1)
                     )
                 ),
                 theme_args
             )
             
-            #return(private$setup())
             super$initialize(
                 data = self$data,
                 name = self$name,
@@ -77,53 +80,62 @@ ConnectionEnrichment <- R6::R6Class(
         
         plot = function(){
             
-            order_x <- unique(self$data$cls_label0)
-            order_y <- unique(self$data$cls_label1)
-            
-            data <- self$data %>%
-                arrange(cls_label0, cls_label1) %>%
-                mutate(
-                    cls_label0 = factor(
-                        cls_label0,
-                        levels = unique(cls_label0),
-                        ordered = TRUE
-                    ),
-                    cls_label1 = factor(
-                        cls_label1,
-                        levels = unique(cls_label1),
-                        ordered = TRUE
-                    ),
-                )
-            
             data <- bind_rows(
                     private$upper_triangle(
-                        data %>% filter(enrich_dir)
+                        self$data %>% filter(enrich_dir)
                     ),
                     private$upper_triangle(
-                        data %>% filter(!enrich_dir),
+                        self$data %>% filter(!enrich_dir),
                         swap_labels = TRUE
-                    )
+                    ) %>%
+                    filter(cls_label0 != cls_label1)
                 ) %>%
                 mutate(
-                    sym = ifelse(enrich_dir, "\u25E4", "\u25E2")
+                    sym1 = ifelse(enrich_dir, "\u25E4", "\u25E2"),
+                    sym2 = ifelse(enrich_dir, "\u25E2", "\u25E4")
                 )
             
             self$plt <- ggplot(
-                data,
-                aes(
+                mapping = aes(
                     x = cls_label0,
                     y = cls_label1,
-                    color = enrichment_log2,
-                    label = sym
+                    label = sym1
                 )
             ) +
-            geom_text(size = 4.2) +
+            geom_text(
+                data = data,
+                mapping = aes(
+                    color = enrichment_log2
+                ),
+                size = 4.2
+            ) +
             scale_color_viridis_c(
                 na.value = '#FFFFFF',
                 guide = guide_colorbar(
-                    title = 'Enrichment of\nconnections (log2)'
+                    title = 'Enrichment of\nconnections (log2)',
+                    barheight = unit(.5, 'inches')
                 ),
                 limits = c(-2, 2)
+            ) +
+            new_scale_color() +
+            geom_text(
+                data = data,
+                mapping = aes(
+                    x = cls_label1,
+                    y = cls_label0,
+                    color = numof_con_log10,
+                    label = sym2
+                )
+            ) +
+            scale_color_gradient(
+                low = '#FFFFFF',
+                high = '#333333',
+                na.value = '#FFFFFF',
+                limits = c(0, 5),
+                guide = guide_colorbar(
+                    title = 'Number of\nconnections (log10)',
+                    barheight = unit(.5, 'inches')
+                )
             ) +
             ggtitle(self$title) +
             xlab('Inter-cellular\ncommunication roles') +
@@ -132,15 +144,13 @@ ConnectionEnrichment <- R6::R6Class(
         }
         
     ),
-    #sym = ifelse(grp == 'a', "\u25E4", "\u25E2")
+    
     
     private = list(
         
         setup = function(){
             
             private$add_enrichment()
-            
-            #return(private$set_order())
             private$set_order()
             
         },
@@ -163,6 +173,31 @@ ConnectionEnrichment <- R6::R6Class(
         },
         
         
+        add_numof_con = function(data, direction = c(0, 1)){
+            
+            dir_str <- do.call(
+                sprintf,
+                as.list(c('%sto%s', direction))
+            )
+            
+            var <- private$dir_sign_choice(c(
+                sym('con_all'),
+                sym(sprintf('con_%s', dir_str)),
+                sym(sprintf('con_%s_stim', dir_str)),
+                sym(sprintf('con_%s_inh', dir_str))
+            ))
+            
+            (
+                data %>%
+                mutate(
+                    numof_con = !!var,
+                    numof_con_log10 = log10(!!var)
+                )
+            )
+            
+        },
+        
+        
         add_enrichment = function(){
             
             self$data <- `if`(
@@ -176,7 +211,8 @@ ConnectionEnrichment <- R6::R6Class(
         
         get_enrichment_undirected = function(){
             
-            data <- private$get_enrichment()$data
+            data <- private$get_enrichment()$data %>%
+                private$add_numof_con()
             
             bind_rows(
                 data %>% mutate(enrich_dir = TRUE),
@@ -188,11 +224,23 @@ ConnectionEnrichment <- R6::R6Class(
         
         get_enrichment_directed = function(){
             
-            bind_rows(
+            data <- bind_rows(
                 private$get_enrichment(direction = c(0, 1))$data %>%
+                    private$add_numof_con(direction = c(0, 1)) %>%
                     mutate(enrich_dir = TRUE),
                 private$get_enrichment(direction = c(1, 0))$data %>%
+                    private$add_numof_con(direction = c(1, 0)) %>%
                     mutate(enrich_dir = FALSE)
+            )
+            
+            bind_rows(
+                data,
+                data %>%
+                    rename(
+                        cls_label0 = cls_label1,
+                        cls_label1 = cls_label0
+                    ) %>%
+                    filter(cls_label0 != cls_label1)
             )
             
         },
@@ -204,33 +252,32 @@ ConnectionEnrichment <- R6::R6Class(
                 sprintf,
                 as.list(c('%sto%s', direction))
             )
-            i <- private$dir_sign_choice(c(1, 2, 3, 4))
             
             self$variables <- list(
-                side0 = list(
+                side0 = private$dir_sign_choice(c(
                     sym('deg_total0'),
                     sym(sprintf('deg_out%i', direction[1])),
                     sym(sprintf('deg_out%i_stim', direction[1])),
                     sym(sprintf('deg_out%i_inh', direction[1]))
-                )[[i]],
-                side1 = list(
+                )),
+                side1 = private$dir_sign_choice(c(
                     sym('deg_total1'),
                     sym(sprintf('deg_in%i', direction[2])),
                     sym(sprintf('deg_in%i_stim', direction[2])),
                     sym(sprintf('deg_in%i_inh', direction[2]))
-                )[[i]],
-                observed = list(
+                )),
+                observed = private$dir_sign_choice(c(
                     sym('con_all'),
                     sym(sprintf('con_%s', dir_str)),
                     sym(sprintf('con_%s_stim', dir_str)),
                     sym(sprintf('con_%s_inh', dir_str))
-                )[[i]],
-                universe = list(
+                )),
+                universe = private$dir_sign_choice(c(
                     sym('con_omnipath'),
                     sym('con_omnipath_dir'),
                     sym('con_omnipath_stim'),
                     sym('con_omnipath_inh')
-                )[[i]]
+                ))
             )
             
         },
@@ -315,10 +362,26 @@ ConnectionEnrichment <- R6::R6Class(
         },
         
         
-        upper_triangle = function(data, swap_labels = FALSE){
+        upper_triangle = function(...){
             
-            order_x <- unique(data$cls_label0)
-            order_y <- unique(data$cls_label1)
+            private$triangle(...)
+            
+        },
+        
+        
+        lower_triangle = function(...){
+            
+            private$triangle(..., op = `>=`)
+            
+        },
+        
+        
+        triangle = function(data, swap_labels = FALSE, op = `<=`){
+            
+            order_x <- levels(data$cls_label0)
+            order_y <- levels(data$cls_label1)
+            
+            #return(data)
             
             (
                 data %>%
@@ -332,8 +395,22 @@ ConnectionEnrichment <- R6::R6Class(
                     .
                 )} %>%
                 filter(
-                    match(cls_label0, order_x) <=
-                    match(cls_label1, order_y)
+                    op(
+                        match(cls_label0, order_x),
+                        match(cls_label1, order_y)
+                    )
+                ) %>%
+                mutate(
+                    cls_label0 = factor(
+                        cls_label0,
+                        levels = order_x,
+                        ordered = TRUE
+                    ),
+                    cls_label1 = factor(
+                        cls_label1,
+                        levels = order_y,
+                        ordered = TRUE
+                    )
                 )
             )
             
