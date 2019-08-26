@@ -65,19 +65,15 @@ pypath.settings.setup(cachedir=cachedir)
 #============================== RETRIEVING INFO ==============================#
 with pypath.curl.cache_off():
     i = intercell.IntercellAnnotation()
+    pa = PyPath()
+    pa.init_network()
 
 i.save_to_pickle(os.path.join(cachedir, 'intercell.pickle'))
+pa.save_network(pfile=os.path.join(cachedir, 'network.pickle'))
 
 #i = intercell.IntercellAnnotation(pickle_file=os.path.join(cachedir,
 #                                                           'intercell.pickle'))
-
-pa = PyPath()
-pa.init_network()
-
-pa.save_network(pfile=os.path.join(cachedir, 'network.pickle'))
 #pa.init_network(pfile=os.path.join(cachedir, 'network.pickle'))
-
-
 
 print([x for x in dir(i) if not x.startswith('_')])
 i.class_names

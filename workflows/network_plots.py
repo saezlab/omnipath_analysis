@@ -62,12 +62,12 @@ def color(*args, **kwargs):
 #============================== RETRIEVING INFO ==============================#
 pa = PyPath()
 
-pa.init_network()
-#pa.init_network(pfile=os.path.join(cachedir, 'network.pickle'))
+#pa.init_network()
+pa.init_network(pfile=os.path.join(cachedir, 'network.pickle'))
 pa.get_directed()
 pa.load_all_pathways()
 
-pa.save_network(pfile=os.path.join(cachedir, 'network.pickle'))
+#pa.save_network(pfile=os.path.join(cachedir, 'network.pickle'))
 
 # Undirected graph
 pa.graph.vcount()
