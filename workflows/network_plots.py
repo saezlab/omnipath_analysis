@@ -62,12 +62,12 @@ def color(*args, **kwargs):
 #============================== RETRIEVING INFO ==============================#
 pa = PyPath()
 
-#pa.init_network()
-pa.init_network(pfile=os.path.join(cachedir, 'network.pickle'))
+pa.init_network()
+#pa.init_network(pfile=os.path.join(cachedir, 'network.pickle'))
 pa.get_directed()
 pa.load_all_pathways()
 
-#pa.save_network(pfile=os.path.join(cachedir, 'network.pickle'))
+pa.save_network(pfile=os.path.join(cachedir, 'network.pickle'))
 
 # Undirected graph
 pa.graph.vcount()
@@ -92,9 +92,12 @@ node_sources = dict()
 refs_per_node = list(map(len, pa.graph.vs['references']))
 
 for v in pa.graph.vs:
+
     for k in v['sources']:
+
         if k in node_sources.keys():
             node_sources[k].add(v.index)
+
         else:
             node_sources[k] = set([v.index])
 
@@ -172,15 +175,15 @@ degrees = Counter(pa.graph.vs.degree())
 # Edge sources
 fig, ax = plt.subplots(figsize=(9, 7))
 rng = range(len(edge_sources))
-ax.barh(rng, edge_sources.values, color=blue)
+#ax.barh(rng, edge_sources.values, color=blue)
+ax.scatter(edge_sources.values, rng, color=blue)
 ax.set_yticks(rng)
 ax.set_yticklabels(edge_sources.index)
 ax.set_ylabel('Resource')
 ax.set_xlabel('Number of edges')
 ax.set_xscale('log')
-ax.grid(True, axis='x')
+ax.grid()
 ax.set_ylim(-1, len(edge_sources))
-
 fig.tight_layout()
 fig.savefig(os.path.join(dest_dir, 'network_edges_by_source.pdf'))
 
@@ -198,13 +201,14 @@ fig.savefig(os.path.join(dest_dir, 'network_cloud_edges_by_source.pdf'))
 # Node sources
 fig, ax = plt.subplots(figsize=(9, 7))
 rng = range(len(node_sources))
-ax.barh(rng, node_sources.values, color=blue)
+#ax.barh(rng, node_sources.values, color=blue)
+ax.scatter(node_sources.values, rng, color=blue)
 ax.set_yticks(rng)
 ax.set_yticklabels(node_sources.index)
 ax.set_ylabel('Resource')
 ax.set_xlabel('Number of nodes')
 ax.set_xscale('log')
-ax.grid(True, axis='x')
+ax.grid()
 ax.set_ylim(-1, len(node_sources))
 
 fig.tight_layout()
@@ -252,23 +256,27 @@ venn(list(sd.values()), labels=list(sd.keys()), title='Direction and signs of '
 # SignaLink pathways
 fig, ax = plt.subplots()
 rng = range(len(slk_path))
-ax.barh(rng, slk_path.values, color=blue)
+#ax.barh(rng, slk_path.values, color=blue)
+ax.scatter(slk_path.values, rng, color=blue)
 ax.set_yticks(rng)
 ax.set_yticklabels(slk_path.index)
 ax.set_ylabel('SignaLink pathway')
 ax.set_xlabel('Members in network')
+ax.grid()
 fig.tight_layout()
 fig.savefig(os.path.join(dest_dir, 'network_slk_pathw.pdf'))
 
 # Signor pathways
 fig, ax = plt.subplots(figsize=(7, 8))
 rng = range(len(sgr_path))
-ax.barh(rng, sgr_path.values, color=blue)
+#ax.barh(rng, sgr_path.values, color=blue)
+ax.scatter(sgr_path.values, rng, color=blue)
 ax.set_yticks(rng)
 ax.set_yticklabels(sgr_path.index)
 ax.set_ylim(-1, len(sgr_path))
 ax.set_ylabel('Signor pathway')
 ax.set_xlabel('Members in network')
+ax.grid()
 fig.tight_layout()
 fig.savefig(os.path.join(dest_dir, 'network_sgr_pathw.pdf'))
 
