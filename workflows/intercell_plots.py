@@ -63,19 +63,19 @@ if not os.path.exists(cachedir):
 pypath.settings.setup(cachedir=cachedir)
 
 #============================== RETRIEVING INFO ==============================#
-#with pypath.curl.cache_off():
-#    i = intercell.IntercellAnnotation()
+with pypath.curl.cache_off():
+    i = intercell.IntercellAnnotation()
 
-#i.save_to_pickle(os.path.join(cachedir, 'intercell.pickle'))
+i.save_to_pickle(os.path.join(cachedir, 'intercell.pickle'))
 
-i = intercell.IntercellAnnotation(pickle_file=os.path.join(cachedir,
-                                                           'intercell.pickle'))
+#i = intercell.IntercellAnnotation(pickle_file=os.path.join(cachedir,
+#                                                           'intercell.pickle'))
 
 pa = PyPath()
-#pa.init_network()
+pa.init_network()
 
-#pa.save_network(pfile=os.path.join(cachedir, 'network.pickle'))
-pa.init_network(pfile=os.path.join(cachedir, 'network.pickle'))
+pa.save_network(pfile=os.path.join(cachedir, 'network.pickle'))
+#pa.init_network(pfile=os.path.join(cachedir, 'network.pickle'))
 
 
 
@@ -99,7 +99,8 @@ for c in set(df.mainclass):
         elem_by_class[c].update(elems)
 
 elem_counts_by_class = pd.Series(map(len, elem_by_class.values()),
-                                 index=elem_by_class.keys()).sort_values()
+                                 index=[s.capitalize() for s in elem_by_class.\
+                                 keys()]).sort_values()
 
 # Number of proteins by class
 counts = dict((c, i.counts()[c]) for c in i.class_names)
@@ -132,7 +133,7 @@ aux = list(elem_by_class.keys())
 aux.remove('extracellular')
 aux.remove('transmembrane')
 aux.remove('secreted')
-
+aux.remove('intracellular')
 combs = list(itertools.combinations_with_replacement(aux, 2))
 connections = dict((k, 0) for k in combs)
 
@@ -142,16 +143,21 @@ for cat_a, cat_b in combs:
     ups_a = [e for e in elem_by_class[cat_a] if not e.startswith('COMPLEX')]
     ups_b = [e for e in elem_by_class[cat_b] if not e.startswith('COMPLEX')]
 
+    print(ups_a[:3])
     for up_a, up_b in itertools.product(ups_a, ups_b):
-        if pa.up_edge(up_a, up_b):
+        if pa.up_edge(up_a, up_b, directed=False):
             connections[(cat_a, cat_b)] += 1
 
 #================================= PLOTTING ==================================#
 # Proteins by class
 fig, ax = plt.subplots()
-ax.barh(range(len(counts)), counts.values, color=blue)
+#ax.barh(range(len(counts)), counts.values, color=blue)
+ax.scatter(counts.values, range(len(counts)), color=blue)
 ax.set_yticks(range(len(counts)))
-ax.set_yticklabels([s.replace('_', ' ') for s in counts.index])#, rotation=90)
+labels = [s.replace('_', ' ').capitalize() for s in counts.index]
+labels[labels.index('Ecm')] = 'ECM'
+ax.set_yticklabels(labels)#, rotation=90)
+ax.grid()
 ax.set_title('Proteins by class')
 ax.set_xscale('log')
 ax.set_ylim(-1, len(counts))
@@ -161,10 +167,13 @@ fig.savefig(os.path.join(dest_dir, 'intercell_prots_by_class.pdf'))
 # Number of elements by class
 fig, ax = plt.subplots()
 rng = range(len(elem_counts_by_class))
-ax.grid(True, axis='x')
-ax.barh(rng, elem_counts_by_class.values, color=blue)
+ax.grid()
+#ax.barh(rng, elem_counts_by_class.values, color=blue)
+ax.scatter(elem_counts_by_class.values, rng, color=blue)
 ax.set_yticks(rng)
-ax.set_yticklabels([s.replace('_', ' ') for s in elem_counts_by_class.index])
+labels = [s.replace('_', ' ').capitalize() for s in elem_counts_by_class.index]
+labels[labels.index('Ecm')] = 'ECM'
+ax.set_yticklabels(labels)
 ax.set_title('Number of elements per intercell class')
 ax.set_xscale('log')
 ax.set_ylim(-1, len(elem_counts_by_class))
@@ -180,8 +189,8 @@ for (a, b) in itertools.product(groups, repeat=2):
 
 sims = np.array(sims).reshape(len(groups), len(groups))
 
-labels = [s.replace('_', ' ') for s in elem_by_class.keys()]
-
+labels = [s.replace('_', ' ').capitalize() for s in elem_by_class.keys()]
+labels[labels.index('Ecm')] = 'ECM'
 cluster_hmap(sims, xlabels=labels, ylabels=labels,
              title='Szymkiewicz–Simpson similarity of major intercellular clas'
              + 'ses', filename=os.path.join(dest_dir,
@@ -189,13 +198,30 @@ cluster_hmap(sims, xlabels=labels, ylabels=labels,
 
 # Entities by source
 fig, ax = plt.subplots(figsize=(7, 7))
-ax.barh(range(len(elems_by_source)), elems_by_source.values, color=blue)
+#ax.barh(range(len(elems_by_source)), elems_by_source.values, color=blue)
+ax.grid()
+ax.scatter(elems_by_source.values, range(len(elems_by_source)), color=blue)
+
 ax.set_yticks(range(len(elems_by_source)))
-ax.set_yticklabels(elems_by_source.index)#, rotation=90)
+
+labels = [s.capitalize() for s in elems_by_source.index]
+labels[labels.index('Comppi')] = 'ComPPI'
+labels[labels.index('Opm')] = 'OPM'
+labels[labels.index('Hgnc')] = 'HGNC'
+labels[labels.index('Hpmr')] = 'HPMR'
+labels[labels.index('Topdb')] = 'TopDB'
+labels[labels.index('Cellphonedb')] = 'CellPhoneDB'
+labels[labels.index('Cspa')] = 'CSPA'
+labels[labels.index('Matrixdb')] = 'MatrixDB'
+labels[labels.index('Go')] = 'GO curated'
+
+ax.set_yticklabels(labels)#, rotation=90)
+
 ax.set_title('Entities by source')
-ax.set_xscale('log')
+#ax.set_xlim(-1, elems_by_source.max())
 ax.set_ylim(-1, len(elems_by_source))
 fig.tight_layout()
+#ax.set_xscale('log')
 fig.savefig(os.path.join(dest_dir, 'intercell_ents_by_source.pdf'))
 
 # Some are empty!
@@ -203,18 +229,21 @@ i.classes['ligand_kirouac']
 
 # Interactions between subclasses
 edges = pd.DataFrame([[k[0], k[1], v] for (k, v) in connections.items()])
+
 nodes = dict((k, len([x for x in elem_by_class[k] if not x.startswith('complex')]))
               for k in aux)
 nodes = pd.Series(nodes)
 nodes.sort_index(inplace=True)
 
-labels = [s.replace('_', ' ') for s in nodes.index]
+labels = [s.replace('_', ' ').capitalize() for s in nodes.index]
+labels[labels.index('Ecm')] = 'ECM'
 
 #cmap = matplotlib.cm.get_cmap('jet')
 #colors = list(map(cmap, np.linspace(1, 0, len(nodes))))
 fig = chordplot(nodes, edges, labels=labels, label_sizes=True, alpha=0.5,
                 colors=cseq3)#colors)
-fig.savefig(os.path.join(dest_dir, 'intercell_interact_chordplot.pdf'))
+fig.savefig(os.path.join(dest_dir, 'intercell_interact_chordplot2.pdf'))
+
 # =========================================================================== #
 # Moving files to omnipath2_latex repository
 tomove = [f for f in os.listdir(dest_dir)
