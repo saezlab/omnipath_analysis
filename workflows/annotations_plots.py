@@ -34,18 +34,17 @@ if not os.path.exists(cachedir):
 
 #============================== RETRIEVING INFO ==============================#
 pypath.settings.setup(cachedir=cachedir)
+pa = PyPath()
 
 #with pypath.curl.cache_off():
-#    pa.init_network()
-#    a = annot.AnnotationTable(keep_annotators=True, create_dataframe=True)
-#    a.load()
+    #pa.init_network()
+    #a = annot.AnnotationTable(keep_annotators=True, create_dataframe=True)
+    #a.load()
+    #pa.init_network()
 
 #a.save_to_pickle(os.path.join(cachedir, 'annot.pickle'))
 
 a = annot.AnnotationTable(pickle_file=os.path.join(cachedir, 'annot.pickle'))
-
-pa = PyPath()
-#pa.init_network()
 
 #pa.save_network(pfile=os.path.join(cachedir, 'network.pickle'))
 pa.init_network(pfile=os.path.join(cachedir, 'network.pickle'))
@@ -86,8 +85,8 @@ a.annots.keys()
 # Annotation classes by resource
 rng = range(len(subclasses))
 fig, ax = plt.subplots(figsize=(9, 7))
-ax.grid(True, axis='x')
-ax.barh(rng, subclasses.values, color=cb)
+ax.grid()
+ax.scatter(subclasses.values, rng, color=cb)
 ax.set_yticks(rng)
 ax.set_yticklabels([s.replace('_', ' ') for s in subclasses.index])
 ax.set_ylim(-1, len(subclasses))
@@ -109,9 +108,9 @@ fig.savefig(os.path.join(dest_dir, 'annot_per_prot.pdf'))
 
 # Proteins/complexes by resource
 fig, ax = plt.subplots(figsize=(7, 6))
-ax.grid(True, axis='x')
+ax.grid()
 rng = range(len(prots_by_res))
-ax.barh(rng, prots_by_res.values, color=cb)
+ax.scatter(prots_by_res.values, rng, color=cb)
 ax.set_title('Proteins/complexes by resource')
 ax.set_ylabel('Resource')
 ax.set_xlabel('Number of proteins/complexes')
