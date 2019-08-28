@@ -117,14 +117,14 @@ ax.set_xlabel('Number of proteins/complexes')
 ax.set_ylim(-1, len(prots_by_res))
 ax.set_yticks(rng)
 ax.set_yticklabels([s.replace('_', ' ') for s in prots_by_res.index])
-ax.set_xscale('log')
+#ax.set_xscale('log')
 fig.tight_layout()
 fig.savefig(os.path.join(dest_dir, 'annot_prot_by_source.pdf'))
 
 # Overlap between annotation and network
 
 plot = venn([set(df.index), set(pa.graph.vs['name'])],
-            labels=['annot', 'network'], c=[cb, cg],
+            labels=['Annot', 'Network'], c=[cb, cg],
             filename=os.path.join(dest_dir, 'annot_overlap_network.pdf'))
 
 # =========================================================================== #
