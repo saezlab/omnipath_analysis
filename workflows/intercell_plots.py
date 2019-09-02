@@ -139,7 +139,7 @@ for cat_a, cat_b in combs:
     ups_a = [e for e in elem_by_class[cat_a] if not e.startswith('COMPLEX')]
     ups_b = [e for e in elem_by_class[cat_b] if not e.startswith('COMPLEX')]
 
-    print(ups_a[:3])
+    #print(ups_a[:3])
     for up_a, up_b in itertools.product(ups_a, ups_b):
         if pa.up_edge(up_a, up_b, directed=False):
             connections[(cat_a, cat_b)] += 1
