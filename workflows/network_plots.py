@@ -172,20 +172,24 @@ sgr_path = pd.Series(sgr_path).sort_values(ascending=True)
 degrees = Counter(pa.graph.vs.degree())
 
 #================================= PLOTTING ==================================#
-# Edge sources
+aux = list(set.union(set(node_sources.keys()),
+                     set(edge_sources.keys())))
+# Edge + node sources
 fig, ax = plt.subplots(figsize=(9, 7))
-rng = range(len(edge_sources))
+rng = range(len(aux))
 #ax.barh(rng, edge_sources.values, color=blue)
-ax.scatter(edge_sources.values, rng, color=blue)
+ax.scatter([edge_sources[i] for i in aux], rng, color=blue, label='Edges')
+ax.scatter([node_sources[i] for i in aux], rng, color=green, label='Nodes')
 ax.set_yticks(rng)
-ax.set_yticklabels(edge_sources.index)
+ax.set_yticklabels(aux)
 ax.set_ylabel('Resource')
-ax.set_xlabel('Number of edges')
+ax.set_xlabel('Number of nodes/edges')
 ax.set_xscale('log')
 ax.grid()
+ax.legend(loc=0)
 ax.set_ylim(-1, len(edge_sources))
 fig.tight_layout()
-fig.savefig(os.path.join(dest_dir, 'network_edges_by_source.pdf'))
+fig.savefig(os.path.join(dest_dir, 'network_nodes_edges_by_source.pdf'))
 
 # Edge sources - as wordcloud
 wc = wordcloud.WordCloud(background_color='white', color_func=color)
@@ -196,23 +200,6 @@ ax.imshow(wc)
 ax.set_axis_off()
 fig.tight_layout()
 fig.savefig(os.path.join(dest_dir, 'network_cloud_edges_by_source.pdf'))
-
-
-# Node sources
-fig, ax = plt.subplots(figsize=(9, 7))
-rng = range(len(node_sources))
-#ax.barh(rng, node_sources.values, color=blue)
-ax.scatter(node_sources.values, rng, color=blue)
-ax.set_yticks(rng)
-ax.set_yticklabels(node_sources.index)
-ax.set_ylabel('Resource')
-ax.set_xlabel('Number of nodes')
-ax.set_xscale('log')
-ax.grid()
-ax.set_ylim(-1, len(node_sources))
-
-fig.tight_layout()
-fig.savefig(os.path.join(dest_dir, 'network_nodes_by_source.pdf'))
 
 # Node sources - as wordcloud
 wc = wordcloud.WordCloud(background_color='white', color_func=color)
@@ -225,10 +212,20 @@ fig.tight_layout()
 fig.savefig(os.path.join(dest_dir, 'network_cloud_nodes_by_source.pdf'))
 
 # Distribution of references by edge/node
+len(refs_node)
+
+refs_edge = Counter(refs_per_edge)
+refs_node = Counter(refs_per_node)
+#model1 = PowerLaw(list(refs_edge.keys()), list(refs_edge.values()))
+#model2 = PowerLaw(list(refs_node.keys()), list(refs_node.values()))
+
 fig, ax = plt.subplots()
-bins = np.histogram(np.hstack([refs_per_edge, refs_per_node]), bins=100)[1]
-ax.hist(refs_per_edge, color=blue, alpha=0.5, bins=bins, label='References per edge')
-ax.hist(refs_per_node, color=green, alpha=0.5, bins=bins, label='References per node')
+
+ax.scatter(list(refs_node.keys()), list(refs_node.values()), alpha=0.25,
+           label='Nodes', color=blue)
+ax.scatter(list(refs_edge.keys()), list(refs_edge.values()), alpha=0.25,
+           label='Edges', color=green)
+ax.set_xscale('log')
 ax.set_yscale('log')
 ax.legend()
 ax.set_xlabel('Number of references')
@@ -237,6 +234,17 @@ fig.tight_layout()
 
 fig.savefig(os.path.join(dest_dir, 'network_refs_per_node_edge.pdf'))
 
+# Nodes degree vs references
+fig, ax = plt.subplots()
+ax.scatter(refs_per_node, pa.graph.vs.degree(), color=blue)
+ax.set_xlabel('Number of references')
+ax.set_ylabel('Node degree')
+ax.set_yscale('log')
+ax.set_xscale('log')
+
+fig.tight_layout()
+fig.savefig(os.path.join(dest_dir, 'network_node_deg_refs.pdf'))
+np.corrcoef(refs_per_node, pa.graph.vs.degree())[0, 1]# ** 2
 # Distribution of node degrees
 fig, ax = plt.subplots()
 ax.hist(pa.graph.vs.degree(), color=blue, bins=100)
