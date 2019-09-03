@@ -97,11 +97,10 @@ fig.savefig(os.path.join(dest_dir, 'annot_classes_by_source.pdf'))
 
 # Annotations per protein/complex
 fig, ax = plt.subplots()
-ax.hist(annots_per_prot, bins=100, color=cb)
+ax.hist(annots_per_prot, bins=50, color=cb)
 ax.set_title('Annotations per protein/complex')
 ax.set_xlabel('Number of annotations')
 ax.set_ylabel('Proteins/complexes')
-#ax.set_yscale('log')
 ax.set_xlim([-1, max(annots_per_prot)])
 fig.tight_layout()
 fig.savefig(os.path.join(dest_dir, 'annot_per_prot.pdf'))
@@ -117,12 +116,10 @@ ax.set_xlabel('Number of proteins/complexes')
 ax.set_ylim(-1, len(prots_by_res))
 ax.set_yticks(rng)
 ax.set_yticklabels([s.replace('_', ' ') for s in prots_by_res.index])
-#ax.set_xscale('log')
 fig.tight_layout()
 fig.savefig(os.path.join(dest_dir, 'annot_prot_by_source.pdf'))
 
 # Overlap between annotation and network
-
 plot = venn([set(df.index), set(pa.graph.vs['name'])],
             labels=['Annot', 'Network'], c=[cb, cg],
             filename=os.path.join(dest_dir, 'annot_overlap_network.pdf'))

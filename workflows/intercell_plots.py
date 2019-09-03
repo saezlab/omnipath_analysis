@@ -47,7 +47,10 @@ lila = (122/255, 111/255, 172/255)
 # Color sequences
 cseq = [blue, blue75, petrol, turquoise, green, lime] # More gradual
 cseq2 = [blue, green, orange, red, purple] # More contrasted
-cseq3 = [blue, petrol, turquoise, green, yellow, orange, red, purple]
+cseq3 = [blue, #petrol,
+         turquoise, green, lime, orange, red, purple, lila]
+
+cseq4 = [blue, turquoise, green, lime, yellow, orange, red, purple]
 
 # Setting up the working environment
 cachedir = '/home/nico/pypath_cache'
@@ -63,9 +66,9 @@ if not os.path.exists(cachedir):
 pypath.settings.setup(cachedir=cachedir)
 
 #============================== RETRIEVING INFO ==============================#
+pa = PyPath()
 with pypath.curl.cache_off():
     i = intercell.IntercellAnnotation()
-    pa = PyPath()
     pa.init_network()
 
 i.save_to_pickle(os.path.join(cachedir, 'intercell.pickle'))
@@ -73,11 +76,16 @@ pa.save_network(pfile=os.path.join(cachedir, 'network.pickle'))
 
 #i = intercell.IntercellAnnotation(pickle_file=os.path.join(cachedir,
 #                                                           'intercell.pickle'))
+
 #pa.init_network(pfile=os.path.join(cachedir, 'network.pickle'))
 
 print([x for x in dir(i) if not x.startswith('_')])
 i.class_names
 df = i.df
+
+
+#df.loc[df.mainclass == 'receptor']
+
 
 # Elements by class
 elem_by_class = dict()
@@ -122,17 +130,18 @@ for k, v in i.classes.items():
 elems_by_source = pd.Series(map(len, elems_by_source.values()),
                             index=elems_by_source.keys())
 elems_by_source.sort_values(inplace=True)
-
+[(k, len(set(v))) for k, v in elem_by_class.items()]
+[(k, len(v)) for k, v in elem_by_class.items()]
 # Connections between intercell classes
 
-aux = list(elem_by_class.keys())
-aux.remove('extracellular')
-aux.remove('transmembrane')
-aux.remove('secreted')
-aux.remove('intracellular')
-combs = list(itertools.combinations_with_replacement(aux, 2))
+main_classes = list(elem_by_class.keys())
+main_classes.remove('extracellular')
+main_classes.remove('transmembrane')
+main_classes.remove('secreted')
+main_classes.remove('intracellular')
+combs = list(itertools.combinations_with_replacement(main_classes, 2))
 connections = dict((k, 0) for k in combs)
-
+connections
 for cat_a, cat_b in combs:
     print('Counting connections between %s and %s...' % (cat_a, cat_b))
 
@@ -143,7 +152,6 @@ for cat_a, cat_b in combs:
     for up_a, up_b in itertools.product(ups_a, ups_b):
         if pa.up_edge(up_a, up_b, directed=False):
             connections[(cat_a, cat_b)] += 1
-
 #================================= PLOTTING ==================================#
 # Proteins by class
 fig, ax = plt.subplots()
@@ -227,17 +235,67 @@ i.classes['ligand_kirouac']
 edges = pd.DataFrame([[k[0], k[1], v] for (k, v) in connections.items()])
 
 nodes = dict((k, len([x for x in elem_by_class[k] if not x.startswith('complex')]))
-              for k in aux)
+              for k in main_classes)
+[(k, len(v)) for k, v in elem_by_class.items()]
+nodes
 nodes = pd.Series(nodes)
 nodes.sort_index(inplace=True)
+nodes
+# "Adjacency"
+adj = pd.DataFrame(index=nodes.index, columns=nodes.index)
+for k, (s, t, v) in edges.iterrows():
+    adj.loc[s, t] = v
+    adj.loc[t, s] = v
 
 labels = [s.replace('_', ' ').capitalize() for s in nodes.index]
 labels[labels.index('Ecm')] = 'ECM'
 
 #cmap = matplotlib.cm.get_cmap('jet')
 #colors = list(map(cmap, np.linspace(1, 0, len(nodes))))
-fig = chordplot(nodes, edges, labels=labels, label_sizes=True, alpha=0.5,
-                colors=cseq3)#colors)
+
+cmap = matplotlib.cm.get_cmap('gist_rainbow')
+colors = list(map(cmap, np.linspace(0, 1, len(nodes))))
+fig = chordplot(nodes, edges, #labels=labels, label_sizes=True,
+                alpha=.5,
+                colors=colors, figsize=(10, 8))#colors)
+ax = fig.gca() # [left, bottom, width, height]
+ax.set_position([0, 0, 0.75, 1]) # chordplot
+ax2 = fig.add_axes([0.75, 0.75, 0.25, 0.25]) # legend
+ax2.legend([matplotlib.lines.Line2D([0], [0], marker='o', color='w',
+                                              markerfacecolor=c)
+                      for c in colors],
+                     labels,
+                     loc='center', ncol=2)
+ax2.set_axis_off()
+ax3 = fig.add_axes([0.75, 0.5, 0.25, 0.25]) # barplot
+ax4 =fig.add_axes([0.75, 0, 0.25, 0.5], sharex=ax3) # heatmap
+
+ax3.bar(range(len(nodes)), nodes.values, color=colors)
+#ax3.set_axis_off()
+ax3.spines['right'].set_visible(False)
+ax3.spines['top'].set_visible(False)
+ax3.spines['bottom'].set_visible(False)
+ax3.spines['left'].set_visible(False)
+ax3.set_xticks([])
+#ax.axes.get_yaxis().set_visible(False)
+
+ax3.locator_params(axis='y', nbins=4)
+
+#ax.tick_params(axis='both', left='off', top='off', right='off', bottom='off', labelleft='off', labeltop='off', labelright='off', labelbottom='off')
+
+#ax3.get_yaxis().set_visible(True)
+
+mat = np.triu(adj.values).astype(float)
+mat[np.where(mat == 0)] = np.nan
+
+
+im = ax4.imshow(mat, cmap='plasma')
+ # [left, bottom, width, height]
+ax5 = fig.add_axes([0.75, 0.05, 0.25, 0.01]) # colorbar
+fig.colorbar(im, cax=ax5, ax=ax5, orientation='horizontal')
+ax4.set_axis_off()
+
+fig
 fig.savefig(os.path.join(dest_dir, 'intercell_interact_chordplot2.pdf'))
 
 # =========================================================================== #
