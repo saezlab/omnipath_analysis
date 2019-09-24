@@ -15,7 +15,10 @@
 # turei.denes@gmail.com
 #
 
+import os
+import sys
 import imp
+import time
 import pprint
 import copy
 import collections
@@ -29,13 +32,13 @@ from pypath import complex
 from pypath import ptm
 from pypath import session_mod
 
-import settings as op2_settings
+import workflows.settings as op2_settings
 
 
-class Database(session_mod.Logger)
+class Database(session_mod.Logger):
     
     
-    def __init__(self, rebuild = False):
+    def __init__(self, rebuild = False, **kwargs):
         
         session_mod.Logger.__init__(self, name = 'op2.database')
         
@@ -45,6 +48,19 @@ class Database(session_mod.Logger)
         self.ensure_dirs()
         
         self._log('OmniPath2 database builder initialized.')
+    
+    
+    def reload(self):
+        """
+        Reloads the object from the module level.
+        """
+
+        modname = self.__class__.__module__
+        mod = __import__(modname, fromlist = [modname.split('.')[0]])
+        imp.reload(mod)
+        new = getattr(mod, self.__class__.__name__)
+        setattr(self, '__class__', new)
+        self.foreach_dataset(method = self.reload_module)
     
     
     def build(self):
@@ -97,13 +113,13 @@ class Database(session_mod.Logger)
         
         return os.path.join(
             self.get_param('pickle_dir'),
-            getattr(self, '%s_pickle' % dataset),
+            self.get_param('%s_pickle' % dataset),
         )
     
     
     def pickle_exists(self, dataset):
         
-        return os.path.exists(self.get_param('dataset'))
+        return os.path.exists(self.get_param('%s_pickle' % dataset))
     
     
     def table_path(dataset):
@@ -118,7 +134,7 @@ class Database(session_mod.Logger)
         
         self._log('Building dataset `%s`.' % dataset)
         
-        args = get_build_args(dataset)
+        args = self.get_build_args(dataset)
         
         mod = self.ensure_module(dataset)
         
@@ -133,15 +149,26 @@ class Database(session_mod.Logger)
         setattr(self, dataset, db)
     
     
-    def ensure_module(self, dataset):
+    def ensure_module(self, dataset, reset = True):
         
-        mod = self.get_param('%s_mod' % dataset)
+        mod_str = self.get_param('%s_mod' % dataset)
+        mod = sys.modules['pypath.%s' % mod_str]
         
-        if hasattr(mod, 'db'):
+        if reset and hasattr(mod, 'db'):
             
             delattr(mod, 'db')
         
         return mod
+    
+    
+    def reload_module(self, dataset):
+        
+        mod = self.ensure_module(dataset, reset = False)
+        imp.reload(mod)
+        
+        if hasattr(mod, 'db'):
+            
+            mod.db.reload()
     
     
     def get_build_args(self, dataset):
@@ -163,7 +190,7 @@ class Database(session_mod.Logger)
         
         mod = self.ensure_module(dataset)
         
-        mod.get_db(pickle_file = pickle_path)
+        setattr(self, dataset, mod.get_db(pickle_file = pickle_path))
         
         self._log('Loaded dataset `%s` from `%s`.' % (dataset, pickle_path))
     
@@ -219,7 +246,7 @@ class Database(session_mod.Logger)
         
         for dataset in self.datasets:
             
-            method(dataset)
+            _ = method(dataset)
     
     
     def get_db(self, dataset):
@@ -231,7 +258,14 @@ class Database(session_mod.Logger)
     
     def remove_db(self, dataset):
         
+        
         delattr(self, dataset)
+    
+    
+    def remove_all(self):
+        
+        self.foreach_dataset(method = self.ensure_module)
+        self.foreach_dataset(method = self.remove_db)
     
     
     def get_param(self, key):
@@ -240,7 +274,7 @@ class Database(session_mod.Logger)
             
             return self.param[key]
         
-        return op2_settings.get(param)
+        return op2_settings.get(key)
 
 #
 # to be removed once we have it elsewhere:

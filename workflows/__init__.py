@@ -15,10 +15,11 @@
 # turei.denes@gmail.com
 #
 
-import collections
+import os
 
 from pypath import settings as pp_settings
 from workflows import settings as settings_mod
+from workflows import compile_data
 
 
 def setup(environment):
@@ -33,3 +34,23 @@ def setup(environment):
     if pp_cachedir:
         
         pp_settings.setup(cachedir = pp_cachedir)
+
+
+def init(environment = None, **kwargs):
+    
+    param = (
+        copy.deepcopy(globals()['OP2_DB_ARGS'])
+            if 'OP2_DB_ARGS' in globals() else
+        {}
+    )
+    
+    param.update(kwargs)
+    
+    environment = environment or os.path.split(os.path.expanduser('~'))[-1]
+    
+    setup(environment)
+    
+    globals()['data'] = compile_data.Database(**param)
+
+
+init()
