@@ -21,15 +21,10 @@ import copy
 import collections
 import itertools
 
-from pypath import mapping
-from pypath import dataio
 from pypath import data_formats
-from pypath import intercell_annot
 from pypath import annot
 from pypath import intercell
 from pypath import main
-from pypath import network
-from pypath import uniprot_input
 from pypath import complex
 from pypath import ptm
 from pypath import session_mod
