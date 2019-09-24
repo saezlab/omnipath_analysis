@@ -67,6 +67,10 @@ pypath.settings.setup(cachedir=cachedir)
 
 #============================== RETRIEVING INFO ==============================#
 pa = PyPath()
+tf = PyPath()
+from pypath import data_formats
+tf.init_network(data_formats.transcription)
+
 with pypath.curl.cache_off():
     i = intercell.IntercellAnnotation()
     pa.init_network()
@@ -79,13 +83,24 @@ pa.save_network(pfile=os.path.join(cachedir, 'network.pickle'))
 
 #pa.init_network(pfile=os.path.join(cachedir, 'network.pickle'))
 
+
 print([x for x in dir(i) if not x.startswith('_')])
 i.class_names
 df = i.df
+###############################################################################
+## Checking ligand-receptor interactions
+ligands = [p for p in i.classes['ligand'] if type(p) is str]
+receptors = [p for p in i.classes['receptor'] if type(p) is str]
 
+count = 0
 
-#df.loc[df.mainclass == 'receptor']
+lr_interacts = [pa.up_edge(lig, rec, directed=False) is not None
+                for lig, rec in itertools.product(ligands, receptors)]
+sum(lr_interacts)
 
+## Checking number of ligands we have TF information for:
+sum([lig in tf.vs['name'] for lig in ligands])
+###############################################################################
 
 # Elements by class
 elem_by_class = dict()
