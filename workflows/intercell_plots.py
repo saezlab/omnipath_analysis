@@ -30,40 +30,8 @@ from data_tools.plots import chordplot
 
 #=================================== SETUP ===================================#
 # Colors!
-green = (87/255, 171/255, 39/255)
-lime = (189/255, 205/255, 0/255)
-blue = (0/255, 84/255, 159/255)
-blue75 = (64/255, 127/255, 183/255)
-blue50 = (142/255, 186/255, 229/255)
-yellow = (255/255, 237/255, 0/255)
-orange = (246/255, 168/255, 0/255)
-petrol = (0/255, 97/255, 101/255)
-turquoise = (0/255, 152/255, 161/255)
-red = (161/255, 16/255, 53/255)
-bordeaux = (161/255, 16/255, 53/255)
-purple = (97/255, 33/255, 88/255)
-lila = (122/255, 111/255, 172/255)
-
-# Color sequences
-cseq = [blue, blue75, petrol, turquoise, green, lime] # More gradual
-cseq2 = [blue, green, orange, red, purple] # More contrasted
-cseq3 = [blue, #petrol,
-         turquoise, green, lime, orange, red, purple, lila]
-
-cseq4 = [blue, turquoise, green, lime, yellow, orange, red, purple]
-
-# Setting up the working environment
-cachedir = '/home/nico/pypath_cache'
-dest_dir = '../figures'
-latex_dir = '../../omnipath2_latex/figures'
-
-if os.getcwd().endswith('omnipath2'):
-    os.chdir('workflows')
-
-if not os.path.exists(cachedir):
-    os.makedirs(cachedir)
-
-pypath.settings.setup(cachedir=cachedir)
+from workflows import colors
+from workflows import compile_data
 
 #============================== RETRIEVING INFO ==============================#
 pa = PyPath()

@@ -1,7 +1,19 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
-# Denes Turei 2019
+#
+# Copyright 2019 Saez Lab
+#
+# OmniPath2 analysis and figures suit
+#
+# Authors:
+#
+# Nicolàs Palacio-Escat
+# nicolas.palacio@bioquant.uni-heidelberg.de
+#
+# Dénes Türei
 # turei.denes@gmail.com
+#
 
 import imp
 import pprint
@@ -22,71 +34,7 @@ from pypath import complex
 from pypath import ptm
 from pypath import session_mod
 
-
-defaults = {
-    # pickle_dir
-    'pickle_dir': 'pickles',
-    
-    # tables dir
-    'tables_dir': 'tables',
-    
-    # pickles
-    'omnipath_pickle': 'omnipath_pw_es_lr_20190918.pickle',
-    'curated_pickle': 'network_curated_20190924.pickle',
-    'complex_pickle': 'complexes.pickle',
-    'annotations_pickle': 'annotations2.pickle',
-    'intercell_pickle': 'intercell.pickle',
-    'enz_sub_pickle': 'ptms.pickle',
-    'tf_target_pickle': 'tfregulons.pickle',
-    'tf_mirna_pickle': 'tfmirna.pickle',
-    'mirna_mrna_pickle': 'mirna_mrna.pickle',
-
-    # tables
-    'omnipath_tsv': 'network_summaries.tsv',
-    'curated_tsv': 'network-curated_summaries.tsv',
-    'tf_target_tsv': 'network-tf.tsv',
-    'mirna_mrna_tsv': 'network-mirna-target_summaries.tsv',
-    'tf_mirna_tsv': 'network-tf-mirna_summaries.tsv',
-    'annotations_tsv': 'annotations.tsv',
-    'enz_sub_tsv': 'enzsub_summaries.tsv',
-    'intercell_tsv': 'intercell_summaries.tsv',
-    'complex_tsv': 'complex_summaries.tsv',
-
-    # tfregulons levels
-    'tfregulons_levels': {'A', 'B', 'C', 'D'},
-
-    # datasets
-    [
-       'omnipath',
-       'curated',
-       'complex',
-       'annotations',
-       'intercell',
-       'tf_target',
-       'tf_mirna',
-       'mirna_target',
-       'enz_sub',
-    ],
-    
-    'timestamp_dirs': True,
-    
-    'omnipath_mod': 'main',
-    'curated_mod': 'main',
-    'complex_mod': 'complex',
-    'annotations_mod': 'annot',
-    'intercell_mod': 'intercell',
-    'enz_sub_mod': 'ptm',
-    'tf_target_mod': 'main',
-    'tf_mirna_mod': 'main',
-    'mirna_mrna_mod': 'main',
-    
-    'omnipath_args': {
-        'use_omnipath': True,
-        'kinase_substrate_extra': True,
-        'ligand_receptor_extra': True,
-        'pathway_extra': True,
-    },
-}
+import settings as op2_settings
 
 
 class Database(session_mod.Logger)
@@ -94,23 +42,14 @@ class Database(session_mod.Logger)
     
     def __init__(self, rebuild = False):
         
-        session_mod.Logger.__init__(self, name = 'omnipath2.database')
+        session_mod.Logger.__init__(self, name = 'op2.database')
         
-        for key, val in itertools.chain(defaults, kwargs.items()):
-            
-            setattr(self, key, val)
-        
+        self.param = kwargs
         self.rebuild = rebuild
+        self.datasets = op2_settings.get('datasets')
+        self.ensure_dirs()
         
         self._log('OmniPath2 database builder initialized.')
-    
-    
-    def main(self):
-        
-        self.ensure_dirs()
-        self.build()
-        build()
-        load()
     
     
     def build(self):
@@ -119,21 +58,17 @@ class Database(session_mod.Logger)
             'Building databases. Rebuild forced: %s.' % str(self.rebuild)
         )
         
-        for dataset in self.datasets:
-            
-            self.ensure_dataset(dataset)
+        self.foreach_dataset(method = self.ensure_dataset)
     
     
     def ensure_dataset(self, dataset):
         
-        rebuild_attr = 'rebuild_%s' % dataset
+        rebuild_dataset = op2_settings.get('rebuild_%s' % dataset)
         
         if (
             self.rebuild or
-            not self.pickle_exists(dataset) or (
-                hasattr(self, rebuild_attr) and
-                getattr(self, rebuild_attr)
-            )
+            rebuild_dataset or
+            not self.pickle_exists(dataset)
         ):
             
             self.build_dataset(dataset)
@@ -145,20 +80,20 @@ class Database(session_mod.Logger)
     
     def ensure_dirs(self):
         
-        if self.timestamp_dirs:
+        if op2_settings.get('timestamp_dirs'):
             
             self.tables_dir = os.path.join(
-                self.tables_dir,
+                op2_settings.get('tables_dir'),
                 self.timestamp()
             )
             self.figures_dir = os.path.join(
-                self.figures_dir,
+                op2_settings.get('figures_dir'),
                 self.timestamp(),
             )
         
         for _dir in ('pickle', 'tables', 'figures'):
             
-            path = getattr(self, '%s_dir' % _dir
+            path = op2_settings.get('%s_dir' % _dir)
             os.makedirs(path, exist_ok = True)
             self._log('%s directory: `%s`.' % (_dir.capitalize(), path))
     
@@ -166,21 +101,21 @@ class Database(session_mod.Logger)
     def pickle_path(self, dataset):
         
         return os.path.join(
-            self.pickle_dir,
+            op2_settings.get('pickle_dir'),
             getattr(self, '%s_pickle' % dataset),
         )
     
     
     def pickle_exists(self, dataset):
         
-        return os.path.exists(self.pickle_path(dataset))
+        return os.path.exists(op2_settings.get('dataset'))
     
     
-    def table_path(self, dataset):
+    def table_path(dataset):
         
         return os.path.join(
-            self.tables_dir,
-            getattr(self, '%s_tsv' % dataset),
+            op2_settings.get('tables_dir'),
+            op2_settings.get('%s_tsv' % dataset),
         )
     
     
@@ -205,7 +140,7 @@ class Database(session_mod.Logger)
     
     def ensure_module(self, dataset):
         
-        mod = getattr(self, '%s_mod' % dataset)
+        mod = op2_settings.get('%s_mod' % dataset)
         
         if hasattr(mod, 'db'):
             
@@ -216,11 +151,7 @@ class Database(session_mod.Logger)
     
     def get_build_args(self, dataset):
         
-        args = (
-            getattr(self, '%s_args' % dataset)
-                if hasattr(self, '%s_args' % dataset) else
-            {}
-        )
+        args = op2_settings.get('%s_args' % dataset) or {}
         
         if hasattr(self, 'get_args_%s' % dataset):
             
@@ -278,9 +209,7 @@ class Database(session_mod.Logger)
     
     def compile_tables(self):
         
-        for dataset in self.datasets:
-            
-            self.compile_table(dataset)
+        self.foreach_dataset(method = self.compile_table)
     
     
     def compile_table(self, dataset):
@@ -291,9 +220,23 @@ class Database(session_mod.Logger)
         db.summaries_tab(outfile = table_path)
     
     
+    def foreach_dataset(self, method):
+        
+        for dataset in self.datasets:
+            
+            method(dataset)
+    
+    
     def get_db(self, dataset):
         
+        self.ensure_dataset(dataset)
+        
         return getattr(self, dataset)
+    
+    
+    def remove_db(self, dataset):
+        
+        delattr(self, dataset)
 
 #
 # to be removed once we have it elsewhere:
