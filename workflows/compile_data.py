@@ -46,7 +46,7 @@ class Database(session_mod.Logger)
         
         self.param = kwargs
         self.rebuild = rebuild
-        self.datasets = op2_settings.get('datasets')
+        self.datasets = self.get_param('datasets')
         self.ensure_dirs()
         
         self._log('OmniPath2 database builder initialized.')
@@ -63,7 +63,7 @@ class Database(session_mod.Logger)
     
     def ensure_dataset(self, dataset):
         
-        rebuild_dataset = op2_settings.get('rebuild_%s' % dataset)
+        rebuild_dataset = self.get_param('rebuild_%s' % dataset)
         
         if (
             self.rebuild or
@@ -80,20 +80,20 @@ class Database(session_mod.Logger)
     
     def ensure_dirs(self):
         
-        if op2_settings.get('timestamp_dirs'):
+        if self.get_param('timestamp_dirs'):
             
             self.tables_dir = os.path.join(
-                op2_settings.get('tables_dir'),
+                self.get_param('tables_dir'),
                 self.timestamp()
             )
             self.figures_dir = os.path.join(
-                op2_settings.get('figures_dir'),
+                self.get_param('figures_dir'),
                 self.timestamp(),
             )
         
         for _dir in ('pickle', 'tables', 'figures'):
             
-            path = op2_settings.get('%s_dir' % _dir)
+            path = self.get_param('%s_dir' % _dir)
             os.makedirs(path, exist_ok = True)
             self._log('%s directory: `%s`.' % (_dir.capitalize(), path))
     
@@ -101,21 +101,21 @@ class Database(session_mod.Logger)
     def pickle_path(self, dataset):
         
         return os.path.join(
-            op2_settings.get('pickle_dir'),
+            self.get_param('pickle_dir'),
             getattr(self, '%s_pickle' % dataset),
         )
     
     
     def pickle_exists(self, dataset):
         
-        return os.path.exists(op2_settings.get('dataset'))
+        return os.path.exists(self.get_param('dataset'))
     
     
     def table_path(dataset):
         
         return os.path.join(
-            op2_settings.get('tables_dir'),
-            op2_settings.get('%s_tsv' % dataset),
+            self.get_param('tables_dir'),
+            self.get_param('%s_tsv' % dataset),
         )
     
     
@@ -140,7 +140,7 @@ class Database(session_mod.Logger)
     
     def ensure_module(self, dataset):
         
-        mod = op2_settings.get('%s_mod' % dataset)
+        mod = self.get_param('%s_mod' % dataset)
         
         if hasattr(mod, 'db'):
             
@@ -151,7 +151,7 @@ class Database(session_mod.Logger)
     
     def get_build_args(self, dataset):
         
-        args = op2_settings.get('%s_args' % dataset) or {}
+        args = self.get_param('%s_args' % dataset) or {}
         
         if hasattr(self, 'get_args_%s' % dataset):
             
@@ -237,6 +237,15 @@ class Database(session_mod.Logger)
     def remove_db(self, dataset):
         
         delattr(self, dataset)
+    
+    
+    def get_param(self, key):
+        
+        if key in self.param:
+            
+            return self.param[key]
+        
+        return op2_settings.get(param)
 
 #
 # to be removed once we have it elsewhere:
