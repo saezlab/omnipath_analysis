@@ -46,6 +46,7 @@ from pypath import progress
 from pypath import data_formats
 from pypath import intera
 
+import workflows
 
 def reload():
     
@@ -56,42 +57,14 @@ def reload():
 
 class FiguresPreprocess(session_mod.Logger):
     
-    omnipath_args_default = {
-        'kinase_substrate_extra': True,
-        'ligand_receptor_extra': True,
-    }
     
-    def __init__(
-            self,
-            omnipath_pickle = None,
-            complex_pickle = None,
-            annotation_pickle = None,
-            intercell_pickle = None,
-            omnipath_args = None,
-            complex_args = None,
-            annotation_args = None,
-            intercell_args = None,
-            datadir = None,
-            keep_igraph = False,
-        ):
+    def __init__(self, network_dataset = 'omnipath'):
         
         session_mod.Logger.__init__(self, name = 'figures_preproc')
         
-        self.omnipath_args = copy.deepcopy(self.omnipath_args_default)
-        self.omnipath_args.update(omnipath_args or {})
-        self.complex_args = complex_args or {}
-        self.annotation_args = annotation_args or {}
-        self.intercell_args = intercell_args or {}
-        
-        self.omnipath_pickle = omnipath_pickle
-        self.complex_pickle = complex_pickle
-        self.annotation_pickle = annotation_pickle
-        self.intercell_pickle = intercell_pickle
-        
-        self.datadir = datadir
+        self.data = workflows.data
         self.date = time.strftime('%Y%m%d')
-        
-        self.keep_igraph = keep_igraph
+        self.network_dataset = network_dataset
     
     
     def reload(self):
@@ -127,9 +100,8 @@ class FiguresPreprocess(session_mod.Logger):
     
     def setup(self):
         
-        self.datadir = self.datadir or (
-            'data' if os.path.exists('data') else os.path.join('..', 'data')
-        )
+        self.figures_dir = self.data.figures_dir
+        self.tables_dir = self.data.tables_dir
     
     
     def load(self):
@@ -157,49 +129,26 @@ class FiguresPreprocess(session_mod.Logger):
     def load_complex(self):
         
         self._log('Loading the complex database.')
-        self.complex = complex.get_db(
-            pickle_file = self.complex_pickle,
-            **self.complex_args
-        )
+        self.complex = self.data.get_db('complex')
     
     
     def load_annot(self):
         
         self._log('Loading the annotation database.')
-        self.annot = annot.get_db(
-            pickle_file = self.annotation_pickle,
-            **self.annotation_args
-        )
+        self.annot = self.data.get_db('annotations')
     
     
     def load_intercell(self):
         
         self._log('Loading the intercell annotation database.')
-        self.intercell = intercell.IntercellAnnotation(
-            pickle_file = self.intercell_pickle,
-            **self.intercell_args
-        )
+        self.intercell = self.data.get_db('intercell')
     
     
     def load_network(self):
         
         self._log('Loading the signaling network.')
-        
-        self.igraph_network = main.PyPath()
-        
-        if self.omnipath_pickle:
-            
-            self.igraph_network.init_network(pfile = self.omnipath_pickle)
-            
-        else:
-            
-            self.igraph_network.load_omnipath(**self.omnipath_args)
-        
-        self.network = network.Network.from_igraph(self.igraph_network)
-        
-        if not self.keep_igraph:
-            
-            delattr(self, 'igraph_network')
+        self.igraph_network = self.data.get_db(self.network_dataset)
+        self.network = self.data.network_df(self.network_dataset)
     
     
     def count_connections(self):

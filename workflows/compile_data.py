@@ -31,6 +31,7 @@ from pypath import main
 from pypath import complex
 from pypath import ptm
 from pypath import session_mod
+from pypath import network
 
 import workflows.settings as op2_settings
 
@@ -275,6 +276,13 @@ class Database(session_mod.Logger):
             return self.param[key]
         
         return op2_settings.get(key)
+    
+    
+    def network_df(self, dataset = 'omnipath'):
+        
+        graph = self.get_db(dataset)
+        
+        return network.Network.from_igraph(graph)
 
 #
 # to be removed once we have it elsewhere:
