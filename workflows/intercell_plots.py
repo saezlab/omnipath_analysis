@@ -92,14 +92,43 @@ df = i.df
 ligands = [p for p in i.classes['ligand'] if type(p) is str]
 receptors = [p for p in i.classes['receptor'] if type(p) is str]
 
-count = 0
+# Number of ligands and receptors
+len(set(ligands))
+len(set(receptors))
 
+# Total connections
+count = 0
 lr_interacts = [pa.up_edge(lig, rec, directed=False) is not None
                 for lig, rec in itertools.product(ligands, receptors)]
 sum(lr_interacts)
 
+r_per_l = []
+for lig in ligands:
+    aux = [pa.up_edge(lig, rec, directed=False) is not None for rec in receptors]
+    r_per_l.append(sum(aux))
+
+fig, ax = plt.subplots()
+
+ax.hist(r_per_l, bins=100)
+ax.set_title('Receptors per ligand')
+
+
+l_per_r = []
+for rec in ligands:
+    aux = [pa.up_edge(lig, rec, directed=False) is not None for lig in ligands]
+    l_per_r.append(sum(aux))
+
+fig, ax = plt.subplots()
+
+ax.hist(l_per_r, bins=100)
+ax.set_title('Ligands per receptor')
+
+
+
 ## Checking number of ligands we have TF information for:
 sum([lig in tf.vs['name'] for lig in ligands])
+
+print('done')
 ###############################################################################
 
 # Elements by class
