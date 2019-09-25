@@ -53,6 +53,8 @@ class Colors(session_mod.Logger):
     
     def read_palette(self, path, name = None):
         
+        self._log('Loading color palette from `%s`.' % path)
+        
         colors = collections.OrderedDict()
         
         with open(path, 'r') as fp:
@@ -78,3 +80,11 @@ class Colors(session_mod.Logger):
             name = os.path.basename(os.path.splitext(path)[0])
         
         self.palettes[name] = colors
+        
+        self._log(
+            'Color palette `%s` with %u colors from `%s`.' % (
+                name,
+                len(colors),
+                path,
+            )
+        )
