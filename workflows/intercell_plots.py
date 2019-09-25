@@ -352,3 +352,178 @@ tomove.remove('intercell_overlaps.pdf')
 for f in tomove:
     shutil.copy2(os.path.join(dest_dir, f), os.path.join(latex_dir, f))
 # =========================================================================== #
+
+import numpy as np
+import collections
+import workflows
+from workflows import settings as op2_settings
+
+
+def tf_lig_rec_query(print_to_stdout = True):
+    
+    all_conf_levels = tuple(sorted(
+        op2_settings.get('tfregulons_levels')
+    ))
+    
+    data = workflows.data
+    data.ensure_dataset('tf_target')
+    data.ensure_dataset('intercell')
+    
+    ligands = data.intercell.classes['ligand']
+    receptors = data.intercell.classes['receptor']
+    
+    statements = []
+    
+    for i in range(len(all_conf_levels)):
+        
+        conf_levels = set(all_conf_levels[:i + 1])
+        
+        all_tfs = {
+            src
+            for e in data.tf_target.graph.es
+            for src, tgt in e['dirs'].which_dirs()
+            if e['tfregulons_level'] & conf_levels
+        }
+        
+        tf_lig_statement = (
+            (
+                '%u out of %u TFs in DoRothEA %s confidence level(s) '
+                'regulate %u out of %u ligands '
+                'by ,%03u connections. '
+                'Median degree for TFs is %.01f, for ligands is %.01f.'
+            ) % (
+                
+                # TFs regulating ligands
+                len({
+                    src
+                    for e in data.tf_target.graph.es
+                    for src, tgt in e['dirs'].which_dirs()
+                    if e['tfregulons_level'] & conf_levels
+                    if tgt in ligands
+                }), # 492
+                
+                # all TFs in DoRothEA
+                len(all_tfs), # 656
+                
+                ', '.join(sorted(conf_levels)), # confidence levels used
+                
+                # ligands with known TF(s)
+                len({
+                    tgt
+                    for e in data.tf_target.graph.es
+                    for src, tgt in e['dirs'].which_dirs()
+                    if e['tfregulons_level'] & conf_levels
+                    if tgt in ligands
+                }), # 931
+                
+                # all ligands
+                len(ligands), # 1494
+                
+                len({
+                    e.index
+                    for e in data.tf_target.graph.es
+                    for src, tgt in e['dirs'].which_dirs()
+                    if e['tfregulons_level'] & conf_levels
+                    if tgt in ligands
+                }), # 15354
+                
+                # median degree for TFs
+                np.median(
+                    list(collections.Counter(
+                        src
+                        for e in data.tf_target.graph.es
+                        for src, tgt in e['dirs'].which_dirs()
+                        if e['tfregulons_level'] & conf_levels
+                        if tgt in ligands
+                    ).values())
+                ),
+                
+                # median degree for ligands
+                np.median(
+                    list(collections.Counter(
+                        tgt
+                        for e in data.tf_target.graph.es
+                        for src, tgt in e['dirs'].which_dirs()
+                        if e['tfregulons_level'] & conf_levels
+                        if tgt in ligands
+                    ).values())
+                ),
+                
+            )
+        )
+        
+        if print_to_stdout: print(tf_lig_statement)
+        statements.append(tf_lig_statement)
+        
+        tf_rec_statement = (
+            (
+                '%u out of %u TFs in DoRothEA %s confidence level(s) '
+                'regulate %u out of %u receptors '
+                'by %u connections. '
+                'Median degree for TFs is %.01f, for receptors is %.01f.'
+            ) % (
+                
+                # TFs regulating receptors
+                len({
+                    src
+                    for e in data.tf_target.graph.es
+                    for src, tgt in e['dirs'].which_dirs()
+                    if e['tfregulons_level'] & conf_levels
+                    if tgt in receptors
+                }), # 445
+                
+                # all TFs in DoRothEA
+                len(all_tfs), # 656
+                
+                ', '.join(sorted(conf_levels)), # confidence levels used
+                
+                # receptors with known TF(s)
+                len({
+                    tgt
+                    for e in data.tf_target.graph.es
+                    for src, tgt in e['dirs'].which_dirs()
+                    if e['tfregulons_level'] & conf_levels
+                    if tgt in receptors
+                }), # 1620
+                
+                # all receptors
+                len(receptors), # 2517
+                
+                len({
+                    e.index
+                    for e in data.tf_target.graph.es
+                    for src, tgt in e['dirs'].which_dirs()
+                    if e['tfregulons_level'] & conf_levels
+                    if tgt in receptors
+                }), # 22349
+                
+                # median degree for TFs
+                np.median(
+                    list(collections.Counter(
+                        src
+                        for e in data.tf_target.graph.es
+                        for src, tgt in e['dirs'].which_dirs()
+                        if e['tfregulons_level'] & conf_levels
+                        if tgt in receptors
+                    ).values())
+                ),
+                
+                # median degree for receptors
+                np.median(
+                    list(collections.Counter(
+                        tgt
+                        for e in data.tf_target.graph.es
+                        for src, tgt in e['dirs'].which_dirs()
+                        if e['tfregulons_level'] & conf_levels
+                        if tgt in receptors
+                    ).values())
+                ),
+            )
+        )
+        
+        if print_to_stdout: print(tf_rec_statement)
+        statements.append(tf_rec_statement)
+    
+    return statements
+
+statements = tf_lig_rec_query()
