@@ -20,6 +20,7 @@ import os
 from pypath import settings as pp_settings
 from workflows import settings as settings_mod
 from workflows import compile_data
+from workflows import colors
 
 
 def setup(environment):
@@ -51,6 +52,7 @@ def init(environment = None, **kwargs):
     setup(environment)
     
     globals()['data'] = compile_data.Database(**param)
+    globals()['colors'] = colors.Colors()
 
 
 init()
