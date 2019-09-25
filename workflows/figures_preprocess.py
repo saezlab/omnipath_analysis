@@ -47,6 +47,7 @@ from pypath import data_formats
 from pypath import intera
 
 import workflows
+from workflows import op2_settings
 
 def reload():
     
@@ -182,8 +183,8 @@ class FiguresPreprocess(session_mod.Logger):
         
         self.intercell.export(
             fname = os.path.join(
-                self.datadir,
-                'intercell_classes_%s.tsv' % self.date,
+                self.tables_dir,
+                op2_settings.get('intercell_classes_tsv') % self.date,
             ),
             sep = '\t',
             index = False,
@@ -213,8 +214,8 @@ class FiguresPreprocess(session_mod.Logger):
                 ])
         
         path = os.path.join(
-            self.datadir,
-            'main_coverage_%s.tsv' % self.date,
+            self.tables_dir,
+            op2_settings.get('main_coverage_tsv') % self.date,
         )
         
         with open(path, 'w') as fp:
@@ -402,6 +403,8 @@ class FiguresPreprocess(session_mod.Logger):
             )
         
         
+        self._log('Counting connections between intercell classes.')
+        
         con_all = collections.defaultdict(set)
         undirected = collections.defaultdict(set)
         directed = collections.defaultdict(set)
@@ -452,6 +455,8 @@ class FiguresPreprocess(session_mod.Logger):
         self.con_stimulation = counts_dict(stimulation)
         self.con_inhibition = counts_dict(inhibition)
         self.con_all = counts_dict(con_all)
+        
+        self._log('Finished counting connections between intercell classes.')
     
     
     def export_stats_by_category_pairs(self):
@@ -620,8 +625,8 @@ class FiguresPreprocess(session_mod.Logger):
         stats = []
         
         path = os.path.join(
-            self.datadir,
-            'stats_by_resource_%s.tsv' % self.date,
+            self.tables_dir,
+            op2_settings.get('intercell_network_by_resource_tsv') % self.date,
         )
         
         proteins = set(self.annot.proteins)
@@ -634,6 +639,8 @@ class FiguresPreprocess(session_mod.Logger):
             set(self.network.records.id_b)
         )
         class_types = self.intercell.class_types
+        
+        self._log('Building intercell network by resource table.')
         
         prg = progress.Progress(
             len(classes.items()) ** 2 / 2,
@@ -686,6 +693,8 @@ class FiguresPreprocess(session_mod.Logger):
         )
         
         self.stats.to_csv(path, index = False, sep = '\t')
+        
+        self._log('Finished intercell network by resource table.')
     
     
     def export_annotations_by_entity(self):
@@ -762,8 +771,8 @@ class FiguresPreprocess(session_mod.Logger):
         tbl = []
         
         path = os.path.join(
-            self.datadir,
-            'resources_by_entity_%s.tsv' % self.date,
+            self.tables_dir,
+            op2_settings.get('resources_by_entity_tsv') % self.date,
         )
         
         for resource, entities in iteritems(entities_by_resource):
@@ -803,8 +812,8 @@ class FiguresPreprocess(session_mod.Logger):
         tbl = []
         
         path = os.path.join(
-            self.datadir,
-            'complexes_by_resource_%s.tsv' % self.date,
+            self.tables_dir,
+            op2_settings.get('complexes_by_resource_tsv') % self.date,
         )
         
         for cplex_name, cplex in iteritems(self.complex.complexes):
@@ -1088,8 +1097,8 @@ class FiguresPreprocess(session_mod.Logger):
             ])
         
         path = os.path.join(
-            self.datadir,
-            'connections_%s.tsv' % self.date,
+            self.tables_dir,
+            op2_settings.get('connections_tsv') % self.date,
         )
         
         with open(path, 'w') as fp:
@@ -1133,8 +1142,8 @@ class FiguresPreprocess(session_mod.Logger):
             ])
         
         path = os.path.join(
-            self.datadir,
-            'category_overlaps_%s.tsv' % self.date,
+            self.tables_dir,
+            op2_settings.get('category_overlaps_tsv') % self.date,
         )
         
         with open(path, 'w') as fp:
