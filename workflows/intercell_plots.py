@@ -109,8 +109,13 @@ for lig in ligands:
 
 fig, ax = plt.subplots()
 
-ax.hist(r_per_l, bins=100)
+ax.hist(r_per_l, bins=100, color=blue)
 ax.set_title('Receptors per ligand')
+ax.set_yscale('log')
+ax.grid()
+fig.tight_layout()
+fig.savefig(os.path.join(dest_dir, 'intercell_rec_per_ligand.pdf'))
+fig.savefig(os.path.join(dest_dir, 'intercell_rec_per_ligand.png'))
 
 
 l_per_r = []
@@ -120,15 +125,22 @@ for rec in ligands:
 
 fig, ax = plt.subplots()
 
-ax.hist(l_per_r, bins=100)
+ax.hist(l_per_r, bins=100, color=blue)
 ax.set_title('Ligands per receptor')
-
+ax.set_yscale('log')
+ax.grid()
+fig.tight_layout()
+fig.savefig(os.path.join(dest_dir, 'intercell_lig_per_receptor.png'))
+fig.savefig(os.path.join(dest_dir, 'intercell_lig_per_receptor.pdf'))
 
 
 ## Checking number of ligands we have TF information for:
 sum([lig in tf.vs['name'] for lig in ligands])
 
-print('done')
+
+# <----- HERE: Check more details on TF-Targets
+
+
 ###############################################################################
 
 # Elements by class
