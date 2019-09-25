@@ -26,8 +26,8 @@ get_default_param <- function(){
         
         typeface = 'HelveticaNeueLT Std Lt Cn',
         font_style = 'bold',
-        dir_figures = 'figures',
-        dir_data = 'data',
+        dir_figures = file.path('figures', '20190925'),
+        dir_data = file.path('tables', '20190925'),
         dir_misc = 'misc',
         add_titles = TRUE,
         theme = theme_minimal,
@@ -36,12 +36,12 @@ get_default_param <- function(){
             axis.text.y = element_text(color = '#000000'),
             panel.grid.major.x = element_blank()
         ),
-        input_intercell_cat_pairwise = 'stats_by_resource_20190814.tsv',
+        input_intercell_cat_pairwise = 'stats_by_resource_20190925.tsv',
         input_intercell_annotation_by_entity = (
             'annotations_by_entity_20190814.tsv'
         ),
-        input_resource_by_entity = 'resources_by_entity_20190814.tsv',
-        input_complexes_by_resource = 'complexes_by_resource_20190814.tsv',
+        input_resource_by_entity = 'resources_by_entity_20190925.tsv',
+        input_complexes_by_resource = 'complexes_by_resource_20190925.tsv',
         graph_plot_defaults = list(
             vertex.frame.color = NA,
             vertex.color = '#FDC70F',

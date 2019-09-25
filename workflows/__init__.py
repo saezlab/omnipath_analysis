@@ -18,9 +18,17 @@
 import os
 
 from pypath import settings as pp_settings
+from pypath import session_mod
 from workflows import settings as settings_mod
 from workflows import compile_data
 from workflows import colors
+
+
+_logger = session_mod.Logger(name = 'op2.init')
+_log = _logger._log
+
+
+_log('Welcome to the OmniPath2 analysis and figures suite.')
 
 
 def setup(environment):
@@ -43,6 +51,13 @@ def init(environment = None, **kwargs):
         copy.deepcopy(globals()['OP2_DB_ARGS'])
             if 'OP2_DB_ARGS' in globals() else
         {}
+    )
+    
+    _log(
+        'You can customize the database building process by '
+        'setting parameters in the `OP2_DB_ARGS` global variable '
+        'or by calling `init` again with keyword arguments or after '
+        'setting values in the `settings` module.'
     )
     
     param.update(kwargs)

@@ -365,13 +365,61 @@ for f in tomove:
     shutil.copy2(os.path.join(dest_dir, f), os.path.join(latex_dir, f))
 # =========================================================================== #
 
-import numpy as np
+
+import os
 import collections
+import numpy as np
+import seaborn as sns
 import workflows
 from workflows import settings as op2_settings
 
 
 def tf_lig_rec_query(print_to_stdout = True):
+    
+    
+    def histogram(counts, label0, label1, levels):
+        
+        xlab = '%ss per %s' % (
+            label0.capitalize(),
+            label1,
+        )
+        
+        fig, ax = plt.subplots()
+        #ax.hist(
+            #counts,
+            #bins = 100,
+            #color = workflows.colors.palettes['Nico_0']['blue50'],
+        #)
+        sns.kdeplot(
+            data = counts,
+            ax = ax,
+            color = workflows.colors.palettes['Nico_1']['purple'],
+        )
+        ax.set_title(
+            '%s (confid %s)' % (
+                xlab,
+                ', '.join(sorted(levels)),
+            )
+        )
+        #ax.set_yscale('log')
+        #ax.set_xscale('log')
+        ax.set_xlim(left = 1.)
+        ax.set_xlabel(xlab)
+        ax.set_ylabel('Frequency')
+        ax.grid()
+        fig.tight_layout()
+        fig.savefig(
+            os.path.join(
+                workflows.data.figures_dir,
+                '%s_per_%s_%s.pdf' % (
+                    label0,
+                    label1,
+                    ''.join(sorted(levels)),
+                )
+            )
+        )
+        plt.close(fig)
+    
     
     all_conf_levels = tuple(sorted(
         op2_settings.get('tfregulons_levels')
@@ -396,6 +444,26 @@ def tf_lig_rec_query(print_to_stdout = True):
             for src, tgt in e['dirs'].which_dirs()
             if e['tfregulons_level'] & conf_levels
         }
+        
+        lig_tf_degrees = list(
+            collections.Counter(
+                src
+                for e in data.tf_target.graph.es
+                for src, tgt in e['dirs'].which_dirs()
+                if e['tfregulons_level'] & conf_levels
+                if tgt in ligands
+            ).values()
+        )
+        
+        lig_degrees = list(
+            collections.Counter(
+                tgt
+                for e in data.tf_target.graph.es
+                for src, tgt in e['dirs'].which_dirs()
+                if e['tfregulons_level'] & conf_levels
+                if tgt in ligands
+            ).values()
+        )
         
         tf_lig_statement = (
             (
@@ -440,32 +508,36 @@ def tf_lig_rec_query(print_to_stdout = True):
                 }), # 15354
                 
                 # median degree for TFs
-                np.median(
-                    list(collections.Counter(
-                        src
-                        for e in data.tf_target.graph.es
-                        for src, tgt in e['dirs'].which_dirs()
-                        if e['tfregulons_level'] & conf_levels
-                        if tgt in ligands
-                    ).values())
-                ),
+                np.median(lig_tf_degrees),
                 
                 # median degree for ligands
-                np.median(
-                    list(collections.Counter(
-                        tgt
-                        for e in data.tf_target.graph.es
-                        for src, tgt in e['dirs'].which_dirs()
-                        if e['tfregulons_level'] & conf_levels
-                        if tgt in ligands
-                    ).values())
-                ),
+                np.median(lig_degrees),
                 
             )
         )
         
         if print_to_stdout: print(tf_lig_statement)
         statements.append(tf_lig_statement)
+        
+        rec_tf_degrees = list(
+            collections.Counter(
+                src
+                for e in data.tf_target.graph.es
+                for src, tgt in e['dirs'].which_dirs()
+                if e['tfregulons_level'] & conf_levels
+                if tgt in receptors
+            ).values()
+        )
+        
+        rec_degrees = list(
+            collections.Counter(
+                tgt
+                for e in data.tf_target.graph.es
+                for src, tgt in e['dirs'].which_dirs()
+                if e['tfregulons_level'] & conf_levels
+                if tgt in receptors
+            ).values()
+        )
         
         tf_rec_statement = (
             (
@@ -510,31 +582,21 @@ def tf_lig_rec_query(print_to_stdout = True):
                 }), # 22349
                 
                 # median degree for TFs
-                np.median(
-                    list(collections.Counter(
-                        src
-                        for e in data.tf_target.graph.es
-                        for src, tgt in e['dirs'].which_dirs()
-                        if e['tfregulons_level'] & conf_levels
-                        if tgt in receptors
-                    ).values())
-                ),
+                np.median(rec_tf_degrees),
                 
                 # median degree for receptors
-                np.median(
-                    list(collections.Counter(
-                        tgt
-                        for e in data.tf_target.graph.es
-                        for src, tgt in e['dirs'].which_dirs()
-                        if e['tfregulons_level'] & conf_levels
-                        if tgt in receptors
-                    ).values())
-                ),
+                np.median(rec_degrees),
+                
             )
         )
         
         if print_to_stdout: print(tf_rec_statement)
         statements.append(tf_rec_statement)
+        
+        histogram(lig_tf_degrees, 'ligand', 'TF', conf_levels)
+        histogram(rec_tf_degrees, 'receptor', 'TF', conf_levels)
+        histogram(lig_degrees, 'TF', 'ligand', conf_levels)
+        histogram(rec_degrees, 'TF', 'receptor', conf_levels)
     
     return statements
 

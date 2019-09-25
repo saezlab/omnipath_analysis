@@ -73,21 +73,30 @@ class Database(session_mod.Logger):
         self.foreach_dataset(method = self.ensure_dataset)
     
     
-    def ensure_dataset(self, dataset):
+    def ensure_dataset(
+            self,
+            dataset,
+            force_reload = False,
+            force_rebuild = False,
+        ):
         
         rebuild_dataset = self.get_param('rebuild_%s' % dataset)
         
-        if (
-            self.rebuild or
-            rebuild_dataset or
-            not self.pickle_exists(dataset)
-        ):
+        if force_reload or force_rebuild or not hasattr(self, dataset):
             
-            self.build_dataset(dataset)
-            
-        else:
-            
-            self.load_dataset(dataset)
+            if (
+                force_rebuild or
+                self.rebuild or
+                rebuild_dataset or
+                not self.pickle_exists(dataset)
+            ):
+                
+                self.remove_db(dataset)
+                self.build_dataset(dataset)
+                
+            elif not hasattr(self, dataset):
+                
+                self.load_dataset(dataset)
     
     
     def ensure_dirs(self):
@@ -101,6 +110,10 @@ class Database(session_mod.Logger):
             self.figures_dir = os.path.join(
                 self.get_param('figures_dir'),
                 self.timestamp(),
+            )
+            op2_settings.setup(
+                tables_dir = self.tables_dir,
+                figures_dir = self.figures_dir,
             )
         
         for _dir in ('pickle', 'tables', 'figures'):
@@ -214,7 +227,7 @@ class Database(session_mod.Logger):
         
         transcription = copy.deepcopy(data_formats.transcription)
         transcription['tfregulons'].input_args = {
-            'levels': self.tfregulons_levels,
+            'levels': self.get_param('tfregulons_levels'),
         }
         
         return {'lst': transcription}
@@ -258,7 +271,6 @@ class Database(session_mod.Logger):
     
     
     def remove_db(self, dataset):
-        
         
         delattr(self, dataset)
     

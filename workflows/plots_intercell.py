@@ -18,6 +18,7 @@ import wordcloud
 import pypath
 from pypath import intercell
 from pypath.main import PyPath
+from pypath import session_mod
 #reload(data_tools)
 #reload(data_tools.plots)
 import data_tools
@@ -32,64 +33,7 @@ import workflows
 from workflows import settings as op2_settings
 from workflows import colors
 
-#=================================== SETUP ===================================#
-# Colors!
-green = (87/255, 171/255, 39/255)
-lime = (189/255, 205/255, 0/255)
-blue = (0/255, 84/255, 159/255)
-blue75 = (64/255, 127/255, 183/255)
-blue50 = (142/255, 186/255, 229/255)
-yellow = (255/255, 237/255, 0/255)
-orange = (246/255, 168/255, 0/255)
-petrol = (0/255, 97/255, 101/255)
-turquoise = (0/255, 152/255, 161/255)
-red = (161/255, 16/255, 53/255)
-bordeaux = (161/255, 16/255, 53/255)
-purple = (97/255, 33/255, 88/255)
-lila = (122/255, 111/255, 172/255)
 
-# Color sequences
-cseq = [blue, blue75, petrol, turquoise, green, lime] # More gradual
-cseq2 = [blue, green, orange, red, purple] # More contrasted
-cseq3 = [blue, #petrol,
-         turquoise, green, lime, orange, red, purple, lila]
-
-cseq4 = [blue, turquoise, green, lime, yellow, orange, red, purple]
-
-# Setting up the working environment
-cachedir = '/home/nico/pypath_cache'
-dest_dir = '../figures'
-latex_dir = '../../omnipath2_latex/figures'
-
-if os.getcwd().endswith('omnipath2'):
-    os.chdir('workflows')
-
-if not os.path.exists(cachedir):
-    os.makedirs(cachedir)
-
-pypath.settings.setup(cachedir=cachedir)
-
-#============================== RETRIEVING INFO ==============================#
-pa = PyPath()
-tf = PyPath()
-from pypath import data_formats
-tf.init_network(data_formats.transcription)
-
-with pypath.curl.cache_off():
-    i = intercell.IntercellAnnotation()
-    pa.init_network()
-
-i.save_to_pickle(os.path.join(cachedir, 'intercell.pickle'))
-pa.save_network(pfile=os.path.join(cachedir, 'network.pickle'))
-
-#i = intercell.IntercellAnnotation(pickle_file=os.path.join(cachedir,
-#                                                           'intercell.pickle'))
-
-#pa.init_network(pfile=os.path.join(cachedir, 'network.pickle'))
-
-
-print([x for x in dir(i) if not x.startswith('_')])
-i.class_names
 df = i.df
 ###############################################################################
 ## Checking ligand-receptor interactions
@@ -111,21 +55,46 @@ for lig in ligands:
     aux = [pa.up_edge(lig, rec, directed=False) is not None for rec in receptors]
     r_per_l.append(sum(aux))
 
-fig, ax = plt.subplots()
+class IntercellPlots(session_mod.Logger):
+    
+    
+    def __init__(self, network_dataset = 'omnipath'):
+        
+        session_mod.Logger.__init__(self, name = 'op2.intercell_plots')
+        
+        self.network_dataset = network_dataset
+    
+    
+    def main(self):
+        
+        self.load()
+        self.plot_ligands_per_receptor()
+    
+    
+    def load(self):
+        
+        self.data = workflows.data
+        self.intercell = self.data.get_db('intercell')
+        self.network = self.data.get_db(self.network_dataset)
+    
+    
+    def plot_ligands_per_receptor(self):
+        
+        fig, ax = plt.subplots()
+        
+        ax.hist(r_per_l, bins=100)
+        ax.set_title('Receptors per ligand')
+        
+        l_per_r = []
+        for rec in ligands:
+            
+            aux = [pa.up_edge(lig, rec, directed=False) is not None for lig in ligands]
+            l_per_r.append(sum(aux))
 
-ax.hist(r_per_l, bins=100)
-ax.set_title('Receptors per ligand')
+        fig, ax = plt.subplots()
 
-
-l_per_r = []
-for rec in ligands:
-    aux = [pa.up_edge(lig, rec, directed=False) is not None for lig in ligands]
-    l_per_r.append(sum(aux))
-
-fig, ax = plt.subplots()
-
-ax.hist(l_per_r, bins=100)
-ax.set_title('Ligands per receptor')
+        ax.hist(l_per_r, bins=100)
+        ax.set_title('Ligands per receptor')
 
 
 

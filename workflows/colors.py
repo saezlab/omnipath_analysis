@@ -36,10 +36,11 @@ class Colors(session_mod.Logger):
     
     def __init__(self):
         
-        session_mod.Logger.__init__(self, name = 'colors')
+        session_mod.Logger.__init__(self, name = 'op2.colors')
         
         self.palette_dir = op2_settings.get('palette_dir')
         self.palettes = {}
+        self.read_palettes()
     
     
     def read_palettes(self):

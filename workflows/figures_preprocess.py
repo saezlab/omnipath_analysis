@@ -47,7 +47,7 @@ from pypath import data_formats
 from pypath import intera
 
 import workflows
-from workflows import op2_settings
+from workflows import settings as op2_settings
 
 def reload():
     
@@ -61,7 +61,7 @@ class FiguresPreprocess(session_mod.Logger):
     
     def __init__(self, network_dataset = 'omnipath'):
         
-        session_mod.Logger.__init__(self, name = 'figures_preproc')
+        session_mod.Logger.__init__(self, name = 'op2.fig_preproc')
         
         self.data = workflows.data
         self.date = time.strftime('%Y%m%d')
@@ -122,7 +122,7 @@ class FiguresPreprocess(session_mod.Logger):
         self.export_intercell_classes()
         self.collect_classes()
         self.export_intercell_coverages()
-        self.export_intercell_coverages_by_resource()
+        # self.export_intercell_coverages_by_resource()
         self.export_connections()
         self.export_overlaps()
     
@@ -153,6 +153,8 @@ class FiguresPreprocess(session_mod.Logger):
     
     
     def count_connections(self):
+        
+        self._log('Counting connections in the network.')
         
         self.con_omnipath = len(
             set(
