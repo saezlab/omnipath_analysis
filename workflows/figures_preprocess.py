@@ -46,6 +46,8 @@ from pypath import progress
 from pypath import data_formats
 from pypath import intera
 
+import workflows
+from workflows import op2_settings
 
 def reload():
     
@@ -56,42 +58,14 @@ def reload():
 
 class FiguresPreprocess(session_mod.Logger):
     
-    omnipath_args_default = {
-        'kinase_substrate_extra': True,
-        'ligand_receptor_extra': True,
-    }
     
-    def __init__(
-            self,
-            omnipath_pickle = None,
-            complex_pickle = None,
-            annotation_pickle = None,
-            intercell_pickle = None,
-            omnipath_args = None,
-            complex_args = None,
-            annotation_args = None,
-            intercell_args = None,
-            datadir = None,
-            keep_igraph = False,
-        ):
+    def __init__(self, network_dataset = 'omnipath'):
         
         session_mod.Logger.__init__(self, name = 'figures_preproc')
         
-        self.omnipath_args = copy.deepcopy(self.omnipath_args_default)
-        self.omnipath_args.update(omnipath_args or {})
-        self.complex_args = complex_args or {}
-        self.annotation_args = annotation_args or {}
-        self.intercell_args = intercell_args or {}
-        
-        self.omnipath_pickle = omnipath_pickle
-        self.complex_pickle = complex_pickle
-        self.annotation_pickle = annotation_pickle
-        self.intercell_pickle = intercell_pickle
-        
-        self.datadir = datadir
+        self.data = workflows.data
         self.date = time.strftime('%Y%m%d')
-        
-        self.keep_igraph = keep_igraph
+        self.network_dataset = network_dataset
     
     
     def reload(self):
@@ -127,9 +101,8 @@ class FiguresPreprocess(session_mod.Logger):
     
     def setup(self):
         
-        self.datadir = self.datadir or (
-            'data' if os.path.exists('data') else os.path.join('..', 'data')
-        )
+        self.figures_dir = self.data.figures_dir
+        self.tables_dir = self.data.tables_dir
     
     
     def load(self):
@@ -157,49 +130,26 @@ class FiguresPreprocess(session_mod.Logger):
     def load_complex(self):
         
         self._log('Loading the complex database.')
-        self.complex = complex.get_db(
-            pickle_file = self.complex_pickle,
-            **self.complex_args
-        )
+        self.complex = self.data.get_db('complex')
     
     
     def load_annot(self):
         
         self._log('Loading the annotation database.')
-        self.annot = annot.get_db(
-            pickle_file = self.annotation_pickle,
-            **self.annotation_args
-        )
+        self.annot = self.data.get_db('annotations')
     
     
     def load_intercell(self):
         
         self._log('Loading the intercell annotation database.')
-        self.intercell = intercell.IntercellAnnotation(
-            pickle_file = self.intercell_pickle,
-            **self.intercell_args
-        )
+        self.intercell = self.data.get_db('intercell')
     
     
     def load_network(self):
         
         self._log('Loading the signaling network.')
-        
-        self.igraph_network = main.PyPath()
-        
-        if self.omnipath_pickle:
-            
-            self.igraph_network.init_network(pfile = self.omnipath_pickle)
-            
-        else:
-            
-            self.igraph_network.load_omnipath(**self.omnipath_args)
-        
-        self.network = network.Network.from_igraph(self.igraph_network)
-        
-        if not self.keep_igraph:
-            
-            delattr(self, 'igraph_network')
+        self.igraph_network = self.data.get_db(self.network_dataset)
+        self.network = self.data.network_df(self.network_dataset)
     
     
     def count_connections(self):
@@ -233,8 +183,8 @@ class FiguresPreprocess(session_mod.Logger):
         
         self.intercell.export(
             fname = os.path.join(
-                self.datadir,
-                'intercell_classes_%s.tsv' % self.date,
+                self.tables_dir,
+                op2_settings.get('intercell_classes_tsv') % self.date,
             ),
             sep = '\t',
             index = False,
@@ -264,8 +214,8 @@ class FiguresPreprocess(session_mod.Logger):
                 ])
         
         path = os.path.join(
-            self.datadir,
-            'main_coverage_%s.tsv' % self.date,
+            self.tables_dir,
+            op2_settings.get('main_coverage_tsv') % self.date,
         )
         
         with open(path, 'w') as fp:
@@ -453,6 +403,8 @@ class FiguresPreprocess(session_mod.Logger):
             )
         
         
+        self._log('Counting connections between intercell classes.')
+        
         con_all = collections.defaultdict(set)
         undirected = collections.defaultdict(set)
         directed = collections.defaultdict(set)
@@ -503,6 +455,8 @@ class FiguresPreprocess(session_mod.Logger):
         self.con_stimulation = counts_dict(stimulation)
         self.con_inhibition = counts_dict(inhibition)
         self.con_all = counts_dict(con_all)
+        
+        self._log('Finished counting connections between intercell classes.')
     
     
     def export_stats_by_category_pairs(self):
@@ -671,8 +625,8 @@ class FiguresPreprocess(session_mod.Logger):
         stats = []
         
         path = os.path.join(
-            self.datadir,
-            'stats_by_resource_%s.tsv' % self.date,
+            self.tables_dir,
+            op2_settings.get('intercell_network_by_resource_tsv') % self.date,
         )
         
         proteins = set(self.annot.proteins)
@@ -685,6 +639,8 @@ class FiguresPreprocess(session_mod.Logger):
             set(self.network.records.id_b)
         )
         class_types = self.intercell.class_types
+        
+        self._log('Building intercell network by resource table.')
         
         prg = progress.Progress(
             len(classes.items()) ** 2 / 2,
@@ -737,6 +693,8 @@ class FiguresPreprocess(session_mod.Logger):
         )
         
         self.stats.to_csv(path, index = False, sep = '\t')
+        
+        self._log('Finished intercell network by resource table.')
     
     
     def export_annotations_by_entity(self):
@@ -813,8 +771,8 @@ class FiguresPreprocess(session_mod.Logger):
         tbl = []
         
         path = os.path.join(
-            self.datadir,
-            'resources_by_entity_%s.tsv' % self.date,
+            self.tables_dir,
+            op2_settings.get('resources_by_entity_tsv') % self.date,
         )
         
         for resource, entities in iteritems(entities_by_resource):
@@ -854,8 +812,8 @@ class FiguresPreprocess(session_mod.Logger):
         tbl = []
         
         path = os.path.join(
-            self.datadir,
-            'complexes_by_resource_%s.tsv' % self.date,
+            self.tables_dir,
+            op2_settings.get('complexes_by_resource_tsv') % self.date,
         )
         
         for cplex_name, cplex in iteritems(self.complex.complexes):
@@ -1139,8 +1097,8 @@ class FiguresPreprocess(session_mod.Logger):
             ])
         
         path = os.path.join(
-            self.datadir,
-            'connections_%s.tsv' % self.date,
+            self.tables_dir,
+            op2_settings.get('connections_tsv') % self.date,
         )
         
         with open(path, 'w') as fp:
@@ -1184,8 +1142,8 @@ class FiguresPreprocess(session_mod.Logger):
             ])
         
         path = os.path.join(
-            self.datadir,
-            'category_overlaps_%s.tsv' % self.date,
+            self.tables_dir,
+            op2_settings.get('category_overlaps_tsv') % self.date,
         )
         
         with open(path, 'w') as fp:
