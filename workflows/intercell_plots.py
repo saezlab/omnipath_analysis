@@ -373,6 +373,8 @@ import seaborn as sns
 import workflows
 from workflows import settings as op2_settings
 
+op2_settings.setup(tfregulons_levels = {'A', 'B', 'C', 'D', 'E'})
+
 
 def tf_lig_rec_query(print_to_stdout = True):
     
@@ -469,7 +471,7 @@ def tf_lig_rec_query(print_to_stdout = True):
             (
                 '%u out of %u TFs in DoRothEA %s confidence level(s) '
                 'regulate %u out of %u ligands '
-                'by ,%03u connections. '
+                'by %u connections. '
                 'Median degree for TFs is %.01f, for ligands is %.01f.'
             ) % (
                 

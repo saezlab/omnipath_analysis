@@ -80,6 +80,10 @@ class Database(session_mod.Logger):
             force_rebuild = False,
         ):
         
+        for dep_dataset in self.dataset_dependencies(dataset):
+            
+            self.ensure_dataset(dep_dataset)
+        
         rebuild_dataset = self.get_param('rebuild_%s' % dataset)
         
         if force_reload or force_rebuild or not hasattr(self, dataset):
@@ -97,6 +101,13 @@ class Database(session_mod.Logger):
             elif not hasattr(self, dataset):
                 
                 self.load_dataset(dataset)
+    
+    
+    def dataset_dependencies(self, dataset):
+        
+        deps = self.get_param('dependencies')
+        
+        return deps[dataset] if dataset in deps else ()
     
     
     def ensure_dirs(self):
@@ -125,15 +136,25 @@ class Database(session_mod.Logger):
     
     def pickle_path(self, dataset):
         
+        pickle_fname = self.get_param('%s_pickle' % dataset)
+        
+        if dataset == 'tf_target':
+            
+            pickle_fname = (
+                pickle_fname % ''.join(
+                    sorted(self.get_param('tfregulons_levels'))
+                )
+            )
+        
         return os.path.join(
             self.get_param('pickle_dir'),
-            self.get_param('%s_pickle' % dataset),
+            pickle_fname,
         )
     
     
     def pickle_exists(self, dataset):
         
-        return os.path.exists(self.get_param('%s_pickle' % dataset))
+        return os.path.exists(self.pickle_path(dataset))
     
     
     def table_path(dataset):
@@ -272,7 +293,9 @@ class Database(session_mod.Logger):
     
     def remove_db(self, dataset):
         
-        delattr(self, dataset)
+        if hasattr(self, dataset):
+            
+            delattr(self, dataset)
     
     
     def remove_all(self):
