@@ -94,8 +94,10 @@ class Colors(session_mod.Logger):
     @staticmethod
     def scale_to_01(values):
         
+        values = tuple(map(float, values))
+        
         return (
-            tuple(int(i) / 255 for i in values)
-                if any(int(v) > 1. for v in values) else
+            tuple(i / 255. for i in values)
+                if any(v > 1. for v in values) else
             values
         )

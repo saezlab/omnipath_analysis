@@ -96,6 +96,7 @@ class FiguresPreprocess(session_mod.Logger):
         
         self.setup()
         self.load()
+        self.build()
         self.export_tables()
     
     
@@ -111,6 +112,10 @@ class FiguresPreprocess(session_mod.Logger):
         self.load_annot()
         self.load_intercell()
         self.load_network()
+    
+    
+    def build(self):
+        
         self.count_connections()
         self.build_intercell_network()
         self.count_connections_groupwise()
@@ -152,6 +157,15 @@ class FiguresPreprocess(session_mod.Logger):
         self.network = self.data.network_df(self.network_dataset)
         self.network_by_source = self.data.network_df_by_source(
             self.network_dataset
+        )
+    
+    
+    def set_network(self, dataset, by_source = False):
+        
+        self.ensure_dataset(dataset)
+        
+        self.intercell.register_network(
+            network.Network.from_igraph(get_db(dataset))
         )
     
     
@@ -408,7 +422,7 @@ class FiguresPreprocess(session_mod.Logger):
             )
         
         
-        self._log('Counting connections between intercell classes.')
+        self._log('Counting connections between classes.')
         
         con_all = collections.defaultdict(set)
         undirected = collections.defaultdict(set)
@@ -461,7 +475,7 @@ class FiguresPreprocess(session_mod.Logger):
         self.con_inhibition = counts_dict(inhibition)
         self.con_all = counts_dict(con_all)
         
-        self._log('Finished counting connections between intercell classes.')
+        self._log('Finished counting connections between classes.')
     
     
     def export_stats_by_category_pairs(self):

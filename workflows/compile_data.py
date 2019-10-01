@@ -47,6 +47,7 @@ class Database(session_mod.Logger):
         self.rebuild = rebuild
         self.datasets = self.get_param('datasets')
         self.ensure_dirs()
+        self.network_dfs = {}
         
         self._log('OmniPath2 database builder initialized.')
     
@@ -55,7 +56,7 @@ class Database(session_mod.Logger):
         """
         Reloads the object from the module level.
         """
-
+        
         modname = self.__class__.__module__
         mod = __import__(modname, fromlist = [modname.split('.')[0]])
         imp.reload(mod)
@@ -182,6 +183,8 @@ class Database(session_mod.Logger):
         self._log('Successfully built dataset `%s`.' % dataset)
         
         setattr(self, dataset, db)
+        
+        self._add_network_df(dataset)
     
     
     def ensure_module(self, dataset, reset = True):
@@ -228,6 +231,8 @@ class Database(session_mod.Logger):
         setattr(self, dataset, mod.get_db(pickle_file = pickle_path))
         
         self._log('Loaded dataset `%s` from `%s`.' % (dataset, pickle_path))
+        
+        self._add_network_df(dataset)
     
     
     @staticmethod
@@ -317,12 +322,45 @@ class Database(session_mod.Logger):
         
         graph = self.get_db(dataset)
         
-        return network.Network.from_igraph(graph, **kwargs)
+        return self._network_df(graph, **kwargs)
     
     
     def network_df_by_source(self, dataset = 'omnipath'):
         
-        return self.network_df(dataset = dataset, by_source = True)
+        return self.network_dfs[dataset]['by_source']
+    
+    
+    def _network_df(self, pp_obj, **kwargs):
+        
+        return network.Network.from_igraph(pp_obj, **kwargs)
+    
+    
+    def _add_network_df(self, dataset):
+        
+        obj = getattr(self, dataset)
+        
+        if hasattr(obj, 'graph') and isinstance(obj.graph, main.igraph.Graph):
+            
+            network_df = self._network_df(obj, by_source = False)
+            network_df_by_source = self._network_df(obj, by_source = True)
+            
+            self.network_dfs[dataset] = {}
+            self.network_dfs[dataset]['plain'] = network_df
+            self.network_dfs[dataset]['by_source'] = network_df_by_source
+            
+            self._log('Created network data frames for `%s`.' % dataset)
+    
+    
+    def set_network(self, dataset, by_source = False, **kwargs):
+        """
+        Sets dataset as the default
+        """
+        
+        network_df = self.network_df(dataset, by_source = by_source, **kwargs)
+        
+        self.ensure_dataset('intercell')
+        
+        self.intercell.register_network(network_df)
 
 #
 # to be removed once we have it elsewhere:
