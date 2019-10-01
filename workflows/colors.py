@@ -74,7 +74,7 @@ class Colors(session_mod.Logger):
                 
                 r, g, b, label = m.groups(0)
                 
-                colors[label] = tuple(int(val) / 255 for val in (r, g, b))
+                colors[label] = self.scale_to_01((r, g, b))
         
         if not name:
             
@@ -89,3 +89,9 @@ class Colors(session_mod.Logger):
                 path,
             )
         )
+    
+    
+    @staticmethod
+    def scale_to_01(values):
+        
+        return tuple(i / 255 for i in values) if any(values) > 1. else values

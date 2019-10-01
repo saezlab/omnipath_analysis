@@ -313,11 +313,16 @@ class Database(session_mod.Logger):
         return op2_settings.get(key)
     
     
-    def network_df(self, dataset = 'omnipath'):
+    def network_df(self, dataset = 'omnipath', **kwargs):
         
         graph = self.get_db(dataset)
         
-        return network.Network.from_igraph(graph)
+        return network.Network.from_igraph(graph, **kwargs)
+    
+    
+    def network_df_by_source(self, dataset = 'omnipath'):
+        
+        return self.network_df(dataset = dataset, by_source = True)
 
 #
 # to be removed once we have it elsewhere:

@@ -122,7 +122,7 @@ class FiguresPreprocess(session_mod.Logger):
         self.export_intercell_classes()
         self.collect_classes()
         self.export_intercell_coverages()
-        # self.export_intercell_coverages_by_resource()
+        self.export_intercell_coverages_by_resource()
         self.export_connections()
         self.export_overlaps()
     
@@ -150,6 +150,9 @@ class FiguresPreprocess(session_mod.Logger):
         self._log('Loading the signaling network.')
         self.igraph_network = self.data.get_db(self.network_dataset)
         self.network = self.data.network_df(self.network_dataset)
+        self.network_by_source = self.data.network_df_by_source(
+            self.network_dataset
+        )
     
     
     def count_connections(self):

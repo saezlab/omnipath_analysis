@@ -50,10 +50,7 @@ lr_interacts = [pa.up_edge(lig, rec, directed=False) is not None
                 for lig, rec in itertools.product(ligands, receptors)]
 sum(lr_interacts)
 
-r_per_l = []
-for lig in ligands:
-    aux = [pa.up_edge(lig, rec, directed=False) is not None for rec in receptors]
-    r_per_l.append(sum(aux))
+
 
 class IntercellPlots(session_mod.Logger):
     
@@ -79,6 +76,11 @@ class IntercellPlots(session_mod.Logger):
     
     
     def plot_ligands_per_receptor(self):
+        
+        r_per_l = []
+        for lig in ligands:
+            aux = [pa.up_edge(lig, rec, directed=False) is not None for rec in receptors]
+            r_per_l.append(sum(aux))
         
         fig, ax = plt.subplots()
         
