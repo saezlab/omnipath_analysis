@@ -369,6 +369,9 @@ for f in tomove:
 import os
 import collections
 import numpy as np
+import matplotlib
+import matplotlib.pyplot as plt
+from matplotlib.tight_layout import get_renderer
 import seaborn as sns
 import workflows
 from workflows import settings as op2_settings
@@ -376,7 +379,13 @@ from workflows import settings as op2_settings
 op2_settings.setup(tfregulons_levels = {'A', 'B', 'C', 'D', 'E'})
 
 
-def tf_lig_rec_query(print_to_stdout = True):
+with open('kidney_ligands', 'r') as fp:
+    
+    ligands = {lig.strip() for lig in fp}
+    ligands.discard('')
+
+
+def tf_lig_rec_query(print_to_stdout = True, ligands = None):
     
     
     def histogram(counts, label0, label1, levels):
@@ -431,7 +440,7 @@ def tf_lig_rec_query(print_to_stdout = True):
     data.ensure_dataset('tf_target')
     data.ensure_dataset('intercell')
     
-    ligands = data.intercell.classes['ligand']
+    ligands = ligands or data.intercell.classes['ligand']
     receptors = data.intercell.classes['receptor']
     
     statements = []
@@ -602,4 +611,4 @@ def tf_lig_rec_query(print_to_stdout = True):
     
     return statements
 
-statements = tf_lig_rec_query()
+statements = tf_lig_rec_query(ligands = ligands)
