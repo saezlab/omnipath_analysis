@@ -332,11 +332,18 @@ class PlotBase(session_mod.Logger):
                 or
             self.timestamp_override
                 or
+            workflows.data.timestamp
+                or
             self.timestamp
         )
     
     
     def set_directory(self, figures_dir = None):
+        
+        if workflows.data:
+            
+            self.figures_dir = workflows.data.figures_dir
+            return
         
         self.figures_dir = (
             figures_dir
