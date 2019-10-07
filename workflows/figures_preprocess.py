@@ -155,18 +155,15 @@ class FiguresPreprocess(session_mod.Logger):
         self._log('Loading the signaling network.')
         self.igraph_network = self.data.get_db(self.network_dataset)
         self.network = self.data.network_df(self.network_dataset)
-        self.network_by_source = self.data.network_df_by_source(
-            self.network_dataset
+        self.network_by_source = (
+            self.data.network_df_by_source(self.network_dataset)
         )
     
     
     def set_network(self, dataset, by_source = False):
         
-        self.ensure_dataset(dataset)
-        
-        self.intercell.register_network(
-            network.Network.from_igraph(get_db(dataset))
-        )
+        self.data.set_network(dataset = dataset, by_source = by_source)
+        self.network = self.data.intercell.network
     
     
     def count_connections(self):

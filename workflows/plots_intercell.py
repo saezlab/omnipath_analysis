@@ -72,19 +72,66 @@ class IntercellPlots(session_mod.Logger):
         
         self.data = workflows.data
         self.intercell = self.data.get_db('intercell')
-        self.network = self.data.get_db(self.network_dataset)
+        self.data.ensure_dataset(self.network_dataset)
+        self.intercell.register_network(
+            self.data.network_df(
+                self.network_dataset,
+                by_source = True
+            )
+        )
+    
+    
+    def inter_class_degree_histo(
+            self,
+            class0,
+            class1,
+            label0 = None,
+            label1 = None,
+        ):
+        
+        fname = op2_settings.get('inter_class_degree_pdf') % (
+            class0,
+            class1,
+            self.data.timestamp(),
+        )
+        
+        label0 = label0 or '%ss' % class0.capitalize()
+        label1 = label1 or class1.capitalize()
+        
+        degrees = self.intercell.degree_inter_class_network(class0, class1)
+        
+        fig, ax = plt.subplots()
+        
+        ax.hist(degrees, bins = 100)
+        ax.set_title('%s per %s' % (label0, label1))
+        
+        fig.tight_layout()
+        fig.savefig(fname)
+    
+    
+    def plot_receptors_per_ligand(self):
+        
+        lig_rec = self.intercell.degree_inter_class_network(
+            'ligand',
+            'receptor',
+        )
+        
+        fig, ax = plt.subplots()
+        
+        ax.hist(lig_rec, bins = 100)
+        ax.set_title('Receptors per ligand')
     
     
     def plot_ligands_per_receptor(self):
         
-        r_per_l = []
-        for lig in ligands:
-            aux = [pa.up_edge(lig, rec, directed=False) is not None for rec in receptors]
-            r_per_l.append(sum(aux))
+        lig_rec = self.intercell.degree_inter_class_network(
+            'ligand',
+            'receptor',
+        )
         
         fig, ax = plt.subplots()
         
-        ax.hist(r_per_l, bins=100)
+        ax.hist(lig_rec, bins = 100)
         ax.set_title('Receptors per ligand')
         
         l_per_r = []

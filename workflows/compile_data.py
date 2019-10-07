@@ -48,6 +48,7 @@ class Database(session_mod.Logger):
         self.datasets = self.get_param('datasets')
         self.ensure_dirs()
         self.network_dfs = {}
+        self.timestamp = time.strftime('%Y%m%d')
         
         self._log('OmniPath2 database builder initialized.')
     
@@ -235,12 +236,6 @@ class Database(session_mod.Logger):
         self._add_network_df(dataset)
     
     
-    @staticmethod
-    def timestamp():
-        
-        return time.strftime('%Y%m%d')
-    
-    
     def get_args_curated(self):
         
         resources = copy.deepcopy(data_formats.pathway)
@@ -318,14 +313,24 @@ class Database(session_mod.Logger):
         return op2_settings.get(key)
     
     
-    def network_df(self, dataset = 'omnipath', **kwargs):
+    def _create_network_df(self, dataset = 'omnipath', **kwargs):
         
         graph = self.get_db(dataset)
         
         return self._network_df(graph, **kwargs)
     
+    def network_df(self, dataset, by_source = False):
+        
+        self.ensure_dataset(dataset)
+        
+        by_source_str = 'by_source' if by_source else 'plain'
+        
+        return self.network_dfs[dataset][by_source_str]
+    
     
     def network_df_by_source(self, dataset = 'omnipath'):
+        
+        self.ensure_dataset(dataset)
         
         return self.network_dfs[dataset]['by_source']
     
