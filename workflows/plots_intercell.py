@@ -51,15 +51,22 @@ lr_interacts = [pa.up_edge(lig, rec, directed=False) is not None
 sum(lr_interacts)
 
 
-
 class IntercellPlots(session_mod.Logger):
     
     
-    def __init__(self, network_dataset = 'omnipath'):
+    def __init__(
+            self,
+            network_dataset = 'omnipath',
+            **kwargs,
+        ):
         
         session_mod.Logger.__init__(self, name = 'op2.intercell_plots')
         
         self.network_dataset = network_dataset
+        
+        for attr, val in iteritems(kwargs):
+            
+            setattr(self, attr, val)
     
     
     def main(self):
@@ -68,7 +75,57 @@ class IntercellPlots(session_mod.Logger):
         self.plot_ligands_per_receptor()
     
     
-    def load(self):
+    def plot_ligands_per_receptor(self):
+        
+        param_attr = 'param_ligands_per_receptor_histo'
+        
+        param = getattr(self, param_attr) if hasattr(self, param_attr) else {}
+        
+        default_param = {
+            'class0': 'ligand',
+            'class1': 'receptor',
+        }
+        default_param.update(param)
+        
+        self.lig_per_rec_degree_histo = InterClassDegreeHisto(**param)
+
+
+class InterClassDegreeHisto(plot.PlotBase):
+    
+    
+    def __init__(
+            self,
+            class0,
+            class1,
+            label0 = None,
+            label1 = None,
+            network_dataset = 'omnipath',
+            nbins = 100,
+            **kwargs,
+        ):
+        
+        self.network_dataset = network_dataset
+        
+        self.class0 = class0
+        self.class1 = class1
+        label0 = label0 or '%ss' % class0.capitalize()
+        label1 = label1 or class1.capitalize()
+        self.nbins = nbins
+        
+        param = {
+            'fname': 'inter_class_degree_pdf',
+            'fname_param': (class0, class1),
+            'xlab': self.label0,
+            'ylab': self.label1,
+            'title': '%s per %s' % (label0, label1),
+            'legend': False,
+        }
+        param.update(kwargs)
+        
+        plot.PlotBase.__init__(self, **kwargs)
+    
+    
+    def load_data(self):
         
         self.data = workflows.data
         self.intercell = self.data.get_db('intercell')
@@ -79,73 +136,13 @@ class IntercellPlots(session_mod.Logger):
                 by_source = True
             )
         )
-    
-    
-    def inter_class_degree_histo(
-            self,
-            class0,
-            class1,
-            label0 = None,
-            label1 = None,
-        ):
-        
-        fname = op2_settings.get('inter_class_degree_pdf') % (
-            class0,
-            class1,
-            self.data.timestamp(),
-        )
-        
-        label0 = label0 or '%ss' % class0.capitalize()
-        label1 = label1 or class1.capitalize()
-        
         degrees = self.intercell.degree_inter_class_network(class0, class1)
-        
-        fig, ax = plt.subplots()
-        
-        ax.hist(degrees, bins = 100)
-        ax.set_title('%s per %s' % (label0, label1))
-        
-        fig.tight_layout()
-        fig.savefig(fname)
     
     
-    def plot_receptors_per_ligand(self):
+    def make_plots(self):
         
-        lig_rec = self.intercell.degree_inter_class_network(
-            'ligand',
-            'receptor',
-        )
-        
-        fig, ax = plt.subplots()
-        
-        ax.hist(lig_rec, bins = 100)
-        ax.set_title('Receptors per ligand')
-    
-    
-    def plot_ligands_per_receptor(self):
-        
-        lig_rec = self.intercell.degree_inter_class_network(
-            'ligand',
-            'receptor',
-        )
-        
-        fig, ax = plt.subplots()
-        
-        ax.hist(lig_rec, bins = 100)
-        ax.set_title('Receptors per ligand')
-        
-        l_per_r = []
-        for rec in ligands:
-            
-            aux = [pa.up_edge(lig, rec, directed=False) is not None for lig in ligands]
-            l_per_r.append(sum(aux))
-
-        fig, ax = plt.subplots()
-
-        ax.hist(l_per_r, bins=100)
-        ax.set_title('Ligands per receptor')
-
-
+        self.ax.hist(self.degrees, bins = self.nbins)
+        self.post_subplot_hook()
 
 ## Checking number of ligands we have TF information for:
 sum([lig in tf.vs['name'] for lig in ligands])

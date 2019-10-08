@@ -43,12 +43,12 @@ class Database(session_mod.Logger):
         
         session_mod.Logger.__init__(self, name = 'op2.database')
         
+        self.timestamp = time.strftime('%Y%m%d')
         self.param = kwargs
         self.rebuild = rebuild
         self.datasets = self.get_param('datasets')
         self.ensure_dirs()
         self.network_dfs = {}
-        self.timestamp = time.strftime('%Y%m%d')
         
         self._log('OmniPath2 database builder initialized.')
     
@@ -118,11 +118,11 @@ class Database(session_mod.Logger):
             
             self.tables_dir = os.path.join(
                 self.get_param('tables_dir'),
-                self.timestamp()
+                self.timestamp
             )
             self.figures_dir = os.path.join(
                 self.get_param('figures_dir'),
-                self.timestamp(),
+                self.timestamp,
             )
             op2_settings.setup(
                 tables_dir = self.tables_dir,

@@ -18,9 +18,13 @@
 #  Website: http://pypath.omnipathdb.org/
 #
 
+from future.utils import iteritems
+
 import imp
 import os
 import time
+import copy
+import itertools
 
 import matplotlib as mpl
 import matplotlib.gridspec as gridspec
@@ -29,11 +33,15 @@ import matplotlib.backends.backend_cairo
 from matplotlib import ticker
 from matplotlib import rcParams
 from matplotlib.backends.backend_pdf import PdfPages
-import matplotlib.backends.backend_cairo.FigureCanvasCairo
+import matplotlib.backends.backend_cairo
+from matplotlib.backends.backend_cairo import FigureCanvasCairo
 
 from pypath import session_mod
+from pypath import common
 
+import workflows
 from workflows import settings as op2_settings
+from workflows import colors
 
 
 def is_opentype_cff_font(filename):
@@ -91,17 +99,17 @@ class PlotBase(session_mod.Logger):
             dir_timestamp = True,
             xlab = None,
             ylab = None,
-            width = 7,
-            height = 7,
+            width = None,
+            height = None,
             grid_rows = 1,
             grid_cols = 1,
             grid_hratios = None,
             grid_wratios = None,
             font_family = None,
-            font_style = 'normal',
-            font_weight = 'normal',
-            font_variant = 'normal',
-            font_stretch = 'normal',
+            font_style = None,
+            font_weight = None,
+            font_variant = None,
+            font_stretch = None,
             font_size = None,
             font_sizes = None,
             axis_label_font = None,
@@ -129,6 +137,7 @@ class PlotBase(session_mod.Logger):
             usetex = False,
             do_plot = True,
             log_label = 'plot',
+            plot_args = None,
             **kwargs,
         ):
         """
@@ -189,7 +198,7 @@ class PlotBase(session_mod.Logger):
             Width ratios of grid rows. List of floats.
         font_family : str,list
             Font family to use or list of families in order of preference.
-            Default is from ``settings.font_family``.
+            Default is from ``op2_settings.font_family``.
         font_style : str
             Font style, e.g. `bold` or `medium`.
         font_variant : str
@@ -265,7 +274,7 @@ class PlotBase(session_mod.Logger):
         
         if not hasattr(self, '_logger'):
             
-            session.Logger.__init__(self, name = log_label or 'op2.plot')
+            session_mod.Logger.__init__(self, name = log_label or 'op2.plot')
         
         for k, v in itertools.chain(iteritems(locals()), iteritems(kwargs)):
             
@@ -298,12 +307,18 @@ class PlotBase(session_mod.Logger):
         Calls all methods in the correct order.
         """
         
+        self.load_data()
         self.pre_plot()
         self.make_plot()
         self.post_plot()
     
     # a synonym
     main = plot
+    
+    
+    def load_data(self):
+        
+        pass
     
     
     def pre_plot(self):
@@ -317,7 +332,10 @@ class PlotBase(session_mod.Logger):
         self.set_format()
         self.set_path()
         self.set_fonts()
+        self.set_palette()
+        self.set_rc()
         self.set_bar_args()
+        self.set_plot_args()
         self.set_figsize()
         self.init_figure()
         self.set_grid()
@@ -350,7 +368,7 @@ class PlotBase(session_mod.Logger):
                 or
             self.figures_dir
                 or
-            settings.get('figures_dir')
+            op2_settings.get('figures_dir')
         )
         
         if self.dir_timestamp:
@@ -379,7 +397,7 @@ class PlotBase(session_mod.Logger):
         self.fname = (
             fname
                 or
-            settings.get(self.fname)
+            op2_settings.get(self.fname)
                 or
             self.fname
         )
@@ -396,6 +414,8 @@ class PlotBase(session_mod.Logger):
             self.filetype,
         )
         self.path = os.path.join(self.figures_dir, self.fname)
+        
+        self._log('Plotting to `%s`.' % self.path)
     
     
     def make_plot(self):
@@ -433,6 +453,17 @@ class PlotBase(session_mod.Logger):
         self.bar_args = self.bar_args or {}
     
     
+    def set_plot_args(self):
+        
+        args = {
+            'cmap': self.palette,
+        }
+        
+        args.update(self.plot_args or {})
+        
+        self.plot_args = args
+    
+    
     def set_fonts(self):
         """
         Sets up everything related to fonts.
@@ -457,7 +488,7 @@ class PlotBase(session_mod.Logger):
         provided.
         """
         
-        font_sizes = copy.deepcopy(settings.get('font_sizes'))
+        font_sizes = copy.deepcopy(op2_settings.get('font_sizes'))
         font_sizes.update(self.font_sizes or {})
         
         for text in self.text_elements:
@@ -507,11 +538,16 @@ class PlotBase(session_mod.Logger):
         explicitely set already.
         """
         
-        self.font_family = self.font_family or settings.get('font_family')
-        self.font_style = self.font_style or settings.get('font_style')
-        self.font_variant = self.font_variant or settings.get('font_variant')
-        self.font_stretch = self.font_stretch or settings.get('font_stretch')
-        self.font_size = self.font_size or settings.get('font_size')
+        self.font_family = self.font_family or op2_settings.get('font_family')
+        self.font_style = self.font_style or op2_settings.get('font_style')
+        self.font_variant = (
+            self.font_variant or op2_settings.get('font_variant')
+        )
+        self.font_stretch = (
+            self.font_stretch or op2_settings.get('font_stretch')
+        )
+        self.font_size = self.font_size or op2_settings.get('font_size')
+        self.font_weight = self.font_weight or op2_settings.get('font_weight')
     
     
     def fonts_default_dict(self):
@@ -577,6 +613,31 @@ class PlotBase(session_mod.Logger):
                 )
             )
     
+    def set_palette(self):
+        
+        self.palette = (
+            self.palette
+                if isinstance(self.palette, mpl.colors.Colormap) else
+            colors.get_palette(self.palette)
+                if self.palette in colors.palettes else
+            mpl.cm.get_cmap(self.palette)
+                if isinstance(self.palette, common.basestring) else
+            mpl.colors.ListedColormap(self.palette)
+                if isinstance(
+                    self.palette,
+                    (tuple, list, type({}.values()))
+                ) else
+            colors.get_palette(op2_settings.get('palette'))
+        )
+        
+        mpl.cm.register_cmap(name = 'op2_current', cmap = self.palette)
+        rcParams['image.cmap'] = 'op2_current'
+    
+    
+    def set_rc(self):
+        
+        rcParams.update(self.rc or {})
+    
     
     def set_figsize(self):
         """
@@ -593,7 +654,7 @@ class PlotBase(session_mod.Logger):
             
         else:
             
-            self.figsize = settings.get('figsize')
+            self.figsize = op2_settings.get('figsize')
     
     
     def init_figure(self):
@@ -637,7 +698,7 @@ class PlotBase(session_mod.Logger):
         self.axes = [[None] * self.grid_cols] * self.grid_rows
     
     
-    def get_subplot(self, i, j = 0):
+    def get_subplot(self, i = 0, j = 0):
         
         if self.axes[j][i] is None:
             
@@ -691,7 +752,10 @@ class PlotBase(session_mod.Logger):
             
             self.title_text = self.fig.suptitle(self.title)
             self.title_text.set_fontproperties(self.fp_title)
-            self.title_text.set_horizontalalignment(self.title_halign)
+            
+            if self.title_halign:
+                
+                self.title_text.set_horizontalalignment(self.title_halign)
     
     
     def labels(self):
@@ -770,23 +834,25 @@ class PlotBase(session_mod.Logger):
         Applies tight layout, draws the figure, writes the file and closes.
         """
         
-        #self.fig.tight_layout()
-        self.fig.set_tight_layout(True)
-        self.fig.subplots_adjust(top = .92)
+        self.fig.tight_layout()
+        self.fig.subplots_adjust(top = .9 if self.maketitle else .92)
         self.cvs.draw()
         
         if self.filetype == 'pdf':
             
             self.cvs.print_figure(self.pdf)
             self.pdf.close()
+            self._log('Plot saved to `%s`.' % self.path)
             
-        elif self.filetype == 'png':
+        elif self.filetype in {'png', 'svg'}:
             
             if self.path:
                 
                 with open(self.path, 'wb') as fp:
                     
-                    self.cvs.print_png(fp)
+                    getattr(self.cvs, 'print_%s' % self.filetype)(fp)
+        
+        self._log('Plot saved to `%s`.' % self.path)
         
         #self.fig.clf()
 

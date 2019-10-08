@@ -17,7 +17,11 @@
 
 import os
 import re
+import imp
 import collections
+
+import matplotlib as mpl
+from matplotlib import colors
 
 from pypath import session_mod
 
@@ -43,7 +47,21 @@ class Colors(session_mod.Logger):
         self.read_palettes()
     
     
+    def reload(self):
+        """
+        Reloads the module and updates the class instance.
+        """
+        
+        modname = self.__class__.__module__
+        mod = __import__(modname, fromlist = [modname.split('.')[0]])
+        imp.reload(mod)
+        new = getattr(mod, self.__class__.__name__)
+        setattr(self, '__class__', new)
+    
+    
     def read_palettes(self):
+        
+        self._log('Reading palettes from directory `%s`.' % self.palette_dir)
         
         for fname in os.listdir(self.palette_dir):
             
@@ -100,4 +118,15 @@ class Colors(session_mod.Logger):
             tuple(i / 255. for i in values)
                 if any(v > 1. for v in values) else
             values
+        )
+    
+    
+    def get_palette(self, name):
+        """
+        Returns a palette as a ``matplotlib.colors.ListedColormap``
+        object.
+        """
+        
+        return mpl.colors.ListedColormap(
+            list(self.palettes[name].values())
         )
