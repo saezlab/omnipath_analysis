@@ -65,6 +65,9 @@ class IntercellPlots(session_mod.Logger):
         self.plot_ligands_per_receptor()
         self.plot_receptors_per_ligand()
         self.plot_protein_counts_by_class()
+        self.plot_entity_counts_by_class()
+        self.plot_class_similarities()
+        self.plot_inter_class_chordpot()
     
     
     def plot_ligands_per_receptor(self):
@@ -113,9 +116,22 @@ class IntercellPlots(session_mod.Logger):
         )
     
     
+    def plot_entity_counts_by_resource(self):
+        
+        self.counts_by_class_all = CountsByResource(
+            entity_types = {'protein', 'complex'},
+            xscale_log = True,
+        )
+    
+    
     def plot_class_similarities(self):
         
         self.csim = ClassSimilarities()
+    
+    
+    def plot_inter_class_chordpot(self):
+        
+        pass
 
 
 class InterClassDegreeHisto(plot.PlotBase):
@@ -544,3 +560,163 @@ class ClassSimilarities(plot.PlotBase):
             self.ax.set_ylim(10 * self.sims.shape[0], 0)
         
         self.ax.set_axis_off()
+
+
+class InterClassChordplot(plot.PlotBase):
+    
+    
+    def __init__(
+            self,
+            network_dataset = 'omnipath',
+            intercell_network_param = None,
+            **kwargs
+        ):
+        
+        self.network_dataset = network_dataset
+        
+        self.intercell_network_param = {
+            'only_class_levels': 'main',
+            'only_directed': False,
+            'only_effect': None,
+        }
+        self.intercell_network_param.update(intercell_network_param or {})
+        
+        icnparam = self.intercell_network_param
+        
+        param = {
+            'fname': 'inter_class_chordplot_pdf',
+            'fname_param': (
+                self.network_dataset,
+                'directed'
+                    if icnparam['only_directed'] else
+                'undirected',
+                (
+                    'stimulation'
+                        if icnparam['only_effect'] == 1 else
+                    'inhibition'
+                        if icnparam['only_effect'] == -1 else
+                    'any_effect'
+                ),
+            ),
+            'palette': mpl.cm.get_cmap('gist_rainbow'),
+            'make_plot_first': True,
+            'legend': False,
+            'legend_font_size': 8,
+            'width': 10,
+            'height': 8,
+        }
+        param.update(kwargs)
+        
+        plot.PlotBase.__init__(self, **param)
+    
+    
+    def load_data(self):
+        
+        self.data = workflows.data
+        self.intercell = self.data.get_db('intercell')
+        network = self.data.network_df(self.network_dataset)
+        self.intercell.register_network(network)
+        self.edges = self.intercell.class_to_class_connections(
+            **self.intercell_network_param,
+        )
+        self.edges.category_a = [
+            self.intercell.class_labels[cat]
+            for cat in self.edges.category_a
+        ]
+        self.edges.category_b = [
+            self.intercell.class_labels[cat]
+            for cat in self.edges.category_b
+        ]
+        self.adjacency = self.edges.pivot(
+            index = 'category_a',
+            columns = 'category_b',
+            values = 'connections',
+        )
+        self.segments = self.intercell.counts_by_class()
+        self.segments.name = 'size'
+        self.labels = self.segments.index
+    
+    
+    def make_plots(self):
+        
+        colors = colors = [
+            self.palette(i)
+            for i in np.linspace(0, 1, len(self.segments))
+        ]
+        
+        self.fig = data_tools.plots.chordplot(
+            edges = self.edges,
+            nodes = self.segments,
+            colors = colors,
+            labels = False,
+            alpha = .5,
+        )
+        
+        self.ax = self.fig.gca()
+        self.ax.set_position([0, 0, 0.75, 1]) # [left, bottom, width, height]
+                                              # chordplot
+        
+        ax2 = self.fig.add_axes([0.70, 0.75, 0.25, 0.25]) # legend
+        
+        ax2.legend(
+            [
+                matplotlib.lines.Line2D(
+                    [0],
+                    [0],
+                    marker = 'o',
+                    color = 'w',
+                    markerfacecolor = c
+                )
+                for c in colors
+            ],
+            self.labels,
+            loc = 'center',
+            ncol = 2,
+        )
+        
+        ax2.set_axis_off()
+        
+        ax3 = self.fig.add_axes([0.72, 0.5, 0.25, 0.25]) # barplot
+        ax4 = self.fig.add_axes([0.72, .05, 0.25, 0.5], sharex = ax3) # heatmap
+
+        ax3.bar(
+            range(len(self.segments)),
+            self.segments.values,
+            color = colors,
+        )
+        #ax3.set_axis_off()
+        ax3.spines['right'].set_visible(False)
+        ax3.spines['top'].set_visible(False)
+        ax3.spines['bottom'].set_visible(False)
+        ax3.spines['left'].set_visible(False)
+        ax3.set_xticks([])
+        #ax.axes.get_yaxis().set_visible(False)
+        ax3.locator_params(axis = 'y', nbins = 4)
+        
+        #ax.tick_params(axis='both', left='off', top='off', right='off', bottom='off', labelleft='off', labeltop='off', labelright='off', labelbottom='off')
+        
+        #ax3.get_yaxis().set_visible(True)
+        
+        adj = np.triu(self.adjacency.values).astype(float)
+        adj[np.where(adj == 0)] = np.nan
+        
+        self.heatmap = ax4.imshow(adj, cmap = 'plasma')
+        # [left, bottom, width, height]
+        ax5 = self.fig.add_axes([0.72, 0.05, 0.25, 0.03]) # colorbar
+        colorbar = self.fig.colorbar(
+            self.heatmap,
+            cax = ax5,
+            ax = ax5,
+            orientation = 'horizontal',
+        )
+        colorbar.outline.set_visible(False)
+        ax4.set_axis_off()
+    
+    
+    def post_subplot_hook(self):
+        
+        pass
+    
+    def finish(self):
+        
+        self.save()

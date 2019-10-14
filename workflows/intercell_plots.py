@@ -301,8 +301,8 @@ fig.tight_layout()
 #ax.set_xscale('log')
 fig.savefig(os.path.join(dest_dir, 'intercell_ents_by_source.pdf'))
 
-# Some are empty!
-i.classes['ligand_kirouac']
+# Some are empty! -- not any more -- Denes
+# i.classes['ligand_kirouac']
 
 
 

@@ -136,6 +136,7 @@ class PlotBase(session_mod.Logger):
             title_halign = None,
             usetex = False,
             do_plot = True,
+            make_plot_first = False,
             log_label = 'plot',
             plot_args = None,
             tight_layout = True,
@@ -310,7 +311,22 @@ class PlotBase(session_mod.Logger):
         
         self.load_data()
         self.pre_plot()
-        self.make_plot()
+        
+        if self.make_plot_first:
+            
+            self.make_plot()
+            self.set_figure()
+            
+            for ax in self.fig.axes:
+                
+                self.ax = ax
+                self.post_subplot_hook()
+            
+        else:
+            
+            self.set_figure()
+            self.make_plot()
+        
         self.post_plot()
     
     # a synonym
@@ -338,6 +354,10 @@ class PlotBase(session_mod.Logger):
         self.set_bar_args()
         self.set_plot_args()
         self.set_figsize()
+    
+    
+    def set_figure(self):
+        
         self.init_figure()
         self.set_grid()
     
@@ -719,6 +739,11 @@ class PlotBase(session_mod.Logger):
         self.ax = self.axes[i][j]
     
     
+    def add_subplot(self, ax, i = 0, j = 0):
+        
+        self.axes[i][j] = ax
+    
+    
     def iter_subplots(self):
         
         for j in xrange(self.grid_rows):
@@ -858,6 +883,11 @@ class PlotBase(session_mod.Logger):
             )
         )
         self.cvs.draw()
+        
+        self.save()
+    
+    
+    def save(self):
         
         if self.filetype == 'pdf':
             

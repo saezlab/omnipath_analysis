@@ -134,6 +134,7 @@ _defaults = {
     'counts_by_class_pdf': 'counts_by_class_%s_%s',
     'counts_by_resource_pdf': 'counts_by_resource_%s',
     'inter_class_sim_pdf': 'inter_class_sim',
+    'inter_class_chordplot_pdf': 'inter_class_chordplot_%s_%s_%s',
     
     # default palette
     'palette': 'Nico_3',
