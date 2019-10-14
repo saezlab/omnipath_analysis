@@ -24,6 +24,7 @@ import numpy as np
 import scipy.cluster.hierarchy
 import matplotlib as mpl
 import matplotlib.cm
+import pattern.en
 
 from pypath import session_mod
 from pypath import common
@@ -209,29 +210,29 @@ class InterClassDegreeHisto(plot.PlotBase):
         self.post_subplot_hook()
 
 
-class CountsByClass(plot.PlotBase):
+class CountsScatterBase(plot.PlotBase):
     
     
     def __init__(
             self,
             entity_types = 'protein',
             class_types = 'main',
+            xscale_log = False,
             **kwargs,
         ):
         
         self.entity_types = common.to_set(entity_types)
         self.class_types = common.to_set(class_types)
+        self.xscale_log = xscale_log
         
         param = {
             'maketitle': True,
-            'fname': 'counts_by_class_pdf',
-            'fname_param': (
-                '-'.join(sorted(self.entity_types)),
-                '-'.join(sorted(self.class_types)),
+            'xlab': 'Number of %s' % (
+                pattern.en.pluralize(entity_types)
+                    if isinstance(entity_types, common.basestring) else
+                'entities'
             ),
-            'title': 'Entities by inter-cellular communication role',
-            'xlab': 'Number of entitites',
-            'ylab': 'Inter-cellular communication roles',
+            'legend': False,
         }
         param.update(kwargs)
         
@@ -240,12 +241,13 @@ class CountsByClass(plot.PlotBase):
     
     def load_data(self):
         
-        self.data = workflows.data
-        self.intercell = self.data.get_db('intercell')
-        self.counts = self.intercell.counts_by_class(
-            entity_types = self.entity_types,
-            class_types = self.class_types,
-        )
+        self.labels, self.values = zip(*(
+            sorted(
+                self.counts.items(),
+                key = lambda it: it[1],
+                reverse = True,
+            )
+        ))
     
     
     def make_plots(self):
@@ -253,10 +255,106 @@ class CountsByClass(plot.PlotBase):
         self.get_subplot()
         self.ax.set_yticks(range(len(self.counts)))
         self.ax.grid()
-        self.ax.scatter(self.counts, range(len(self.counts)))
-        self.ax.set_yticklabels(labels = self.counts.index)
+        self.ax.scatter(self.values, range(len(self.counts)))
+        self.ax.set_axisbelow(True)
+        self.ax.set_yticklabels(labels = self.labels)
         self.ax.set_ylim(-1, len(self.counts))
-        #self.ax.set_xscale('log')
+        
+        if self.xscale_log:
+            
+            self.ax.set_xscale('log')
+        
+        self.post_subplot_hook()
+
+
+class CountsByClass(CountsScatterBase):
+    
+    
+    def __init__(
+        self,
+        entity_types = 'protein',
+        class_types = 'main',
+        **kwargs,
+    ):
+        
+        self.entity_types = common.to_set(entity_types)
+        self.class_types = common.to_set(class_types)
+        
+        param = {
+            'title': 'Entities by inter-cellular communication role',
+            'fname': 'counts_by_class_pdf',
+            'ylab': 'Inter-cellular communication roles',
+            'fname_param': (
+                '-'.join(sorted(self.entity_types)),
+                '-'.join(sorted(self.class_types)),
+            ),
+        }
+        param.update(kwargs)
+        
+        CountsScatterBase.__init__(
+            self,
+            entity_types = entity_types,
+            class_types = class_types,
+            **param
+        )
+    
+    
+    def load_data(self):
+        
+        self.data = workflows.data
+        self.intercell = self.data.get_db('intercell')
+        countsdf = self.intercell.counts_by_class(
+            entity_types = self.entity_types,
+            class_types = self.class_types,
+        )
+        self.counts = dict(zip(countsdf.index, countsdf))
+        CountsScatterBase.load_data(self)
+
+
+class CountsByResource(CountsScatterBase):
+    
+    
+    def __init__(
+        self,
+        entity_types = 'protein',
+        class_types = 'main',
+        **kwargs,
+    ):
+        
+        self.entity_types = common.to_set(entity_types)
+        self.class_types = common.to_set(class_types)
+        
+        param = {
+            'title': (
+                'Entities in inter-cellular communication\n'
+                'by annotation resource'
+            ),
+            'fname': 'counts_by_resource_pdf',
+            'ylab': 'Inter-cellular annotation resources',
+            'fname_param': (
+                '-'.join(sorted(self.entity_types)),
+            ),
+            'height': 5,
+        }
+        param.update(kwargs)
+        
+        CountsScatterBase.__init__(
+            self,
+            entity_types = entity_types,
+            class_types = class_types,
+            **param
+        )
+    
+    
+    def load_data(self):
+        
+        self.data = workflows.data
+        self.intercell = self.data.get_db('intercell')
+        
+        self.counts = self.intercell.counts_by_resource(
+            entity_types = self.entity_types
+        )
+        CountsScatterBase.load_data(self)
 
 
 class ClassSimilarities(plot.PlotBase):

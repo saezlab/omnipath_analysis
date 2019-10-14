@@ -433,7 +433,7 @@ class PlotBase(session_mod.Logger):
         A method executed each time after creating a subplot.
         """
         
-        self.labels()
+        self.set_labels()
         self.set_ylims()
         self.set_title()
         self.set_ticklabels()
@@ -760,7 +760,7 @@ class PlotBase(session_mod.Logger):
                 self.title_text.set_horizontalalignment(self.title_halign)
     
     
-    def labels(self):
+    def set_labels(self):
         """
         Sets properties of axis labels and ticklabels.
         """

@@ -224,6 +224,11 @@ ax.set_ylim(-1, len(counts))
 fig.tight_layout()
 fig.savefig(os.path.join(dest_dir, 'intercell_prots_by_class.pdf'))
 
+
+
+
+
+
 # Number of elements by class
 fig, ax = plt.subplots()
 rng = range(len(elem_counts_by_class))
@@ -240,6 +245,11 @@ ax.set_ylim(-1, len(elem_counts_by_class))
 fig.tight_layout()
 fig.savefig(os.path.join(dest_dir, 'intercell_prots_by_class2.pdf'))
 
+
+
+
+
+
 # By similarity
 groups = list(elem_by_class.values())
 sims = []
@@ -255,6 +265,13 @@ cluster_hmap(sims, xlabels=labels, ylabels=labels,
              title='Szymkiewicz–Simpson similarity of major intercellular clas'
              + 'ses', filename=os.path.join(dest_dir,
                                             'intercell_similarity.pdf'))
+
+
+
+
+
+
+
 
 # Entities by source
 fig, ax = plt.subplots(figsize=(7, 7))
@@ -286,6 +303,11 @@ fig.savefig(os.path.join(dest_dir, 'intercell_ents_by_source.pdf'))
 
 # Some are empty!
 i.classes['ligand_kirouac']
+
+
+
+
+
 
 # Interactions between subclasses
 edges = pd.DataFrame([[k[0], k[1], v] for (k, v) in connections.items()])
