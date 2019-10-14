@@ -138,6 +138,7 @@ class PlotBase(session_mod.Logger):
             do_plot = True,
             log_label = 'plot',
             plot_args = None,
+            tight_layout = True,
             **kwargs,
         ):
         """
@@ -695,16 +696,21 @@ class PlotBase(session_mod.Logger):
             width_ratios = self.grid_wratios,
         )
         
-        self.axes = [[None] * self.grid_cols] * self.grid_rows
+        self.axes = [[None] * self.grid_cols for _ in range(self.grid_rows)]
     
     
-    def get_subplot(self, i = 0, j = 0):
+    def get_subplot(self, i = 0, j = 0, subplot_args = None):
         
-        if self.axes[j][i] is None:
+        if self.axes[i][j] is None:
             
-            self.axes[j][i] = self.fig.add_subplot(self.gs[j, i])
+            subplot_args = subplot_args or {}
+            
+            self.axes[i][j] = self.fig.add_subplot(
+                self.gs[i, j],
+                **subplot_args
+            )
         
-        self.ax = self.axes[j][i]
+        self.ax = self.axes[i][j]
     
     
     def iter_subplots(self):
@@ -834,8 +840,17 @@ class PlotBase(session_mod.Logger):
         Applies tight layout, draws the figure, writes the file and closes.
         """
         
-        self.fig.tight_layout()
-        self.fig.subplots_adjust(top = .9 if self.maketitle else .92)
+        if self.tight_layout:
+            
+            self.fig.tight_layout()
+        
+        self.fig.subplots_adjust(
+            top = (
+                (.86 if '\n' in self.title else .9)
+                    if self.maketitle else
+                .92
+            )
+        )
         self.cvs.draw()
         
         if self.filetype == 'pdf':

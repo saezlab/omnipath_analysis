@@ -131,6 +131,7 @@ _defaults = {
     # figure filenames
     'inter_class_degree_pdf': 'inter_class_degree_%s_%s_%s_%s',
     'counts_by_class_pdf': 'counts_by_class_%s_%s',
+    'inter_class_sim_pdf': 'inter_class_sim',
     
     # default palette
     'palette': 'Nico_3',
