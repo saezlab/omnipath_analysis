@@ -659,20 +659,30 @@ class PlotBase(session_mod.Logger):
         Creates a figure using the object oriented matplotlib interface.
         """
         
-        if not hasattr(self, 'fig') or self.fig is None:
+        self._create_figure()
+        
+        if self.filetype == 'pdf':
             
-            if self.filetype == 'pdf':
-                
-                self.pdf = mpl.backends.backend_pdf.PdfPages(self.path)
-                self.fig = mpl.figure.Figure(figsize = self.figsize)
-                self.cvs = mpl.backends.backend_pdf.FigureCanvasPdf(self.fig)
+            self.pdf = mpl.backends.backend_pdf.PdfPages(self.path)
+            self.cvs = mpl.backends.backend_pdf.FigureCanvasPdf(self.fig)
+        
+        elif self.filetype in {'png', 'svg'}:
             
-            elif self.filetype in {'png', 'svg'}:
-                
-                self.fig = mpl.figure.Figure(figsize = self.figsize)
-                self.cvs = (
-                    mpl.backends.backend_cairo.FigureCanvasCairo(self.fig)
-                )
+            self.cvs = (
+                mpl.backends.backend_cairo.FigureCanvasCairo(self.fig)
+            )
+    
+    
+    def _create_figure(self):
+        
+        if not (
+            hasattr(self, 'fig') and
+            isinstance(self.fig, mpl.figure.Figure)
+        ):
+            
+            self.fig = mpl.figure.Figure()
+        
+        self.fig.set_size_inches(self.figsize)
     
     
     def set_grid(self):
