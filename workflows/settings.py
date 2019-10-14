@@ -126,11 +126,13 @@ _defaults = {
         'title': 1.2,
         'annotation': .8,
     },
-    'figsize': (4, 3),
+    'fig_height': 3,
+    'fig_width': 4,
     
     # figure filenames
     'inter_class_degree_pdf': 'inter_class_degree_%s_%s_%s_%s',
     'counts_by_class_pdf': 'counts_by_class_%s_%s',
+    'counts_by_resource_pdf': 'counts_by_resource_%s',
     'inter_class_sim_pdf': 'inter_class_sim',
     
     # default palette

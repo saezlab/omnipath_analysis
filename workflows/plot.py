@@ -649,13 +649,9 @@ class PlotBase(session_mod.Logger):
             
             return
             
-        elif self.width and self.height:
-            
-            self.figsize = (self.width, self.height)
-            
-        else:
-            
-            self.figsize = op2_settings.get('figsize')
+        self.width = self.width or op2_settings.get('fig_width')
+        self.height = self.height or op2_settings.get('fig_height')
+        self.figsize = (self.width, self.height)
     
     
     def init_figure(self):
