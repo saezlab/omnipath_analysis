@@ -25,6 +25,8 @@ from pypath import session_mod
 import workflows
 from workflows import settings as op2_settings
 from workflows import figures_preprocess
+from workflows import annotation_plots_new
+from workflows import intercell_plots_new
 
 
 class Main(session_mod.Logger):
@@ -58,6 +60,15 @@ class Main(session_mod.Logger):
                 getattr(self, obj).reload()
     
     
+    def main(self):
+        
+        self.load_data()
+        self.data_for_r_plotting()
+        self.run_r()
+        self.make_annotation_plots()
+        self.make_intercell_plots()
+    
+    
     def load_data(self):
         
         self._log('Loading all databases.')
@@ -73,3 +84,20 @@ class Main(session_mod.Logger):
             'for exporting tables for R plotting.'
         )
         self.figpreproc = figures_preprocess.FiguresPreprocess()
+    
+    
+    def run_r(self):
+        
+        pass
+    
+    
+    def make_annotation_plots(self):
+        
+        self.annotation_plots = annotation_plots_new.AnnotationPlots()
+        self.annotation_plots.main()
+    
+    
+    def make_intercell_plots(self):
+        
+        self.intercell_plots = intercell_plots_new.IntercellPlots()
+        self.intercell_plots.main()
