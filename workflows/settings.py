@@ -137,6 +137,7 @@ _defaults = {
     'inter_class_chordplot_pdf': 'inter_class_chordplot_%s_%s_%s',
     'annot_entities_by_resource_pdf': 'annot_%s_by_resource',
     'annot_records_by_resource_pdf': 'annot_%s_records_by_resource',
+    'annot_entities_in_network_pdf': 'annot_%s_in_network_%s',
     
     # default palette
     'palette': 'Nico_3',
