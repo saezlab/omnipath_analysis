@@ -125,6 +125,8 @@ class PlotBase(session_mod.Logger):
             bar_args = None,
             xticks = None,
             xticklabels = None,
+            xlim = None,
+            ylim = None,
             uniform_ylim = False,
             palette = None,
             lab_size = (9, 9),
@@ -454,6 +456,7 @@ class PlotBase(session_mod.Logger):
         """
         
         self.set_labels()
+        self.set_limits()
         self.set_ylims()
         self.set_title()
         self.set_ticklabels()
@@ -766,6 +769,17 @@ class PlotBase(session_mod.Logger):
         self.ax.plot(x = [], y = [])
         
         self.post_subplot_hook()
+    
+    
+    def set_limits(self):
+        
+        if self.xlim:
+            
+            self.ax.set_xlim(self.xlim)
+        
+        if self.ylim:
+            
+            self.ax.set_ylim(self.ylim)
     
     
     def set_ylims(self):

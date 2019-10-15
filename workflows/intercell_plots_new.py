@@ -257,9 +257,15 @@ class CountsScatterBase(plot.PlotBase):
     
     def load_data(self):
         
+        self.counts_nonzero = dict(
+            it
+            for it in self.counts.items()
+            if it[1] != 0
+        )
+        
         self.labels, self.values = zip(*(
             sorted(
-                self.counts.items(),
+                self.counts_nonzero.items(),
                 key = lambda it: it[1],
                 reverse = True,
             )
@@ -269,12 +275,12 @@ class CountsScatterBase(plot.PlotBase):
     def make_plots(self):
         
         self.get_subplot()
-        self.ax.set_yticks(range(len(self.counts)))
+        self.ax.set_yticks(range(len(self.counts_nonzero)))
         self.ax.grid()
-        self.ax.scatter(self.values, range(len(self.counts)))
+        self.ax.scatter(self.values, range(len(self.counts_nonzero)))
         self.ax.set_axisbelow(True)
         self.ax.set_yticklabels(labels = self.labels)
-        self.ax.set_ylim(-1, len(self.counts))
+        self.ax.set_ylim(-1, len(self.counts_nonzero))
         
         if self.xscale_log:
             
