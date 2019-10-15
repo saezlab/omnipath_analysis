@@ -136,6 +136,7 @@ _defaults = {
     'inter_class_sim_pdf': 'inter_class_sim',
     'inter_class_chordplot_pdf': 'inter_class_chordplot_%s_%s_%s',
     'annot_entities_by_resource_pdf': 'annot_%s_by_resource',
+    'annot_records_by_resource_pdf': 'annot_%s_records_by_resource',
     
     # default palette
     'palette': 'Nico_3',

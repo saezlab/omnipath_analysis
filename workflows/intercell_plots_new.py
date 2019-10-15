@@ -47,10 +47,14 @@ class IntercellPlots(session_mod.Logger):
     def __init__(
             self,
             network_dataset = 'omnipath',
+            tasks_param = None,
             **kwargs,
         ):
         
         session_mod.Logger.__init__(self, name = 'op2.intercell_plots')
+        self._log('Compiling intercell plots.')
+        
+        self.tasks_param = tasks_param
         
         self.network_dataset = network_dataset
         
@@ -131,7 +135,9 @@ class IntercellPlots(session_mod.Logger):
     
     def plot_inter_class_chordpot(self):
         
-        pass
+        self.chordplot = InterClassChordplot(
+            network_dataset = self.network_dataset,
+        )
 
 
 class InterClassDegreeHisto(plot.PlotBase):
