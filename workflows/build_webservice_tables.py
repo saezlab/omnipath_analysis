@@ -28,3 +28,7 @@ builder = websrvtab.WebserviceTables(
     complex_args = {'pickle_file': 'complexes.pickle'},
 )
 builder.main()
+
+
+builder = websrvtab.WebserviceTables()
+builder.main()

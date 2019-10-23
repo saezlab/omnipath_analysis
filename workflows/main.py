@@ -88,6 +88,8 @@ class Main(session_mod.Logger):
     
     def run_r(self):
         
+        self._log('Running R plotting methods.')
+        
         pass
     
     

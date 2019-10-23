@@ -22,6 +22,7 @@ import collections
 
 import matplotlib as mpl
 from matplotlib import colors
+import colorsys
 
 from pypath import session_mod
 
@@ -130,3 +131,43 @@ class Colors(session_mod.Logger):
         return mpl.colors.ListedColormap(
             list(self.palettes[name].values())
         )
+    
+    
+    def get_altered_tone(self, name, idx, factor):
+        """
+        Retrieves a color `idx` from the palette `name` with a lightness
+        altered by `factor`.
+        """
+        
+        return self.lightness(self.palettes[name][idx], factor)
+    
+    
+    def lightness_palette(self, name, factor):
+        """
+        name : str
+            Palette name.
+        """
+        
+        return [
+            self.lightness(rgb)
+            for rgb in self.palettes[name]
+        ]
+    
+    
+    @staticmethod
+    def lightness(rgb, factor):
+        """
+        rgb : tuple
+            Color as an RGB tuple.
+        factor : float
+            Lightness adjustment factor.
+        """
+        
+        hls = colorsys.rgb_to_hls(*rgb)
+        hls = (
+            hls[0],
+            min(hls[1] * factor, 1.),
+            hls[2],
+        )
+        
+        return colorsys.hls_to_rgb(*hls)
