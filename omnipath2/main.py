@@ -27,6 +27,7 @@ from omnipath2 import settings as op2_settings
 from omnipath2 import figures_preprocess
 from omnipath2 import annotation_plots_new
 from omnipath2 import intercell_plots_new
+from omnipath2 import network_plots_new
 
 
 class Main(session_mod.Logger):
@@ -67,6 +68,7 @@ class Main(session_mod.Logger):
         self.run_r()
         self.make_annotation_plots()
         self.make_intercell_plots()
+        self.make_network_plots()
     
     
     def load_data(self):
@@ -103,3 +105,8 @@ class Main(session_mod.Logger):
         
         self.intercell_plots = intercell_plots_new.IntercellPlots()
         self.intercell_plots.main()
+    
+    
+    def make_network_plots(self):
+        
+        self.network_plots = network_plots_new.NetworkPlots()

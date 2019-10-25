@@ -138,7 +138,7 @@ _defaults = {
     'annot_entities_by_resource_pdf': 'annot_%s_by_resource',
     'annot_records_by_resource_pdf': 'annot_%s_records_by_resource',
     'annot_entities_in_network_pdf': 'annot_%s_in_network_%s',
-    'netw_node_edge_counts_pdf': 'nodes_edges_%s',
+    'netw_edge_node_counts_pdf': 'nodes_edges_%s',
     
     # default palette
     'palette': 'Nico_3',

@@ -20,7 +20,7 @@ import os
 from pypath import settings as pp_settings
 from pypath import session_mod
 from omnipath2 import settings as settings_mod
-from omnipath2 import compile_data
+from omnipath2 import database
 from omnipath2 import colors
 
 
@@ -66,7 +66,7 @@ def init(environment = None, **kwargs):
     
     setup(environment)
     
-    globals()['data'] = compile_data.Database(**param)
+    globals()['data'] = database.Database(**param)
     globals()['colors'] = colors.Colors()
 
 

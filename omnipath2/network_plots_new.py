@@ -47,10 +47,10 @@ class NetworkPlots(session_mod.Logger):
     
     def main(self):
         
-        pass
+        self.edge_node_counts = EdgeNodeCounts()
 
 
-class CountsBarBase(plot.PlotBase):
+class CountsBase(plot.PlotBase):
     
     
     lightness_steps = (1.0, 1.33, 1.66, 2.0, 2.33)
@@ -95,7 +95,7 @@ class CountsBarBase(plot.PlotBase):
         cols = len(variables2)
         
         param = {
-            'fname': 'netw_node_edge_counts_pdf',
+            'fname': 'netw_edge_node_counts_pdf',
             'fname_param': (self.network_dataset,),
             'ylab': 'Resources',
             'height': 9,
@@ -276,3 +276,35 @@ class CountsBarBase(plot.PlotBase):
                     self.ax.set_xlabel(
                         'Number of %s' % var1.replace('_', ' ')
                     )
+
+
+class EdgeNodeCounts(CountsBases):
+    
+    
+    def __init__(
+        self,
+        **kwargs
+    ):
+        
+        param = {
+            'variables': (
+                'entities',
+                'interactions_undirected',
+            ),
+            'variables2': (
+                (
+                    'by_resource',
+                    'shared',
+                    'shared_res_cat',
+                ),
+                (
+                    'by_resource',
+                    'shared',
+                    'shared_res_cat',
+                ),
+            ),
+            'fname': 'netw_node_edge_counts_pdf',
+        }
+        param.update(kwargs)
+        
+        CountsBase.__init__(self, **param)
