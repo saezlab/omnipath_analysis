@@ -19,9 +19,9 @@ import os
 
 from pypath import settings as pp_settings
 from pypath import session_mod
-from workflows import settings as settings_mod
-from workflows import compile_data
-from workflows import colors
+from omnipath2 import settings as settings_mod
+from omnipath2 import compile_data
+from omnipath2 import colors
 
 
 _logger = session_mod.Logger(name = 'op2.init')

@@ -33,7 +33,7 @@ from pypath import ptm
 from pypath import session_mod
 from pypath import network
 
-import workflows.settings as op2_settings
+import omnipath2.settings as op2_settings
 
 
 class Database(session_mod.Logger):

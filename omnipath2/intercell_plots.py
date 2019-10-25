@@ -58,7 +58,7 @@ dest_dir = '../figures'
 latex_dir = '../../omnipath2_latex/figures'
 
 if os.getcwd().endswith('omnipath2'):
-    os.chdir('workflows')
+    os.chdir('omnipath2')
 
 if not os.path.exists(cachedir):
     os.makedirs(cachedir)
@@ -395,8 +395,8 @@ import matplotlib
 import matplotlib.pyplot as plt
 from matplotlib.tight_layout import get_renderer
 import seaborn as sns
-import workflows
-from workflows import settings as op2_settings
+import omnipath2
+from omnipath2 import settings as op2_settings
 
 op2_settings.setup(tfregulons_levels = {'A', 'B', 'C', 'D', 'E'})
 
@@ -421,12 +421,12 @@ def tf_lig_rec_query(print_to_stdout = True, ligands = None):
         #ax.hist(
             #counts,
             #bins = 100,
-            #color = workflows.colors.palettes['Nico_0']['blue50'],
+            #color = omnipath2.colors.palettes['Nico_0']['blue50'],
         #)
         sns.kdeplot(
             data = counts,
             ax = ax,
-            color = workflows.colors.palettes['Nico_1']['purple'],
+            color = omnipath2.colors.palettes['Nico_1']['purple'],
         )
         ax.set_title(
             '%s (confid %s)' % (
@@ -443,7 +443,7 @@ def tf_lig_rec_query(print_to_stdout = True, ligands = None):
         fig.tight_layout()
         fig.savefig(
             os.path.join(
-                workflows.data.figures_dir,
+                omnipath2.data.figures_dir,
                 '%s_per_%s_%s.pdf' % (
                     label0,
                     label1,
@@ -458,7 +458,7 @@ def tf_lig_rec_query(print_to_stdout = True, ligands = None):
         op2_settings.get('tfregulons_levels')
     ))
     
-    data = workflows.data
+    data = omnipath2.data
     data.ensure_dataset('tf_target')
     data.ensure_dataset('intercell')
     

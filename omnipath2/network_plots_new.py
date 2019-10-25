@@ -26,8 +26,8 @@ import numpy as np
 from pypath import session_mod
 
 
-import workflows
-import workflows.plot as plot
+import omnipath2
+import omnipath2.plot as plot
 
 
 class NetworkPlots(session_mod.Logger):
@@ -50,7 +50,7 @@ class NetworkPlots(session_mod.Logger):
         pass
 
 
-class CountsScatterBase(plot.PlotBase):
+class CountsBarBase(plot.PlotBase):
     
     
     lightness_steps = (1.0, 1.33, 1.66, 2.0, 2.33)
@@ -111,7 +111,7 @@ class CountsScatterBase(plot.PlotBase):
     
     def load_data(self):
         
-        self.data = workflows.data
+        self.data = omnipath2.data
         self.network = self.data.get_db(self.network_dataset)
         
         for var in self.variables:
@@ -181,7 +181,7 @@ class CountsScatterBase(plot.PlotBase):
         
         self.colors = [
             np.array([
-                workflows.colors.lightness(
+                omnipath2.colors.lightness(
                     self.palette.colors[ivar],
                     self.lightness_steps[ivar2],
                 )

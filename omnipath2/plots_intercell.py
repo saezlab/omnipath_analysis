@@ -29,9 +29,9 @@ from data_tools.plots import cluster_hmap
 from data_tools.plots import upset_wrap
 from data_tools.plots import chordplot
 
-import workflows
-from workflows import settings as op2_settings
-from workflows import colors
+import omnipath2
+from omnipath2 import settings as op2_settings
+from omnipath2 import colors
 
 
 df = i.df
@@ -127,7 +127,7 @@ class InterClassDegreeHisto(plot.PlotBase):
     
     def load_data(self):
         
-        self.data = workflows.data
+        self.data = omnipath2.data
         self.intercell = self.data.get_db('intercell')
         self.data.ensure_dataset(self.network_dataset)
         self.intercell.register_network(

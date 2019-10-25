@@ -26,7 +26,7 @@ import colorsys
 
 from pypath import session_mod
 
-from workflows import settings as op2_settings
+from omnipath2 import settings as op2_settings
 
 
 recolor = re.compile(

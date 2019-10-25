@@ -5,7 +5,7 @@ from pypath.main import PyPath
 cachedir = '/home/nico/pypath_cache'
 
 if os.getcwd().endswith('omnipath2'):
-    os.chdir('workflows')
+    os.chdir('omnipath2')
 
 if not os.path.exists(cachedir):
     os.makedirs(cachedir)

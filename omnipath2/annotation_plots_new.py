@@ -26,10 +26,10 @@ import pypath.common as common
 import pypath.session_mod as session_mod
 import pypath.annot as annot
 
-import workflows
-import workflows.settings as op2_settings
-import workflows.plot as plot
-import workflows.intercell_plots_new as intercell_plots
+import omnipath2
+import omnipath2.settings as op2_settings
+import omnipath2.plot as plot
+import omnipath2.intercell_plots_new as intercell_plots
 
 
 class AnnotationPlots(session_mod.Logger):
@@ -106,7 +106,7 @@ class EntitiesByResource(intercell_plots.CountsScatterBase):
     
     def load_data(self):
         
-        self.annot = workflows.data.get_db('annotations')
+        self.annot = omnipath2.data.get_db('annotations')
         self.counts = dict(
             (
                 resource,
@@ -158,7 +158,7 @@ class RecordsByResource(intercell_plots.CountsScatterBase):
     
     def load_data(self):
         
-        self.annot = workflows.data.get_db('annotations')
+        self.annot = omnipath2.data.get_db('annotations')
         self.counts = dict(
             (
                 resource,
@@ -214,8 +214,8 @@ class AnnotationNetworkOverlap(intercell_plots.CountsScatterBase):
     
     def load_data(self):
         
-        self.network = workflows.data.get_db(self.network_dataset)
-        self.annot = workflows.data.get_db('annotations')
+        self.network = omnipath2.data.get_db(self.network_dataset)
+        self.annot = omnipath2.data.get_db('annotations')
         self.in_network = {
             entity
             for entity in self.network.graph.vs['name']

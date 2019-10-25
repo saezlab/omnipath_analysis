@@ -39,9 +39,9 @@ from matplotlib.backends.backend_cairo import FigureCanvasCairo
 from pypath import session_mod
 from pypath import common
 
-import workflows
-from workflows import settings as op2_settings
-from workflows import colors
+import omnipath2
+from omnipath2 import settings as op2_settings
+from omnipath2 import colors
 
 
 def is_opentype_cff_font(filename):
@@ -373,7 +373,7 @@ class PlotBase(session_mod.Logger):
                 or
             self.timestamp_override
                 or
-            workflows.data.timestamp
+            omnipath2.data.timestamp
                 or
             self.timestamp
         )
@@ -381,9 +381,9 @@ class PlotBase(session_mod.Logger):
     
     def set_directory(self, figures_dir = None):
         
-        if workflows.data:
+        if omnipath2.data:
             
-            self.figures_dir = workflows.data.figures_dir
+            self.figures_dir = omnipath2.data.figures_dir
             return
         
         self.figures_dir = (

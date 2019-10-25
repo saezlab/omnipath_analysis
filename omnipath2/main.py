@@ -22,11 +22,11 @@ import imp
 
 from pypath import session_mod
 
-import workflows
-from workflows import settings as op2_settings
-from workflows import figures_preprocess
-from workflows import annotation_plots_new
-from workflows import intercell_plots_new
+import omnipath2
+from omnipath2 import settings as op2_settings
+from omnipath2 import figures_preprocess
+from omnipath2 import annotation_plots_new
+from omnipath2 import intercell_plots_new
 
 
 class Main(session_mod.Logger):
@@ -73,7 +73,7 @@ class Main(session_mod.Logger):
         
         self._log('Loading all databases.')
         
-        self.data = workflows.data
+        self.data = omnipath2.data
         self.data.build()
     
     

@@ -46,8 +46,8 @@ from pypath import progress
 from pypath import data_formats
 from pypath import intera
 
-import workflows
-from workflows import settings as op2_settings
+import omnipath2
+from omnipath2 import settings as op2_settings
 
 def reload():
     
@@ -63,7 +63,7 @@ class FiguresPreprocess(session_mod.Logger):
         
         session_mod.Logger.__init__(self, name = 'op2.fig_preproc')
         
-        self.data = workflows.data
+        self.data = omnipath2.data
         self.date = time.strftime('%Y%m%d')
         self.network_dataset = network_dataset
     

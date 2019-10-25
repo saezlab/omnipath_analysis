@@ -23,7 +23,7 @@ import cProfile as profile
 import numpy as np
 import pandas as pd
 
-from workflows import figures_preprocess as figpreproc
+from omnipath2 import figures_preprocess as figpreproc
 
 omnipath_pickle = 'omnipath.pickle'
 annotation_pickle = 'annotations2.pickle'

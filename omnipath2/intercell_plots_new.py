@@ -37,8 +37,8 @@ from data_tools.plots import cluster_hmap
 from data_tools.plots import upset_wrap
 from data_tools.plots import chordplot
 
-import workflows
-from workflows import plot
+import omnipath2
+from omnipath2 import plot
 
 
 class IntercellPlots(session_mod.Logger):
@@ -201,7 +201,7 @@ class InterClassDegreeHisto(plot.PlotBase):
     
     def load_data(self):
         
-        self.data = workflows.data
+        self.data = omnipath2.data
         self.intercell = self.data.get_db('intercell')
         self.data.ensure_dataset(self.network_dataset)
         self.intercell.register_network(
@@ -329,7 +329,7 @@ class CountsByClass(CountsScatterBase):
     
     def load_data(self):
         
-        self.data = workflows.data
+        self.data = omnipath2.data
         self.intercell = self.data.get_db('intercell')
         countsdf = self.intercell.counts_by_class(
             entity_types = self.entity_types,
@@ -376,7 +376,7 @@ class CountsByResource(CountsScatterBase):
     
     def load_data(self):
         
-        self.data = workflows.data
+        self.data = omnipath2.data
         self.intercell = self.data.get_db('intercell')
         
         self.counts = self.intercell.counts_by_resource(
@@ -432,7 +432,7 @@ class ClassSimilarities(plot.PlotBase):
     
     def load_data(self):
         
-        self.data = workflows.data
+        self.data = omnipath2.data
         self.data.ensure_dataset('intercell')
         
         self.sims = []
@@ -624,7 +624,7 @@ class InterClassChordplot(plot.PlotBase):
     
     def load_data(self):
         
-        self.data = workflows.data
+        self.data = omnipath2.data
         self.intercell = self.data.get_db('intercell')
         network = self.data.network_df(self.network_dataset)
         self.intercell.register_network(network)

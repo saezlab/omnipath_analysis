@@ -44,7 +44,7 @@ dest_dir = '../figures'
 latex_dir = '../../omnipath2_latex/figures'
 
 if os.getcwd().endswith('omnipath2'):
-    os.chdir('workflows')
+    os.chdir('omnipath2')
 
 if not os.path.exists(cachedir):
     os.makedirs(cachedir)
