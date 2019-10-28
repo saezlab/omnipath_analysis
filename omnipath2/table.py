@@ -18,6 +18,9 @@
 #  Website: http://pypath.omnipathdb.org/
 #
 
+from future.utils import iteritems
+
+import itertools
 
 from pypath import session_mod
 
@@ -33,7 +36,7 @@ class TableBase(omnipath2.path.PathBase):
             fname_param = (),
             fname_timestamp = True,
             timestamp_override = None,
-            filetype = 'pdf',
+            filetype = 'tsv',
             tables_dir = None,
             dir_timestamp = True,
             data = None,
@@ -44,7 +47,7 @@ class TableBase(omnipath2.path.PathBase):
         
         if not hasattr(self, '_logger'):
             
-            session_mod.Logger.__init__(self, name = log_label or 'op2.table')
+            session_mod.Logger.__init__(self, name = 'op2.table')
         
         for k, v in itertools.chain(iteritems(locals()), iteritems(kwargs)):
             
@@ -63,36 +66,37 @@ class TableBase(omnipath2.path.PathBase):
             filetype = self.filetype,
             target_dir = self.tables_dir,
         )
+    
+    
+    def main(self):
         
+        omnipath2.path.PathBase.main(self)
+        self.load()
+        self.export()
+    
+    
+    def load(self):
         
-        def main(self):
+        self.data = self.data or []
+        self.header = []
+    
+    
+    def export(self, fname = None):
+        
+        path = fname or self.path
+        
+        with open(path, 'w') as fp:
             
-            self.load()
-            self.export()
-        
-        
-        def load(self):
-            
-            self.data = self.data or []
-            self.header = []
-        
-        
-        def export(self, fname = None):
-            
-            path = fname or self.path
-            
-            with open(path, 'w') as fp:
+            if self.header:
                 
-                if self.header:
-                    
-                    _ = fp.write(self.sep.join(self.header))
-                    _ = fp.write('\n')
-                
-                fp.write(
-                    '\n'.join(
-                        self.sep.join(
-                            str(field) for field in line
-                        )
-                        for line in self.data
+                _ = fp.write(self.sep.join(self.header))
+                _ = fp.write('\n')
+            
+            fp.write(
+                '\n'.join(
+                    self.sep.join(
+                        str(field) for field in line
                     )
+                    for line in self.data
                 )
+            )

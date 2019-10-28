@@ -65,7 +65,7 @@ _defaults = {
     'intercell_network_by_resource_tsv': 'stats_by_resource_%s.tsv',
     'resources_by_entity_tsv': 'resources_by_entity_%s.tsv',
     'complexes_by_resource_tsv': 'complexes_by_resource_%s.tsv',
-    'connections_tsv': 'connections_%s.tsv',
+    'connections_tsv': 'connections_%s_%s',
     'category_overlaps_tsv': 'category_overlaps_%s.tsv',
 
     # tfregulons levels

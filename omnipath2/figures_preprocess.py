@@ -48,12 +48,101 @@ from pypath import intera
 
 import omnipath2
 from omnipath2 import settings as op2_settings
+from omnipath2 import table
 
 def reload():
     
     imp.reload(intercell_annot)
     imp.reload(annot)
     imp.reload(intercell)
+
+
+class InterClassConnections(omnipath2.table.TableBase):
+    
+    
+    def __init__(
+            self,
+            network_dataset = 'omnipath',
+            mode = 'undirected',
+            **kwargs
+        ):
+        
+        self.network_dataset = network_dataset
+        self.mode = mode
+        
+        param = {
+            'fname': 'connections_tsv',
+            'fname_param': (
+                self.network_dataset,
+                self.mode,
+            ),
+            'class_levels': {
+                'main',
+                'small_main',
+            },
+        }
+        param.update(kwargs)
+        
+        omnipath2.table.TableBase.__init__(self, **param)
+    
+    
+    def load(self):
+        
+        self._log(
+            'Counting `%s` inter class connections in network `%s`.' % (
+                self.mode,
+                self.network_dataset,
+            )
+        )
+        
+        self.intercell = omnipath2.data.get_db('intercell')
+        self.intercell.register_network(
+            omnipath2.data.network_df(self.network_dataset)
+        )
+        
+        mode = '' if self.mode == 'undirected' else '_%s' % self.mode
+        method = 'count_inter_class_connections%s' % mode
+        
+        conn_hdr = ['cat0', 'cat1', 'size0', 'size1', 'conn']
+        self.data = []
+        
+        iterator = (
+            itertools.combinations_with_replacement(
+                self.intercell.class_names,
+                2,
+            )
+                if self.mode == 'undirected' else
+            itertools.product(
+                self.intercell.class_names,
+                self.intercell.class_names,
+            )
+        )
+        
+        for c0, c1 in iterator:
+            
+            if (
+                self.intercell.class_types[c0] not in self.class_levels or
+                self.intercell.class_types[c1] not in self.class_levels
+            ):
+                continue
+            
+            numof_connections = getattr(
+                self.intercell,
+                method,
+            )(
+                source_classes = c0,
+                target_classes = c1,
+            )
+            
+            self.data.append([
+                c0,
+                c1,
+                self.intercell.class_labels[c0],
+                self.intercell.class_labels[c1],
+                len(self.intercell.classes[c0]),
+                len(self.intercell.classes[c1]),
+                numof_connections,
+            ])
 
 
 class FiguresPreprocess(session_mod.Logger):
