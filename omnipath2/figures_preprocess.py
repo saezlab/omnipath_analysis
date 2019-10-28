@@ -80,6 +80,15 @@ class InterClassConnections(omnipath2.table.TableBase):
                 'main',
                 'small_main',
             },
+            'header': [
+                'cat0',
+                'cat1',
+                'label0',
+                'label1',
+                'size0',
+                'size1',
+                'conn',
+            ],
         }
         param.update(kwargs)
         
@@ -217,7 +226,6 @@ class FiguresPreprocess(session_mod.Logger):
         self.collect_classes()
         self.export_intercell_coverages()
         self.export_intercell_coverages_by_resource()
-        self.export_connections()
         self.export_overlaps()
     
     
@@ -1128,55 +1136,6 @@ class FiguresPreprocess(session_mod.Logger):
     def add_intercell_network_stats(self):
         
         self.intercell_network.groupby(by = 'pair')
-    
-    
-    def export_connections(self, mode = 'undirected', **kwargs):
-        
-        _mode = '' if mode == 'undirected' else '_%s' % mode
-        method = 'count_inter_class_connections%s' % _mode
-        
-        conn_hdr = ['cat0', 'cat1', 'size0', 'size1', 'conn']
-        self.connections = []
-        
-        for c0, c1 in (
-            itertools.combinations_with_replacement(
-                self.intercell.class_names,
-                2,
-            )
-        ):
-            
-            if (
-                self.intercell.class_types[c0] == 'above_main' or
-                self.intercell.class_types[c1] == 'above_main'
-            ):
-                continue
-            
-            numof_connections = getattr(
-                self.intercell,
-                method,
-            )(**kwargs)
-            
-            self.connections.append([
-                c0,
-                c1,
-                len(self.intercell.classes[c0]),
-                len(self.intercell.classes[c1]),
-                numof_connections,
-            ])
-        
-        path = os.path.join(
-            self.tables_dir,
-            op2_settings.get('connections_tsv') % self.date,
-        )
-        
-        with open(path, 'w') as fp:
-            
-            _ = fp.write('\t'.join(conn_hdr))
-            _ = fp.write('\n')
-            
-            for conn in self.connections:
-                
-                _= fp.write('%s\t%s\t%u\t%u\t%u\n' % tuple(conn))
     
     
     def export_overlaps(self):
