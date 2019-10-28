@@ -1041,7 +1041,10 @@ class FiguresPreprocess(session_mod.Logger):
         self.intercell_network.groupby(by = 'pair')
     
     
-    def export_connections(self):
+    def export_connections(self, mode = 'undirected', **kwargs):
+        
+        _mode = '' if mode == 'undirected' else '_%s' % mode
+        method = 'count_inter_class_connections%s' % _mode
         
         conn_hdr = ['cat0', 'cat1', 'size0', 'size1', 'conn']
         self.connections = []
@@ -1059,18 +1062,10 @@ class FiguresPreprocess(session_mod.Logger):
             ):
                 continue
             
-            numof_connections = sum(
-                np.logical_or(
-                    np.logical_and(
-                        self.intercell_network.category_a == c0,
-                        self.intercell_network.category_b == c1,
-                    ),
-                    np.logical_and(
-                        self.intercell_network.category_a == c1,
-                        self.intercell_network.category_b == c0,
-                    )
-                )
-            )
+            numof_connections = getattr(
+                self.intercell,
+                method,
+            )(**kwargs)
             
             self.connections.append([
                 c0,

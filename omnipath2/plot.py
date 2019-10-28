@@ -42,6 +42,7 @@ from pypath import common
 import omnipath2
 from omnipath2 import settings as op2_settings
 from omnipath2 import colors
+import omnipath2.path
 
 
 def is_opentype_cff_font(filename):
@@ -74,7 +75,7 @@ def is_opentype_cff_font(filename):
 mpl.font_manager.is_opentype_cff_font = is_opentype_cff_font
 
 
-class PlotBase(session_mod.Logger):
+class PlotBase(omnipath2.path.PathBase):
     
     text_elements = (
         'axis_label',
@@ -288,6 +289,16 @@ class PlotBase(session_mod.Logger):
                 
                 setattr(self, k, v)
         
+        omnipath2.path.PathBases.__init__(
+            self,
+            fname = self.fname,
+            fname_param = self.fname_param,
+            fname_timestamp = self.fname_timestamp,
+            timestamp_override = self.timestamp_override,
+            filetype = self.filetype,
+            target_dir = self.figures_dir,
+        )
+        
         if self.do_plot:
             
             self.main()
@@ -346,10 +357,10 @@ class PlotBase(session_mod.Logger):
         Derived classes should override this if necessary.
         """
         
-        self.set_timestamp()
-        self.set_directory()
-        self.set_format()
-        self.set_path()
+        PathBase.main(self)
+        
+        self._log('Plotting to `%s`.' % self.path)
+        
         self.set_fonts()
         self.set_palette()
         self.set_rc()
@@ -362,83 +373,6 @@ class PlotBase(session_mod.Logger):
         
         self.init_figure()
         self.set_grid()
-    
-    
-    def set_timestamp(self, timestamp = None, strftime = ''):
-        
-        self.timestamp = (
-            timestamp
-                or
-            time.strftime(strftime)
-                or
-            self.timestamp_override
-                or
-            omnipath2.data.timestamp
-                or
-            self.timestamp
-        )
-    
-    
-    def set_directory(self, figures_dir = None):
-        
-        if omnipath2.data:
-            
-            self.figures_dir = omnipath2.data.figures_dir
-            return
-        
-        self.figures_dir = (
-            figures_dir
-                or
-            self.figures_dir
-                or
-            op2_settings.get('figures_dir')
-        )
-        
-        if self.dir_timestamp:
-            
-            self.figures_dir = os.path.join(
-                self.figures_dir,
-                self.timestamp,
-            )
-        
-        os.makedirs(self.figures_dir, exist_ok = True)
-    
-    
-    def set_format(self, filetype = None):
-        
-        self.filetype = (
-            filetype
-                if filetype else
-            self.filetype
-                if hasattr(self, 'filetype') else
-            'pdf'
-        )
-    
-    
-    def set_path(self, fname = None):
-        
-        self.fname = (
-            fname
-                or
-            op2_settings.get(self.fname)
-                or
-            self.fname
-        )
-        
-        if not self.fname:
-            
-            self._log('No output file name provided.')
-            return
-        
-        self.fname = self.fname % self.fname_param
-        self.fname = '%s%s.%s' % (
-            self.fname,
-            '__%s' % self.timestamp if self.fname_timestamp else '',
-            self.filetype,
-        )
-        self.path = os.path.join(self.figures_dir, self.fname)
-        
-        self._log('Plotting to `%s`.' % self.path)
     
     
     def make_plot(self):
