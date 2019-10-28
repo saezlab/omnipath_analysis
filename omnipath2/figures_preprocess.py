@@ -877,43 +877,11 @@ class FiguresPreprocess(session_mod.Logger):
         )
     
     
-    def build_intercell_network(self):
+    def build_intercell_network(self, **kwargs):
         
         self._log('Building the intercell communication network.')
         
-        self.intercell_network = pd.merge(
-            self.network.records,
-            self.intercell.df,
-            suffixes = ['', '_a'],
-            how = 'inner',
-            left_on = 'id_a',
-            right_on = 'uniprot',
-        )
-        self.intercell_network.id_a = (
-            self.intercell_network.id_a.astype('category')
-        )
-        
-        self.intercell_network = pd.merge(
-            self.intercell_network,
-            self.intercell.df,
-            suffixes = ['_a', '_b'],
-            how = 'inner',
-            left_on = 'id_b',
-            right_on = 'uniprot',
-        )
-        self.intercell_network.id_b = (
-            self.intercell_network.id_b.astype('category')
-        )
-        
-        self.intercell_network.set_index(
-            'id_a',
-            drop = False,
-            inplace = True,
-        )
-        #self.intercell_network = dd.from_pandas(
-            #self.intercell_network,
-            #100000,
-        #)
+        self.intercell_network = self.intercell.network_df(**kwargs)
     
     
     def connections_of_category(
