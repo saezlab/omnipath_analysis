@@ -79,19 +79,15 @@ class PathBase(session_mod.Logger):
     
     def set_directory(self, target_dir = None):
         
+        target_dir = target_dir or self.target_dir
+        
         if hasattr(omnipath2.data, target_dir):
             
             self.target_dir = getattr(omnipath2.data, target_dir)
         
         else:
             
-            self.target_dir = (
-                target_dir
-                    or
-                self.target_dir
-                    or
-                op2_settings.get(target_dir)
-            )
+            self.target_dir = target_dir or op2_settings.get(target_dir)
             
             if self.dir_timestamp:
                 
@@ -135,6 +131,6 @@ class PathBase(session_mod.Logger):
             '__%s' % self.timestamp if self.fname_timestamp else '',
             self.filetype,
         )
-        self.path = os.path.join(self.figures_dir, self.fname)
+        self.path = os.path.join(self.target_dir, self.fname)
         
         self._log('Plotting to `%s`.' % self.path)
