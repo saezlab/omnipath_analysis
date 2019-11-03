@@ -154,6 +154,36 @@ class InterClassConnections(omnipath2.table.TableBase):
             ])
 
 
+class IntercellClasses(omnipath2.table.TableBase):
+    
+    
+    def __init__(self, **kwargs):
+        
+        param = {
+            'fname': 'intercell_classes_tsv',
+            'header': [
+                'cat0',
+                'cat1',
+                'label0',
+                'label1',
+                'size0',
+                'size1',
+                'conn',
+            ],
+        }
+        param.update(kwargs)
+        
+        omnipath2.table.TableBase.__init__(self, **param)
+    
+    
+    def load(self):
+        
+        self.intercell = omnipath2.data.get_db('intercell')
+        self.intercell.make_df()
+        self.data = self.intercell.df
+        self.header = self.data.columns
+
+
 class FiguresPreprocess(session_mod.Logger):
     
     
@@ -222,7 +252,6 @@ class FiguresPreprocess(session_mod.Logger):
     
     def export_tables(self):
         
-        self.export_intercell_classes()
         self.collect_classes()
         self.export_intercell_coverages()
         self.export_intercell_coverages_by_resource()
@@ -304,18 +333,6 @@ class FiguresPreprocess(session_mod.Logger):
             (k, len(v))
             for k, v in self.intercell.classes.items()
         ])
-    
-    
-    def export_intercell_classes(self):
-        
-        self.intercell.export(
-            fname = os.path.join(
-                self.tables_dir,
-                op2_settings.get('intercell_classes_tsv') % self.date,
-            ),
-            sep = '\t',
-            index = False,
-        )
     
     
     def export_intercell_coverages(self):
