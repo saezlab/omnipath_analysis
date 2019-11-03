@@ -184,6 +184,81 @@ class IntercellClasses(omnipath2.table.TableBase):
         self.header = self.data.columns
 
 
+class IntercellCoverages(omnipath2.table.TableBase):
+    
+    
+    def __init__(self, network_dataset = 'omnipath', **kwargs):
+        
+        self.network_dataset = network_dataset
+        
+        param = {
+            'fname': 'main_coverage_tsv',
+            'fname_param': (
+                self.network_dataset,
+            ),
+            'header': [
+                'typ',
+                'cls',
+                'cls_label',
+                'resource',
+                'entity_type',
+                'total',
+                'omnipath',
+            ],
+        }
+        param.update(kwargs)
+        
+        omnipath2.table.TableBase.__init__(self, **param)
+    
+    
+    def load(self):
+        
+        self.intercell = omnipath2.data.get_db('intercell')
+        self.intercell.make_df()
+        self.network = omnipath2.data.get_db(self.network_dataset)
+        
+        network_entities = {
+            'protein': self.network.protein_entities(),
+            'complex': self.network.complex_entities(),
+        }
+        
+        self.data = []
+        
+        for cls in self.intercell.classes.keys():
+            
+            for entity_type in ('protein', 'complex'):
+                
+                members = self.intercell.get_class(
+                    cls,
+                    entity_type = entity_type,
+                )
+                total = len(members)
+                in_network = len(
+                    members &
+                    network_entities[entity_type]
+                )
+                typ = (
+                    self.intercell.class_types[cls]
+                        if cls in self.intercell.class_types else
+                    'sub'
+                )
+                res = (
+                    self.intercell.resource_labels[cls]
+                        if cls in self.intercell.resource_labels else
+                    ''
+                )
+                
+                self.data.append([
+                    typ,
+                    cls,
+                    self.intercell.class_labels[cls],
+                    res,
+                    entity_type,
+                    total,
+                    in_network,
+                ])
+
+
 class FiguresPreprocess(session_mod.Logger):
     
     
@@ -333,43 +408,6 @@ class FiguresPreprocess(session_mod.Logger):
             (k, len(v))
             for k, v in self.intercell.classes.items()
         ])
-    
-    
-    def export_intercell_coverages(self):
-        
-        cov_hdr = ['typ', 'cls', 'total', 'omnipath']
-        self.intercell_coverages = []
-        
-        for typ, ccls in intercell_annot.class_types.items():
-            
-            for cls in ccls:
-                
-                total = len(self.intercell.classes[cls])
-                in_network = len(
-                    self.intercell.classes[cls] &
-                    set(self.igraph_network.graph.vs['name'])
-                )
-                
-                self.intercell_coverages.append([
-                    typ,
-                    cls,
-                    total,
-                    in_network,
-                ])
-        
-        path = os.path.join(
-            self.tables_dir,
-            op2_settings.get('main_coverage_tsv') % self.date,
-        )
-        
-        with open(path, 'w') as fp:
-            
-            _ = fp.write('\t'.join(cov_hdr))
-            _ = fp.write('\n')
-            
-            for l in self.intercell_coverages:
-                
-                _ = fp.write('%s\t%s\t%u\t%u\n' % tuple(l))
     
     
     def collect_classes(self):

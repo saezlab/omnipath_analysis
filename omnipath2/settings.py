@@ -60,12 +60,12 @@ _defaults = {
     'complex_tsv': 'complex_summaries.tsv',
     
     # for R plotting
-    'intercell_classes_tsv': 'intercell_classes_%s.tsv',
-    'main_coverage_tsv': 'main_coverage_%s.tsv',
+    'intercell_classes_tsv': 'intercell_classes', #
+    'main_coverage_tsv': 'main_coverage_%s', #
     'intercell_network_by_resource_tsv': 'stats_by_resource_%s.tsv',
     'resources_by_entity_tsv': 'resources_by_entity_%s.tsv',
     'complexes_by_resource_tsv': 'complexes_by_resource_%s.tsv',
-    'connections_tsv': 'connections_%s_%s',
+    'connections_tsv': 'connections_%s_%s', #
     'category_overlaps_tsv': 'category_overlaps_%s.tsv',
 
     # tfregulons levels
