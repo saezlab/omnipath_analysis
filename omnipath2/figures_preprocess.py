@@ -282,6 +282,20 @@ class FiguresPreprocess(session_mod.Logger):
         self.con_omnipath_dir = len(set(zip(directed.id_a, directed.id_b)))
         self.con_omnipath_stim = (self.network.records.effect == 1).sum()
         self.con_omnipath_inh = (self.network.records.effect == -1).sum()
+        
+        self._log('Counting connections in the network.')
+        
+        op = self.data.get_db('omnipath')
+        
+        self.con_omnipath_2 = (
+            len(op.interactions_undirected()) +
+            len(op.interactions_directed())
+        )
+        self.con_omnipath_undir_2 = len(op.interactions_undirected())
+        directed = self.network.records[self.network.records.directed]
+        self.con_omnipath_dir_2 = len(op.interactions_directed())
+        self.con_omnipath_stim_2 = len(op.interactions_stimulatory())
+        self.con_omnipath_inh_2 = len(op.interactions_inhibitory())
     
     
     def print_intercell_classes(self):

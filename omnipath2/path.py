@@ -18,6 +18,7 @@
 #  Website: http://pypath.omnipathdb.org/
 #
 
+import os
 import itertools
 import time
 

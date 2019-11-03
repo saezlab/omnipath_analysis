@@ -49,6 +49,8 @@ class TableBase(omnipath2.path.PathBase):
             
             session_mod.Logger.__init__(self, name = 'op2.table')
         
+        tables_dir = tables_dir or omnipath2.data.tables_dir
+        
         for k, v in itertools.chain(iteritems(locals()), iteritems(kwargs)):
             
             # we check this because derived classes might have set

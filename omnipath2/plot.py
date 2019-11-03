@@ -281,6 +281,8 @@ class PlotBase(omnipath2.path.PathBase):
             
             session_mod.Logger.__init__(self, name = log_label or 'op2.plot')
         
+        figures_dir = figures_dir or omnipath2.data.figures_dir
+        
         for k, v in itertools.chain(iteritems(locals()), iteritems(kwargs)):
             
             # we check this because derived classes might have set
@@ -289,7 +291,7 @@ class PlotBase(omnipath2.path.PathBase):
                 
                 setattr(self, k, v)
         
-        omnipath2.path.PathBases.__init__(
+        omnipath2.path.PathBase.__init__(
             self,
             fname = self.fname,
             fname_param = self.fname_param,
@@ -357,7 +359,7 @@ class PlotBase(omnipath2.path.PathBase):
         Derived classes should override this if necessary.
         """
         
-        PathBase.main(self)
+        omnipath2.path.PathBase.main(self)
         
         self._log('Plotting to `%s`.' % self.path)
         
