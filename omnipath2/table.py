@@ -22,6 +22,8 @@ from future.utils import iteritems
 
 import itertools
 
+import pandas as pd
+
 from pypath import session_mod
 
 import omnipath2.path
@@ -87,9 +89,18 @@ class TableBase(omnipath2.path.PathBase):
         
         path = fname or self.path
         
+        if isinstance(self.data, pd.DataFrame):
+            
+            self.data.to_csv(
+                path,
+                sep = self.sep,
+                index = False,
+            )
+            return
+        
         with open(path, 'w') as fp:
             
-            if self.header:
+            if self.header is not None:
                 
                 _ = fp.write(self.sep.join(self.header))
                 _ = fp.write('\n')
@@ -101,4 +112,17 @@ class TableBase(omnipath2.path.PathBase):
                     )
                     for line in self.data
                 )
+            )
+    
+    
+    def to_data_frame(self):
+        """
+        Converts the data to ``pandas.DataFrame``.
+        """
+        
+        if not isinstance(self.data, pd.DataFrame):
+            
+            self.data = pd.DataFrame(
+                self.data,
+                columns = self.header,
             )
