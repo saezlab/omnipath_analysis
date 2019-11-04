@@ -44,12 +44,13 @@ class TableBase(omnipath2.path.PathBase):
             data = None,
             sep = '\t',
             header = True,
+            log_label = None,
             **kwargs
         ):
         
         if not hasattr(self, '_logger'):
             
-            session_mod.Logger.__init__(self, name = 'op2.table')
+            session_mod.Logger.__init__(self, name = log_label or 'op2.table')
         
         tables_dir = tables_dir or omnipath2.data.tables_dir
         

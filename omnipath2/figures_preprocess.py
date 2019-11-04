@@ -45,6 +45,7 @@ from pypath import settings
 from pypath import progress
 from pypath import data_formats
 from pypath import intera
+from pypath import common
 
 import omnipath2
 from omnipath2 import settings as op2_settings
@@ -259,6 +260,348 @@ class IntercellCoverages(omnipath2.table.TableBase):
                 ])
 
 
+class IntercellNetworkCounts(omnipath2.table.TableBase):
+    
+    
+    def __init__(
+            self,
+            network_dataset = 'omnipath',
+            only_proteins = True,
+            class_levels = None,
+            **kwargs
+        ):
+        
+        self.network_dataset = network_dataset
+        self.only_proteins = only_proteins
+        self.class_levels = common.to_set(class_levels)
+        
+        param = {
+            'fname': 'intercell_network_by_resource_tsv',
+            'fname_param': (
+                self.network_dataset,
+                'proteins' if self.only_proteins else 'all-entities',
+                (
+                    '-'.join(sorted(self.class_levels))
+                        if self.class_levels else
+                    'all-class-levels'
+                ),
+            ),
+        }
+        param.update(kwargs)
+        
+        omnipath2.table.TableBase.__init__(self, **param)
+    
+    
+    def load(self):
+        """
+        Creates a table with  a number of statistics for all pairs of
+        categories.
+        """
+        
+        def add_stats_record(
+                cls0,
+                cls1,
+                reference_set,
+            ):
+            
+            entity_type = 'protein' if self.only_proteins else None
+            
+            cls0_elements = self.intercell.get_class(
+                cls0,
+                entity_type = entity_type,
+            )
+            cls1_elements = self.intercell.get_class(
+                cls1,
+                entity_type = entity_type,
+            )
+            
+            parent0 = self.intercell.parents[cls0]
+            parent1 = self.intercell.parents[cls1]
+            
+            overlap = cls0_elements & cls1_elements
+            
+            parent0_elements = classes[parent0] if parent0 else set()
+            parent1_elements = classes[parent1] if parent1 else set()
+            
+            parent0_elements = self.intercell.get_class(
+                parent0,
+                entity_type = entity_type,
+            )
+            parent1_elements = self.intercell.get_class(
+                parent1,
+                entity_type = entity_type,
+            )
+            
+            
+            in_network = self.network.entities(entity_type = entity_type)
+            in_network0 = in_network & cls0_elements
+            in_network1 = in_network & cls1_elements
+            
+            cls01 = (cls0, cls1)
+            cls10 = (cls1, cls0)
+            
+            class_labels = self.intercell.class_labels
+            resource_labels = self.intercell.resource_labels
+            class_types = self.intercell.class_types
+            
+            self.data.append(
+                ClassesPairwiseRecord(
+                    name_cls0 = cls0,
+                    name_cls1 = cls1,
+                    cls_label0 = (
+                        class_labels[cls0] if cls0 in class_labels else ''
+                    ),
+                    cls_label1 = (
+                        class_labels[cls1] if cls1 in class_labels else ''
+                    ),
+                    src_label0 = (
+                        resource_labels[cls0]
+                            if cls0 in resource_labels else
+                        ''
+                    ),
+                    src_label1 = (
+                        resource_labels[cls1]
+                            if cls1 in resource_labels else
+                        ''
+                    ),
+                    typ_cls0 = (
+                        class_types[cls0] if cls0 in class_types else 'sub'
+                    ),
+                    typ_cls1 = (
+                        class_types[cls1] if cls1 in class_types else 'sub'
+                    ),
+                    total = len(reference_set), # total number of all proteins
+                                                # or all complexes
+                    network = len(in_network),
+                    parent0 = parent0,
+                    parent1 = parent1,
+                    # sizes
+                    size_cls0 = len(cls0_elements),
+                    size_cls1 = len(cls1_elements),
+                    overlap_cls01 = len(overlap),
+                    in_network_cls0 = len(in_network0),
+                    in_network_cls1 = len(in_network1),
+                    size_parent0 = len(parent0_elements),
+                    size_parent1 = len(parent1_elements),
+                    # connections
+                    con_all = self.con_all[cls01],
+                    con_0to1 = self.con_directed[cls01],
+                    con_0to1_stim = self.con_stimulation[cls01],
+                    con_0to1_inh = self.con_inhibition[cls01],
+                    con_1to0 = self.con_directed[cls10],
+                    con_1to0_stim = self.con_stimulation[cls10],
+                    con_1to0_inh = self.con_inhibition[cls10],
+                    # sum degrees
+                    deg_total0 = self.degree_total[cls0],
+                    deg_total1 = self.degree_total[cls1],
+                    deg_undir0 = self.degree_undirected[cls0],
+                    deg_undir1 = self.degree_undirected[cls1],
+                    deg_in0 = self.degree_in[cls0],
+                    deg_in1 = self.degree_in[cls1],
+                    deg_out0 = self.degree_out[cls0],
+                    deg_out1 = self.degree_out[cls1],
+                    deg_in0_stim = self.degree_in_stim[cls0],
+                    deg_in1_stim = self.degree_in_stim[cls1],
+                    deg_out0_stim = self.degree_out_stim[cls0],
+                    deg_out1_stim = self.degree_out_stim[cls1],
+                    deg_in0_inh = self.degree_in_inh[cls0],
+                    deg_in1_inh = self.degree_in_inh[cls1],
+                    deg_out0_inh = self.degree_out_inh[cls0],
+                    deg_out1_inh = self.degree_out_inh[cls1],
+                    con_network = self.con_network,
+                    con_network_undir = self.con_network_undir,
+                    con_network_dir = self.con_network_dir,
+                    con_network_stim = self.con_network_stim,
+                    con_network_inh = self.con_network_inh,
+                )
+            )
+        
+        
+        ClassesPairwiseRecord = collections.namedtuple(
+            'ClassesPairwiseRecord',
+            [
+                'name_cls0',
+                'name_cls1',
+                'cls_label0',
+                'cls_label1',
+                'src_label0',
+                'src_label1',
+                'typ_cls0',
+                'typ_cls1',
+                'total',
+                'network',
+                'parent0',
+                'parent1',
+                'size_cls0',
+                'size_cls1',
+                'overlap_cls01',
+                'in_network_cls0',
+                'in_network_cls1',
+                'size_parent0',
+                'size_parent1',
+                'con_all',
+                'con_0to1',
+                'con_0to1_stim',
+                'con_0to1_inh',
+                'con_1to0',
+                'con_1to0_stim',
+                'con_1to0_inh',
+                'deg_total0',
+                'deg_total1',
+                'deg_undir0',
+                'deg_undir1',
+                'deg_in0',
+                'deg_in1',
+                'deg_out0',
+                'deg_out1',
+                'deg_in0_stim',
+                'deg_in1_stim',
+                'deg_out0_stim',
+                'deg_out1_stim',
+                'deg_in0_inh',
+                'deg_in1_inh',
+                'deg_out0_inh',
+                'deg_out1_inh',
+                'con_network',
+                'con_network_undir',
+                'con_network_dir',
+                'con_network_stim',
+                'con_network_inh',
+            ],
+        )
+        
+        self.intercell = omnipath2.data.get_db('intercell')
+        self.annot = omnipath2.data.get_db('annotations')
+        self.network = omnipath2.data.get_db(self.network_dataset)
+        self.network_df = omnipath2.data.network_df(self.network_dataset)
+        self.intercell.register_network(self.network_df)
+        
+        self.count_connections_pairwise()
+        
+        self.data = []
+        
+        annot_entities = (
+            self.annot.proteins
+                if self.only_proteins else
+            self.annot.reference_set
+        )
+        classes = self.intercell.classes
+        class_labels = self.intercell.class_labels
+        resource_labels = self.intercell.resource_labels
+        network = (
+            set(self.network_df.records.id_a) |
+            set(self.network_df.records.id_b)
+        )
+        class_types = self.intercell.class_types
+        
+        self._log('Building the intercell network by resource table.')
+        
+        prg = progress.Progress(
+            len(classes.items()) ** 2 / 2,
+            'Collecting intercell categories stats',
+            1,
+            off = False,
+        )
+        
+        i_ = 0
+        
+        for cls0, cls1 in (
+            itertools.combinations_with_replacement(classes.keys(), 2)
+        ):
+            
+            i_ += 1
+            prg.step()
+            
+            add_stats_record(
+                cls0,
+                cls1,
+                annot_entities,
+            )
+            
+            if i_ == 10:
+                
+                pass
+                # break
+        
+        prg.terminate()
+        
+        self.data = pd.DataFrame(
+            self.data,
+            columns = self.data[0]._fields,
+        )
+        self.header = self.data.columns
+        
+        self._log(
+            'Finished compiling the `intercell network by resource` table.'
+        )
+    
+    
+    def count_connections_pairwise(self):
+        """
+        Counts the connections between categories pairwise.
+        """
+        
+        self._log('Counting connections between classes.')
+        
+        self.intercell_network = self.intercell.network_df(
+            only_class_levels = self.class_levels,
+            only_proteins = self.only_proteins,
+        )
+        
+        con_all = collections.defaultdict(set)
+        undirected = collections.defaultdict(set)
+        directed = collections.defaultdict(set)
+        stimulation = collections.defaultdict(set)
+        inhibition = collections.defaultdict(set)
+        
+        prg = progress.Progress(
+            self.intercell_network.shape[0],
+            'Counting connections',
+            1000,
+        )
+        
+        for i in self.intercell_network.itertuples():
+            
+            prg.step()
+            
+            sorted_tuple = tuple(sorted((i.id_a, i.id_b)))
+            
+            if not i.directed:
+                
+                undirected[(i.category_a, i.category_b)].add(sorted_tuple)
+                undirected[(i.category_b, i.category_a)].add(sorted_tuple)
+                
+            else:
+                
+                directed[(i.category_a, i.category_b)].add((i.id_a, i.id_b))
+                
+                if i.effect == 1:
+                    
+                    stimulation[(i.category_a, i.category_b)].add(
+                        (i.id_a, i.id_b)
+                    )
+                    
+                elif i.effect == -1:
+                    
+                    inhibition[(i.category_a, i.category_b)].add(
+                        (i.id_a, i.id_b)
+                    )
+            
+            con_all[(i.category_a, i.category_b)].add(sorted_tuple)
+            con_all[(i.category_b, i.category_a)].add(sorted_tuple)
+            
+        
+        prg.terminate()
+        
+        self.con_undirected = common.dict_counts(undirected)
+        self.con_directed = common.dict_counts(directed)
+        self.con_stimulation = common.dict_counts(stimulation)
+        self.con_inhibition = common.dict_counts(inhibition)
+        self.con_all = common.dict_counts(con_all)
+        
+        self._log('Finished counting connections between classes.')
+
+
 class FiguresPreprocess(session_mod.Logger):
     
     
@@ -400,14 +743,6 @@ class FiguresPreprocess(session_mod.Logger):
         self.con_omnipath_dir_2 = len(op.interactions_directed())
         self.con_omnipath_stim_2 = len(op.interactions_stimulatory())
         self.con_omnipath_inh_2 = len(op.interactions_inhibitory())
-    
-    
-    def print_intercell_classes(self):
-        
-        pprint.pprint([
-            (k, len(v))
-            for k, v in self.intercell.classes.items()
-        ])
     
     
     def collect_classes(self):

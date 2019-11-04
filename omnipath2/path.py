@@ -43,6 +43,7 @@ class PathBase(session_mod.Logger):
             filetype = 'pdf',
             target_dir = None,
             dir_timestamp = True,
+            log_label = None,
             **kwargs
         ):
         
@@ -134,4 +135,4 @@ class PathBase(session_mod.Logger):
         )
         self.path = os.path.join(self.target_dir, self.fname)
         
-        self._log('Plotting to `%s`.' % self.path)
+        self._log('Output path set: `%s`.' % self.path)

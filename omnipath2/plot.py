@@ -140,7 +140,7 @@ class PlotBase(omnipath2.path.PathBase):
             usetex = False,
             do_plot = True,
             make_plot_first = False,
-            log_label = 'plot',
+            log_label = None,
             plot_args = None,
             tight_layout = True,
             **kwargs,
