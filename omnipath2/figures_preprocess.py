@@ -22,6 +22,7 @@ from future.utils import iteritems
 
 import imp
 import os
+import gc
 import sys
 import pprint
 import copy
@@ -394,20 +395,20 @@ class IntercellNetworkCounts(omnipath2.table.TableBase):
                     # sum degrees
                     deg_total0 = self.degree_total[cls0],
                     deg_total1 = self.degree_total[cls1],
-                    deg_undir0 = self.degree_undirected[cls0],
-                    deg_undir1 = self.degree_undirected[cls1],
-                    deg_in0 = self.degree_in[cls0],
-                    deg_in1 = self.degree_in[cls1],
-                    deg_out0 = self.degree_out[cls0],
-                    deg_out1 = self.degree_out[cls1],
-                    deg_in0_stim = self.degree_in_stim[cls0],
-                    deg_in1_stim = self.degree_in_stim[cls1],
-                    deg_out0_stim = self.degree_out_stim[cls0],
-                    deg_out1_stim = self.degree_out_stim[cls1],
-                    deg_in0_inh = self.degree_in_inh[cls0],
-                    deg_in1_inh = self.degree_in_inh[cls1],
-                    deg_out0_inh = self.degree_out_inh[cls0],
-                    deg_out1_inh = self.degree_out_inh[cls1],
+                    deg_undir0 = self.degree_undirected_out[cls0],
+                    deg_undir1 = self.degree_undirected_out[cls1],
+                    deg_in0 = self.degree_idirected_in[cls0],
+                    deg_in1 = self.degree_directed_in[cls1],
+                    deg_out0 = self.degree_directed_out[cls0],
+                    deg_out1 = self.degree_directed_out[cls1],
+                    deg_in0_stim = self.degree_stimulatory_in[cls0],
+                    deg_in1_stim = self.degree_stimulatory_in[cls1],
+                    deg_out0_stim = self.degree_stimulatory_out[cls0],
+                    deg_out1_stim = self.degree_stimulatory_out[cls1],
+                    deg_in0_inh = self.degree_inhibitory_in[cls0],
+                    deg_in1_inh = self.degree_inhibitory_in[cls1],
+                    deg_out0_inh = self.degree_inhibitory_out[cls0],
+                    deg_out1_inh = self.degree_inhibitory_out[cls1],
                     con_network = self.con_network,
                     con_network_undir = self.con_network_undir,
                     con_network_dir = self.con_network_dir,
@@ -473,6 +474,10 @@ class IntercellNetworkCounts(omnipath2.table.TableBase):
         self.setup_data()
         
         self.count_connections_pairwise()
+        self.count_connections_groupwise()
+        self.count_connections()
+        self.intercell.unset_interclass_network_df()
+        gc.collect()
         
         self.data = []
         
@@ -548,6 +553,8 @@ class IntercellNetworkCounts(omnipath2.table.TableBase):
     
     def count_connections_pairwise(self):
         
+        self._log('Counting connections between classes.')
+        
         for mode in ('undirected', 'directed', 'stimulatory', 'inhibitory'):
             
             setattr(
@@ -574,6 +581,53 @@ class IntercellNetworkCounts(omnipath2.table.TableBase):
                 if cls0 != cls1
             )
         )
+    
+    
+    def count_connections_groupwise(self):
+        
+        self._log('Counting degrees by class.')
+        
+        for mode, degrees_of in (('out', 'source'), ('in', 'target')):
+            
+            for con_mode in (
+                'undirected',
+                'directed',
+                'stimulatory',
+                'inhibitory',
+            ):
+                
+                if mode == 'in' and con_mode == 'undirected':
+                    
+                    continue
+                
+                setattr(
+                    self,
+                    'degree_%s_%s' % (con_mode, mode),
+                    getattr(
+                        self.intercell,
+                        'degree_inter_class_network_%s_2' % con_mode
+                    )(degrees_of = degrees_of)
+                )
+        
+        self.degree_total = common.sum_dicts(
+            self.degree_undirected_out,
+            self.degree_directed_out,
+            self.degree_directed_in,
+        )
+    
+    
+    def count_connections(self):
+    
+        self._log('Counting connections in the network.')
+        
+        self.con_network = (
+            len(self.network.interactions_undirected()) +
+            len(self.network.interactions_directed())
+        )
+        self.con_network_undir = len(self.network.interactions_undirected())
+        self.con_network_dir = len(self.network.interactions_directed())
+        self.con_network_stim = len(self.network.interactions_stimulatory())
+        self.con_network_inh = len(self.network.interactions_inhibitory())
 
 
 class FiguresPreprocess(session_mod.Logger):
