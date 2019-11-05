@@ -470,11 +470,7 @@ class IntercellNetworkCounts(omnipath2.table.TableBase):
             ],
         )
         
-        self.intercell = omnipath2.data.get_db('intercell')
-        self.annot = omnipath2.data.get_db('annotations')
-        self.network = omnipath2.data.get_db(self.network_dataset)
-        self.network_df = omnipath2.data.network_df(self.network_dataset)
-        self.intercell.register_network(self.network_df)
+        self.setup_data()
         
         self.count_connections_pairwise()
         
@@ -536,9 +532,55 @@ class IntercellNetworkCounts(omnipath2.table.TableBase):
         )
     
     
+    def setup_data(self):
+        
+        self.intercell = omnipath2.data.get_db('intercell')
+        self.annot = omnipath2.data.get_db('annotations')
+        self.network = omnipath2.data.get_db(self.network_dataset)
+        self.network_df = omnipath2.data.network_df(self.network_dataset)
+        self.intercell.register_network(self.network_df)
+        
+        self.intercell.set_interclass_network_df(
+            only_class_levels = self.class_levels,
+            only_proteins = self.only_proteins
+        )
+    
+    
     def count_connections_pairwise(self):
+        
+        for mode in ('undirected', 'directed', 'stimulatory', 'inhibitory'):
+            
+            setattr(
+                self,
+                'con_%s' % mode,
+                collections.defaultdict(
+                    int,
+                    getattr(
+                        self.intercell,
+                        'class_to_class_connections_%s' % mode
+                    )()
+                )
+            )
+        
+        self.con_all = common.sum_dicts(
+            self.con_undirected,
+            self.con_directed,
+            dict(
+                (
+                    (cls1, cls0),
+                    val
+                )
+                for (cls0, cls1), val in iteritems(self.con_directed)
+                if cls0 != cls1
+            )
+        )
+    
+    
+    def count_connections_pairwise_old(self):
         """
         Counts the connections between categories pairwise.
+        Another method has been created for the same purpose because this
+        requires too much memory.
         """
         
         self._log('Counting connections between classes.')
@@ -600,6 +642,191 @@ class IntercellNetworkCounts(omnipath2.table.TableBase):
         self.con_all = common.dict_counts(con_all)
         
         self._log('Finished counting connections between classes.')
+
+
+    def count_connections_pairwise_old_2(self):
+        """
+        Counts the connections between categories pairwise.
+        Another method has been created for the same purposes because this
+        is too slow (pandas).
+        """
+        
+        self._log('Counting connections between classes.')
+        
+        #self.intercell_network = self.intercell.network_df(
+            #only_class_levels = self.class_levels,
+            #only_proteins = self.only_proteins,
+        #)
+        
+        self.intercell.set_interclass_network_df(
+            only_class_levels = self.class_levels,
+            only_proteins = self.only_proteins
+        )
+        
+        self.connections = {
+            'all': collections.defaultdict(int),
+            'undirected': collections.defaultdict(int),
+            'directed': collections.defaultdict(int),
+            'stimulatory': collections.defaultdict(int),
+            'inhibitory': collections.defaultdict(int),
+        }
+        modes = set(self.connections.keys()) - {'all'}
+        
+        prg = progress.Progress(
+            len(self.intercell.classes) *
+            len(self.intercell.classes) / 2,
+            'Counting connections',
+            1,
+        )
+        
+        for cls0, cls1 in itertools.combinations_with_replacement(
+            self.intercell.classes.keys(),
+            2,
+        ):
+            
+            key_cls01 = (cls0, cls1)
+            key_cls10 = (cls1, cls0)
+            
+            for key in (key_cls01, key_cls10):
+                
+                for mode in modes:
+                    
+                    if mode == 'undirected' and key == key_cls10:
+                        
+                        self.connections[mode][key] = (
+                            self.connections[mode][key_cls01]
+                        )
+                        continue
+                    
+                    self.connections[mode][key] = (
+                        getattr(
+                            self.intercell,
+                            'count_inter_class_connections_%s' % mode,
+                        )(
+                            source_classes = key[0],
+                            target_classes = key[1],
+                        )
+                    )
+            
+            self.connections['all'][key_cls01] = (
+                self.connections['undirected'][key_cls01] +
+                self.connections['directed'][key_cls01] +
+                self.connections['directed'][key_cls10]
+            )
+            
+            prg.step()
+        
+        for mode in modes:
+            
+            setattr(
+                self,
+                'con_%s' % mode,
+                self.connections[mode],
+            )
+        
+        prg.terminate()
+        
+        self.intercell.unset_interclass_network_df()
+        
+        self._log('Finished counting connections between classes.')
+    
+    
+    def count_connections_pairwise_old_3(self):
+        """
+        Counts the connections between categories pairwise.
+        Another method has been created for the same purpose because this
+        requires too much memory.
+        """
+        
+        self._log('Counting connections between classes.')
+        
+        self.intercell_network = self.intercell.network_df(
+            only_class_levels = self.class_levels,
+            only_proteins = self.only_proteins,
+        )
+        
+        con_all = collections.defaultdict(int)
+        undirected = collections.defaultdict(int)
+        directed = collections.defaultdict(int)
+        stimulation = collections.defaultdict(int)
+        inhibition = collections.defaultdict(int)
+        
+        prg = progress.Progress(
+            self.intercell_network.shape[0],
+            'Counting connections',
+            100,
+        )
+        
+        icn = self.intercell_network.values
+        i_cat_a = self.intercell_network.columns.get_loc('category_a')
+        i_cat_b = self.intercell_network.columns.get_loc('category_b')
+        i_dir = self.intercell_network.columns.get_loc('directed')
+        i_eff = self.intercell_network.columns.get_loc('effect')
+        
+        for _i in range(self.intercell_network.shape[0]):
+            
+            prg.step()
+            
+            category_a = icn[_i, i_cat_a]
+            category_b = icn[_i, i_cat_b]
+            
+            if not icn[_i, i_dir]:
+                
+                undirected[(category_a, category_b)] += 1
+                undirected[(category_b, category_a)] += 1
+                
+            else:
+                
+                directed[(category_a, category_b)] += 1
+                
+                if icn[_i, i_eff] == 1:
+                    
+                    stimulation[(category_a, category_b)] += 1
+                    
+                elif icn[_i, i_eff] == -1:
+                    
+                    inhibition[(category_a, category_b)] += 1
+            
+            con_all[(category_a, category_b)] += 1
+            con_all[(category_b, category_a)] += 1
+        
+        self.con_all = con_all
+        self.undirected = undirected
+        self.directed = directed
+        self.stimulation = stimulation
+        self.inhibition = inhibition
+        
+        prg.terminate()
+        
+        self._log('Finished counting connections between classes.')
+    
+    
+    def count_connections_pairwise(self):
+        """
+        Counts the connections between categories pairwise.
+        Another method has been created for the same purpose because this
+        requires too much memory.
+        """
+        
+        self._log('Counting connections between classes.')
+        
+        self.intercell_network = self.intercell.network_df(
+            only_class_levels = self.class_levels,
+            only_proteins = self.only_proteins,
+        )
+        
+        con_all = collections.defaultdict(int)
+        undirected = collections.defaultdict(int)
+        directed = collections.defaultdict(int)
+        stimulation = collections.defaultdict(int)
+        inhibition = collections.defaultdict(int)
+        
+        icn = self.intercell_network
+        
+        icn_undirected = icn[np.logical_not(icn.directed)]
+        
+        icn_undirected.groupby(['category_a', 'category_b', 'id_a', 'id_b']).size().groupby(level = ['category_a', 'category_b']).size()
+        )
 
 
 class FiguresPreprocess(session_mod.Logger):
