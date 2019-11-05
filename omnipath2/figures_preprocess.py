@@ -33,31 +33,14 @@ import time
 import numpy as np
 import pandas as pd
 
-from pypath import mapping
 from pypath import dataio
-from pypath import intercell_annot
-from pypath import annot
-from pypath import intercell
-from pypath import complex
-from pypath import main
-from pypath import network
-from pypath import session_mod
-from pypath import settings
 from pypath import progress
-from pypath import data_formats
-from pypath import intera
 from pypath import common
 from pypath import entity
 
 import omnipath2
 from omnipath2 import settings as op2_settings
 from omnipath2 import table
-
-def reload():
-    
-    imp.reload(intercell_annot)
-    imp.reload(annot)
-    imp.reload(intercell)
 
 
 class InterClassConnections(omnipath2.table.TableBase):
