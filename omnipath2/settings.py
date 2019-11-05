@@ -65,7 +65,7 @@ _defaults = {
     'intercell_network_by_resource_tsv': 'stats_by_resource_%s_%s_%s', #
     'resources_by_entity_tsv': 'resources_by_entity_%s', #
     'annots_by_entity_tsv': 'annotations_by_entitiy', #
-    'complexes_by_resource_tsv': 'complexes_by_resource_%s.tsv',
+    'complexes_by_resource_tsv': 'complexes_by_resource', #
     'connections_tsv': 'connections_%s_%s', #
     'category_overlaps_tsv': 'category_overlaps_%s.tsv',
 

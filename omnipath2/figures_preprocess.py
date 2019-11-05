@@ -773,6 +773,48 @@ class ResourcesByEntity(omnipath2.table.TableBase):
             columns = ResourceRecord._fields,
         )
         self.header = self.data.columns
+    
+    
+class ComplexesByResource(omnipath2.table.TableBase):
+    
+    
+    def __init__(self, **kwargs):
+        
+        param = {
+            'fname': 'complexes_by_resource_tsv',
+        }
+        param.update(kwargs)
+        
+        omnipath2.table.TableBase.__init__(self, **param)
+    
+    
+    def load(self):
+        
+        ComplexRecord = collections.namedtuple(
+            'ComplexRecord',
+            [
+                'complex_id',
+                'resource',
+            ],
+        )
+        
+        self.complexdb = omnipath2.data.get_db('complex')
+        
+        self.data = []
+        
+        for cplex_name, cplex in iteritems(self.complexdb.complexes):
+            
+            for resource in cplex.sources:
+                
+                self.data.append(
+                    ComplexRecord(
+                        complex_id = cplex.__str__(),
+                        resource = resource,
+                    )
+                )
+        
+        self.data = pd.DataFrame(self.data, columns = ComplexRecord._fields)
+        self.header = self.data.columns
 
 
 class FiguresPreprocess(session_mod.Logger):
@@ -896,78 +938,6 @@ class FiguresPreprocess(session_mod.Logger):
             for typ, ccls in intercell_annot.class_types.items()
             for cls in ccls
         )
-    
-
-    
-    
-    
-    def export_complexes_by_resource(self):
-        
-        ComplexRecord = collections.namedtuple(
-            'ComplexRecord',
-            [
-                'complex_id',
-                'resource',
-            ],
-        )
-        
-        tbl = []
-        
-        path = os.path.join(
-            self.tables_dir,
-            op2_settings.get('complexes_by_resource_tsv') % self.date,
-        )
-        
-        for cplex_name, cplex in iteritems(self.complex.complexes):
-            
-            for resource in cplex.sources:
-                
-                tbl.append(
-                    ComplexRecord(
-                        complex_id = cplex.__str__(),
-                        resource = resource,
-                    )
-                )
-        
-        df = pd.DataFrame(tbl, columns = ComplexRecord._fields)
-        
-        df.to_csv(path, index = False, sep = '\t')
-        
-        self.complexes_by_resource = df
-    
-    
-    def get_class_type(self, cls):
-        
-        return (
-            self.intercell.class_types[cls]
-                if cls in self.intercell.class_types else
-            'sub'
-        )
-    
-    
-    def get_resource_label(self, cls):
-        
-        return (
-            self.intercell.resource_labels[cls]
-                if cls in self.intercell.resource_labels else
-            ''
-        )
-    
-    
-    def get_class_label(self, cls):
-        
-        return (
-            self.intercell.class_labels[cls]
-                if cls in self.intercell.class_labels else
-            ''
-        )
-    
-    
-    def build_intercell_network(self, **kwargs):
-        
-        self._log('Building the intercell communication network.')
-        
-        self.intercell_network = self.intercell.network_df(**kwargs)
     
     
     def connections_of_category(
