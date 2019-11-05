@@ -321,18 +321,22 @@ class IntercellNetworkCounts(omnipath2.table.TableBase):
             
             overlap = cls0_elements & cls1_elements
             
-            parent0_elements = classes[parent0] if parent0 else set()
-            parent1_elements = classes[parent1] if parent1 else set()
-            
-            parent0_elements = self.intercell.get_class(
-                parent0,
-                entity_type = entity_type,
+            parent0_elements = (
+                self.intercell.get_class(
+                    parent0,
+                    entity_type = entity_type,
+                )
+                if parent0 else
+                set()
             )
-            parent1_elements = self.intercell.get_class(
-                parent1,
-                entity_type = entity_type,
+            parent1_elements = (
+                self.intercell.get_class(
+                    parent1,
+                    entity_type = entity_type,
+                )
+                if parent1 else
+                set()
             )
-            
             
             in_network = self.network.entities(entity_type = entity_type)
             in_network0 = in_network & cls0_elements
@@ -387,17 +391,17 @@ class IntercellNetworkCounts(omnipath2.table.TableBase):
                     # connections
                     con_all = self.con_all[cls01],
                     con_0to1 = self.con_directed[cls01],
-                    con_0to1_stim = self.con_stimulation[cls01],
-                    con_0to1_inh = self.con_inhibition[cls01],
+                    con_0to1_stim = self.con_stimulatory[cls01],
+                    con_0to1_inh = self.con_inhibitory[cls01],
                     con_1to0 = self.con_directed[cls10],
-                    con_1to0_stim = self.con_stimulation[cls10],
-                    con_1to0_inh = self.con_inhibition[cls10],
+                    con_1to0_stim = self.con_stimulatory[cls10],
+                    con_1to0_inh = self.con_inhibitory[cls10],
                     # sum degrees
                     deg_total0 = self.degree_total[cls0],
                     deg_total1 = self.degree_total[cls1],
                     deg_undir0 = self.degree_undirected_out[cls0],
                     deg_undir1 = self.degree_undirected_out[cls1],
-                    deg_in0 = self.degree_idirected_in[cls0],
+                    deg_in0 = self.degree_directed_in[cls0],
                     deg_in1 = self.degree_directed_in[cls1],
                     deg_out0 = self.degree_directed_out[cls0],
                     deg_out1 = self.degree_directed_out[cls1],
@@ -560,8 +564,7 @@ class IntercellNetworkCounts(omnipath2.table.TableBase):
             setattr(
                 self,
                 'con_%s' % mode,
-                collections.defaultdict(
-                    int,
+                self.int_default(
                     getattr(
                         self.intercell,
                         'class_to_class_connections_%s' % mode
@@ -569,16 +572,18 @@ class IntercellNetworkCounts(omnipath2.table.TableBase):
                 )
             )
         
-        self.con_all = common.sum_dicts(
-            self.con_undirected,
-            self.con_directed,
-            dict(
-                (
-                    (cls1, cls0),
-                    val
+        self.con_all = self.int_default(
+            common.sum_dicts(
+                self.con_undirected,
+                self.con_directed,
+                dict(
+                    (
+                        (cls1, cls0),
+                        val
+                    )
+                    for (cls0, cls1), val in iteritems(self.con_directed)
+                    if cls0 != cls1
                 )
-                for (cls0, cls1), val in iteritems(self.con_directed)
-                if cls0 != cls1
             )
         )
     
@@ -603,16 +608,20 @@ class IntercellNetworkCounts(omnipath2.table.TableBase):
                 setattr(
                     self,
                     'degree_%s_%s' % (con_mode, mode),
-                    getattr(
-                        self.intercell,
-                        'degree_inter_class_network_%s_2' % con_mode
-                    )(degrees_of = degrees_of)
+                    self.int_default(
+                        getattr(
+                            self.intercell,
+                            'degree_inter_class_network_%s_2' % con_mode
+                        )(degrees_of = degrees_of)
+                    )
                 )
         
-        self.degree_total = common.sum_dicts(
-            self.degree_undirected_out,
-            self.degree_directed_out,
-            self.degree_directed_in,
+        self.degree_total = self.int_default(
+            common.sum_dicts(
+                self.degree_undirected_out,
+                self.degree_directed_out,
+                self.degree_directed_in,
+            )
         )
     
     
@@ -628,6 +637,12 @@ class IntercellNetworkCounts(omnipath2.table.TableBase):
         self.con_network_dir = len(self.network.interactions_directed())
         self.con_network_stim = len(self.network.interactions_stimulatory())
         self.con_network_inh = len(self.network.interactions_inhibitory())
+    
+    
+    @staticmethod
+    def int_default(d):
+        
+        return collections.defaultdict(int, d)
 
 
 class FiguresPreprocess(session_mod.Logger):

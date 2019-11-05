@@ -91,7 +91,10 @@ class PathBase(session_mod.Logger):
             
             self.target_dir = target_dir or op2_settings.get(target_dir)
             
-            if self.dir_timestamp:
+            if (
+                self.dir_timestamp and
+                os.path.split(self.target_dir)[-1] != self.timestamp
+            ):
                 
                 self.target_dir = os.path.join(
                     self.target_dir,

@@ -114,6 +114,8 @@ class TableBase(omnipath2.path.PathBase):
                     for line in self.data
                 )
             )
+        
+        self._log('Table has been written to `%s`.' % path)
     
     
     def to_data_frame(self):
