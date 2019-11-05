@@ -47,6 +47,7 @@ from pypath import progress
 from pypath import data_formats
 from pypath import intera
 from pypath import common
+from pypath import entity
 
 import omnipath2
 from omnipath2 import settings as op2_settings
@@ -645,6 +646,71 @@ class IntercellNetworkCounts(omnipath2.table.TableBase):
         return collections.defaultdict(int, d)
 
 
+class AnnotationsByEntity(omnipath2.table.TableBase):
+    
+    
+    def __init__(self, **kwargs):
+        
+        param = {
+            'fname': 'annots_by_entity_tsv',
+        }
+        param.update(kwargs)
+        
+        omnipath2.table.TableBase.__init__(self, **param)
+    
+    
+    def load(self):
+        
+        self.complexdb = omnipath2.data.get_db('complex')
+        self.annotdb = omnipath2.data.get_db('annotations')
+        self.intercell = omnipath2.data.get_db('intercell')
+        
+        all_proteins = set(dataio.all_uniprots(swissprot = True))
+        all_complexes = set(self.complexdb.complexes.keys())
+        annotations = list(self.intercell.classes.keys())
+        
+        AnnotationRecord = collections.namedtuple(
+            'AnnotationRecord',
+            [
+                'entity_id',
+                'is_complex',
+                'cls',
+                'parent',
+                'resource_label',
+                'class_label',
+                'class_type',
+            ],
+        )
+        
+        self.data = []
+        
+        for cls, elements in iteritems(self.intercell.classes):
+            
+            for elem in elements:
+                
+                self.data.append(
+                    AnnotationRecord(
+                        entity_id = elem.__str__(),
+                        is_complex = (
+                            entity.Entity._get_entity_type(elem) == 'complex'
+                        ),
+                        cls = cls,
+                        parent = self.intercell.parents[cls],
+                        resource_label = (
+                            self.intercell.get_resource_label(cls)
+                        ),
+                        class_label = self.intercell.get_class_label(cls),
+                        class_type = self.intercell.get_class_type(cls),
+                    )
+                )
+        
+        self.data = pd.DataFrame(
+            self.data,
+            columns = AnnotationRecord._fields
+        )
+        self.header = self.data.columns
+
+
 class FiguresPreprocess(session_mod.Logger):
     
     
@@ -768,54 +834,7 @@ class FiguresPreprocess(session_mod.Logger):
         )
     
     
-    def export_annotations_by_entity(self):
-        
-        all_proteins = set(dataio.all_uniprots(swissprot = True))
-        all_complexes = set(self.complex.complexes.keys())
-        annotations = list(self.intercell.classes.keys())
-        resources = list(self.network.resources)
-        
-        AnnotationRecord = collections.namedtuple(
-            'AnnotationRecord',
-            [
-                'entity_id',
-                'is_complex',
-                'cls',
-                'parent',
-                'resource_label',
-                'class_label',
-                'class_type',
-            ],
-        )
-        
-        tbl = []
-        
-        path = os.path.join(
-            self.datadir,
-            'annotations_by_entity_%s.tsv' % self.date,
-        )
-        
-        for cls, elements in iteritems(self.intercell.classes):
-            
-            for elem in elements:
-                
-                tbl.append(
-                    AnnotationRecord(
-                        entity_id = elem.__str__(),
-                        is_complex = isinstance(elem, intera.Complex),
-                        cls = cls,
-                        parent = self.intercell.parents[cls],
-                        resource_label = self.get_resource_label(cls),
-                        class_label = self.get_class_label(cls),
-                        class_type = self.get_class_type(cls),
-                    )
-                )
-        
-        df = pd.DataFrame(tbl, columns = AnnotationRecord._fields)
-        
-        df.to_csv(path, index = False, sep = '\t')
-        
-        self.annotations_by_entity = df
+    
     
     
     def export_resources_by_entity(self):
