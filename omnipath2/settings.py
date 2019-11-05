@@ -67,7 +67,7 @@ _defaults = {
     'annots_by_entity_tsv': 'annotations_by_entitiy', #
     'complexes_by_resource_tsv': 'complexes_by_resource', #
     'connections_tsv': 'connections_%s_%s', #
-    'category_overlaps_tsv': 'category_overlaps_%s.tsv',
+    'category_overlaps_tsv': 'category_overlaps',
 
     # tfregulons levels
     'tfregulons_levels': {'A', 'B', 'C', 'D'},

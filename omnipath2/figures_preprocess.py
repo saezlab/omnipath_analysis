@@ -817,70 +817,52 @@ class ComplexesByResource(omnipath2.table.TableBase):
         self.header = self.data.columns
 
 
-class FiguresPreprocess(session_mod.Logger):
+class InterClassOverlaps(omnipath2.table.TableBase):
     
     
-    def __init__(self, network_dataset = 'omnipath'):
+    def __init__(self, **kwargs):
         
-        session_mod.Logger.__init__(self, name = 'op2.fig_preproc')
+        param = {
+            'fname': 'category_overlaps_tsv',
+            'header': [
+                'cat0', 'cat1', 'size0', 'size1', 'total', 'overlap',
+            ],
+        }
+        param.update(kwargs)
         
-        self.data = omnipath2.data
-        self.date = time.strftime('%Y%m%d')
-        self.network_dataset = network_dataset
-    
-    
-    def reload(self):
-        """
-        Reloads the object from the module level.
-        """
-
-        modname = self.__class__.__module__
-        mod = __import__(modname, fromlist = [modname.split('.')[0]])
-        imp.reload(mod)
-        new = getattr(mod, self.__class__.__name__)
-        setattr(self, '__class__', new)
-        
-        for attr in (
-            'complex',
-            'network',
-            'igraph_network',
-            'annot',
-            'intercell',
-        ):
-            
-            if hasattr(self, attr):
-                
-                getattr(self, attr).reload()
-    
-    
-    def main(self):
-        
-        self.setup()
-        self.load()
-        self.build()
-        self.export_tables()
-    
-    
-    def setup(self):
-        
-        self.figures_dir = self.data.figures_dir
-        self.tables_dir = self.data.tables_dir
+        omnipath2.table.TableBase.__init__(self, **param)
     
     
     def load(self):
         
-        self.load_complex()
-        self.load_annot()
-        self.load_intercell()
-        self.load_network()
-    
-    
-    def build(self):
+        self.intercell = omnipath2.data.get_db('intercell')
         
-        self.count_connections()
-        self.build_intercell_network()
-        self.count_connections_groupwise()
-        self.count_connections_pairwise()
+        self.data = []
+        
+        for c0, c1 in (
+            itertools.product(
+                self.intercell.class_names,
+                self.intercell.class_names,
+            )
+        ):
+            
+            if (
+                self.intercell.class_types[c0] == 'above_main' or
+                self.intercell.class_types[c1] == 'above_main'
+            ):
+                continue
+            
+            self.data.append([
+                c0,
+                c1,
+                len(self.intercell.classes[c0]),
+                len(self.intercell.classes[c1]),
+                len(self.intercell.classes[c0] | self.intercell.classes[c1]),
+                len(self.intercell.classes[c0] & self.intercell.classes[c1]),
+            ])
+
+
+class FiguresPreprocess(session_mod.Logger):
     
     
     def export_tables(self):
@@ -1095,48 +1077,3 @@ class FiguresPreprocess(session_mod.Logger):
     def add_intercell_network_stats(self):
         
         self.intercell_network.groupby(by = 'pair')
-    
-    
-    def export_overlaps(self):
-        
-        # overlaps between categories
-        cat_overlap_hdr = [
-            'cat0', 'cat1', 'size0', 'size1', 'total', 'overlap'
-        ]
-        self.category_overlaps = []
-        
-        for c0, c1 in (
-            itertools.product(
-                self.intercell.class_names,
-                self.intercell.class_names,
-            )
-        ):
-            
-            if (
-                self.intercell.class_types[c0] == 'above_main' or
-                self.intercell.class_types[c1] == 'above_main'
-            ):
-                continue
-            
-            self.category_overlaps.append([
-                c0,
-                c1,
-                len(self.intercell.classes[c0]),
-                len(self.intercell.classes[c1]),
-                len(self.intercell.classes[c0] | self.intercell.classes[c1]),
-                len(self.intercell.classes[c0] & self.intercell.classes[c1]),
-            ])
-        
-        path = os.path.join(
-            self.tables_dir,
-            op2_settings.get('category_overlaps_tsv') % self.date,
-        )
-        
-        with open(path, 'w') as fp:
-            
-            _ = fp.write('\t'.join(cat_overlap_hdr))
-            _ = fp.write('\n')
-            
-            for c_ol in self.category_overlaps:
-                
-                _ = fp.write('%s\t%s\t%u\t%u\t%u\t%u\n' % tuple(c_ol))
