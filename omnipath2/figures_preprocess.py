@@ -691,9 +691,7 @@ class AnnotationsByEntity(omnipath2.table.TableBase):
                 self.data.append(
                     AnnotationRecord(
                         entity_id = elem.__str__(),
-                        is_complex = (
-                            entity.Entity._get_entity_type(elem) == 'complex'
-                        ),
+                        is_complex = entity.Entity._is_complex(elem),
                         cls = cls,
                         parent = self.intercell.parents[cls],
                         resource_label = (
@@ -707,6 +705,72 @@ class AnnotationsByEntity(omnipath2.table.TableBase):
         self.data = pd.DataFrame(
             self.data,
             columns = AnnotationRecord._fields
+        )
+        self.header = self.data.columns
+
+
+class ResourcesByEntity(omnipath2.table.TableBase):
+    
+    
+    def __init__(self, network_dataset = 'omnipath', **kwargs):
+        
+        self.network_dataset = network_dataset
+        
+        param = {
+            'fname': 'resources_by_entity_tsv',
+            'fname_param': (
+                self.network_dataset,
+            )
+        }
+        param.update(kwargs)
+        
+        omnipath2.table.TableBase.__init__(self, **param)
+    
+    
+    def load(self):
+        
+        ResourceRecord = collections.namedtuple(
+            'ResourceRecord',
+            [
+                'entity_id',
+                'resource',
+                'is_complex',
+                'resource_class',
+            ],
+        )
+        
+        self.network = omnipath2.data.network_df(self.network_dataset)
+        
+        all_entities = set(
+            itertools.chain(
+                *self.network.records[['id_a', 'id_b']].values
+            )
+        )
+        
+        entities_by_resource = self.network.entities_by_resource()
+        
+        self.data = []
+        
+        for resource, entities in iteritems(entities_by_resource):
+            
+            for entity_id in entities:
+                
+                self.data.append(
+                    ResourceRecord(
+                        entity_id = entity_id,
+                        resource = resource,
+                        is_complex = entity.Entity._is_complex(entity_id),
+                        resource_class = (
+                            data_formats.categories[resource]
+                                if resource in data_formats.categories else
+                            'z'
+                        ),
+                    )
+                )
+        
+        self.data = pd.DataFrame(
+            self.data,
+            columns = ResourceRecord._fields,
         )
         self.header = self.data.columns
 
@@ -833,60 +897,8 @@ class FiguresPreprocess(session_mod.Logger):
             for cls in ccls
         )
     
+
     
-    
-    
-    
-    def export_resources_by_entity(self):
-        
-        ResourceRecord = collections.namedtuple(
-            'ResourceRecord',
-            [
-                'entity_id',
-                'resource',
-                'is_complex',
-                'resource_class',
-            ],
-        )
-        
-        
-        all_entities = set(
-            itertools.chain(
-                *self.network.records[['id_a', 'id_b']].values
-            )
-        )
-        
-        entities_by_resource = self.network.entities_by_resource()
-        
-        tbl = []
-        
-        path = os.path.join(
-            self.tables_dir,
-            op2_settings.get('resources_by_entity_tsv') % self.date,
-        )
-        
-        for resource, entities in iteritems(entities_by_resource):
-            
-            for entity_id in entities:
-                
-                tbl.append(
-                    ResourceRecord(
-                        entity_id = entity_id,
-                        resource = resource,
-                        is_complex = entity_id.startswith('COMPLEX'),
-                        resource_class = (
-                            data_formats.categories[resource]
-                                if resource in data_formats.categories else
-                            'z'
-                        ),
-                    )
-                )
-        
-        df = pd.DataFrame(tbl, columns = ResourceRecord._fields)
-        
-        df.to_csv(path, index = False, sep = '\t')
-        
-        self.resources_by_entity = df
     
     
     def export_complexes_by_resource(self):
