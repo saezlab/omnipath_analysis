@@ -67,7 +67,7 @@ _defaults = {
     'annots_by_entity_tsv': 'annotations_by_entitiy', #
     'complexes_by_resource_tsv': 'complexes_by_resource', #
     'connections_tsv': 'connections_%s_%s', #
-    'category_overlaps_tsv': 'category_overlaps',
+    'category_overlaps_tsv': 'category_overlaps', #
 
     # tfregulons levels
     'tfregulons_levels': {'A', 'B', 'C', 'D'},
@@ -139,7 +139,8 @@ _defaults = {
     'annot_entities_by_resource_pdf': 'annot_%s_by_resource',
     'annot_records_by_resource_pdf': 'annot_%s_records_by_resource',
     'annot_entities_in_network_pdf': 'annot_%s_in_network_%s',
-    'netw_edge_node_counts_pdf': 'nodes_edges_%s',
+    'netw_node_edge_counts_pdf': 'nodes_edges_%s',
+    'complexes_by_resource_pdf': 'complexes_by_resource',
     
     # default palette
     'palette': 'Nico_3',

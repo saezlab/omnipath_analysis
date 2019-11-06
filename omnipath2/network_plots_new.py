@@ -80,6 +80,7 @@ class CountsBase(plot.PlotBase):
             split_by_categories = True,
             order_by = ('entities', 'by_resource'),
             palette = None,
+            share_xaxis = True,
             **kwargs
         ):
         
@@ -91,12 +92,11 @@ class CountsBase(plot.PlotBase):
         self.split_by_categories = split_by_categories
         self.order_by = order_by
         self.palette = palette
+        self.share_xaxis = share_xaxis
         
         cols = len(variables2)
         
         param = {
-            'fname': 'netw_edge_node_counts_pdf',
-            'fname_param': (self.network_dataset,),
             'ylab': 'Resources',
             'height': 9,
             'width': 3 * cols,
@@ -229,7 +229,8 @@ class CountsBase(plot.PlotBase):
                             np.array([True] * len(tick_loc))
                         ],
                         color = self.colors[ivar1][ivar2],
-                        #facecolors = 'none',
+                        # for scatterplot:
+                        # facecolors = 'none',
                     )
                 
                 self.ax.set_yticks(tick_loc)
@@ -266,7 +267,7 @@ class CountsBase(plot.PlotBase):
                     
                     self.ax.get_yaxis().label.set_visible(False)
                 
-                if icat != self.grid_rows - 1:
+                if self.share_xaxis and icat != self.grid_rows - 1:
                     
                     self.ax.set_xticklabels([])
                     self.ax.get_xaxis().label.set_visible(False)
@@ -274,22 +275,40 @@ class CountsBase(plot.PlotBase):
                 else:
                     
                     self.ax.set_xlabel(
-                        'Number of %s' % var1.replace('_', ' ')
+                        'Number of %s' % ' '.join(reversed(var1.split('_')))
                     )
+        
+        if self.share_xaxis:
+            
+            for ivar1 in range(len(self.variables)):
+                
+                xmins, xmaxs = zip(*(
+                    self.axes[ivar2][ivar1].get_xlim()
+                    for ivar2 in range(len(self.variables2[ivar1]))
+                ))
+                
+                xmin = min(xmins)
+                xmax = max(xmaxs)
+                
+                _ = list(
+                    self.axes[ivar2][ivar1].set_xlim(xmin, xmax)
+                    for ivar2 in range(len(self.variables2[ivar1]))
+                )
 
 
-class EdgeNodeCounts(CountsBases):
+class EdgeNodeCounts(CountsBase):
     
     
     def __init__(
         self,
+        network_dataset = 'omnipath',
         **kwargs
     ):
         
         param = {
             'variables': (
                 'entities',
-                'interactions_undirected',
+                'interactions_all',
             ),
             'variables2': (
                 (
@@ -304,6 +323,8 @@ class EdgeNodeCounts(CountsBases):
                 ),
             ),
             'fname': 'netw_node_edge_counts_pdf',
+            'fname_param': (network_dataset,),
+            'network_dataset': network_dataset,
         }
         param.update(kwargs)
         
