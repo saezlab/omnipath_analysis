@@ -17,7 +17,7 @@
 
 import os
 import sys
-import imp
+import importlib as imp
 import time
 import pprint
 import copy

@@ -17,7 +17,7 @@
 
 import os
 import re
-import imp
+import importlib as imp
 import collections
 
 import matplotlib as mpl

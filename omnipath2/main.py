@@ -18,7 +18,7 @@
 #  Website: http://pypath.omnipathdb.org/
 #
 
-import imp
+import importlib as imp
 
 from pypath import session_mod
 

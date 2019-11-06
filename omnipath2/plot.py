@@ -20,7 +20,7 @@
 
 from future.utils import iteritems
 
-import imp
+import importlib as imp
 import os
 import time
 import copy
