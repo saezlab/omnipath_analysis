@@ -116,3 +116,10 @@ a timestamp can be added to each file name. The timestamps by default are
 an 8 digit representation of the date, so every day a new directory will
 be started (except if you keep running the same session over midnight, then
 still the old directory will be used).
+
+## Resource usage
+
+With all databases loaded Python requires maybe around 5G memory.
+The inter-cellular network data frame requires little more than 1G.
+`pandas` operations can result 1-3G peaks on top of that baseline.
+Overall it's good to have 8G RAM available.
