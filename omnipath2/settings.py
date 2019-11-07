@@ -49,15 +49,11 @@ _defaults = {
     'mirna_mrna_pickle': 'mirna_mrna.pickle',
 
     # supplementary tables
-    'omnipath_tsv': 'network_summaries.tsv',
-    'curated_tsv': 'network-curated_summaries.tsv',
-    'tf_target_tsv': 'network-tf.tsv',
-    'mirna_mrna_tsv': 'network-mirna-target_summaries.tsv',
-    'tf_mirna_tsv': 'network-tf-mirna_summaries.tsv',
-    'annotations_tsv': 'annotations.tsv',
-    'enz_sub_tsv': 'enzsub_summaries.tsv',
-    'intercell_tsv': 'intercell_summaries.tsv',
-    'complex_tsv': 'complex_summaries.tsv',
+    'network_s2_tsv': 'S2_network_%s',
+    'enzsub_s3_tsv': 'S3_enz-sub',
+    'complexes_s4_tsv': 'S4_complexes',
+    'annotations_s5_tsv': 'S5_annotations',
+    'intercell_s6_tsv': 'S6_intercell',
     
     # for R plotting
     'intercell_classes_tsv': 'intercell_classes', #
