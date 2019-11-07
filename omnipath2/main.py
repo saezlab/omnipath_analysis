@@ -260,8 +260,84 @@ workflow = collections.OrderedDict(
                     'tf_target',
                 ),
             ),
-            name = 'Annotation network overlap plot'
+            name = 'Annotation network overlap plot',
         ),
+    ),
+    
+    network_plots = (
+        Task(
+            method = network_plots.EdgeNodeCounts,
+            param = ProductParam(
+                network_dataset = (
+                    'omnipath',
+                    'curated',
+                    'tf_target',
+                ),
+                share_xaxis = (
+                    True,
+                    False,
+                ),
+            ),
+            name = 'Network node and edge counts plot',
+        ),
+    ),
+    
+    intercell_plots = (
+        Task(
+            method = intercell_plots.IntercellDegreeHisto,
+            param = (
+                Param(
+                    class0 = 'ligand',
+                    class1 = 'receptor',
+                ),
+                ProductParam(
+                    network_dataset = (
+                        'omnipath',
+                        'curated',
+                    ),
+                ),
+            ),
+            name = 'Ligand-receptor degrees histogram',
+        ),
+        Task(
+            method = intercell_plots.CountsByClass,
+            param = ProductParam(
+                entity_type = (
+                    'protein',
+                    {'protein', 'complex'},
+                ),
+            ),
+            name = 'Counts by intercell class plot',
+        ),
+        Task(
+            method = intercell_plots.CountsByResource,
+            param = ProductParam(
+                entity_type = (
+                    'protein',
+                    {'protein', 'complex'},
+                ),
+            ),
+            name = 'Counts by intercell resource plot',
+        ),
+        Task(
+            method = intercell_plots.ClassSimilarities,
+            name = 'Intercell class similarities plot',
+        ),
+        Task(
+            method = intercell_plots.InterclassChordplot,
+            param = ProductParam(
+                network_dataset = (
+                    'omnipath',
+                    'curated',
+                ),
+                only_directed = (
+                    True,
+                    False,
+                ),
+            ),
+            name = 'Intercell class connections chordplot',
+        ),
+        
     ),
     
 )
