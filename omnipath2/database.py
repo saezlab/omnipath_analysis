@@ -100,7 +100,7 @@ class Database(session_mod.Logger):
                 self.remove_db(dataset)
                 self.build_dataset(dataset)
                 
-            elif not hasattr(self, dataset):
+            elif not hasattr(self, dataset) or force_reload:
                 
                 self.load_dataset(dataset)
     
