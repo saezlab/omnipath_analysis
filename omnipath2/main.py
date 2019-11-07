@@ -26,13 +26,15 @@ from pypath import session_mod
 
 import omnipath2
 from omnipath2 import settings as op2_settings
-from omnipath2 import figures_preprocess
+from omnipath2 import r_preprocess
 from omnipath2 import annotation_plots
 from omnipath2 import intercell_plots
 from omnipath2 import network_plots
+from omnipath2 import complexes_plots
+from omnipath2 import supptables
 
 
-_logger = session_mod.Logger(name = 'dataio')
+_logger = session_mod.Logger(name = 'op2.main')
 _log = _logger._log
 
 
@@ -51,6 +53,34 @@ class ProductParam(object):
             yield dict(zip(self.args, val))
 
 
+class IterParam(object):
+    
+    
+    def __init__(self, *args):
+        
+        self.args = args
+    
+    
+    def __iter__(self):
+        
+        for arg in self.args:
+            
+            yield arg
+
+
+class Param(object):
+    
+    
+    def __init__(self, **kwargs):
+        
+        self.param = kwargs
+    
+    
+    def __iter__(self):
+        
+        yield self.param
+
+
 class Task(
     collections.namedtuple(
         'TaskBase',
@@ -63,17 +93,76 @@ class Task(
 ):
     
     
+    def __new__(cls, method, param = None, name = 'unknown'):
+        
+        param = param or Param()
+        
+        if not isinstance(param, (tuple, list)):
+            
+            param = param,
+        
+        return super(Task, cls).__new__(cls, method, param, name)
+    
+    
     def run(self):
         
         _log('Running task `%s`.' % self.name)
         
-        self.method(**self.param)
+        for param in itertools.product(*self.param):
+            
+            param = dict(itertools.chain(*(par.items() for par in param)))
+            
+            _log(
+                'Running with param `%s`.' % (
+                    ', '.join(
+                        '%s=%s' % (name, str(value))
+                        for name, value in param.items()
+                    )
+                )
+            )
+            
+            self.method(**param)
         
         _log('Task `%s` finished.' % self.name)
 
 
 workflow = (
-    
+    Task(
+        method = supptables.NetworkS2_PPIall,
+        name = 'Supp Table S2, network all PPI',
+    ),
+    Task(
+        method = supptables.NetworkS2_PPIcurated,
+        name = 'Supp Table S2, network curated PPI',
+    ),
+    Task(
+        method = supptables.NetworkS2_TFtarget,
+        name = 'Supp Table S2, TF-target network',
+    ),
+    Task(
+        method = supptables.NetworkS2_miRNAmRNA,
+        name = 'Supp Table S2, miRNA-mRNA network',
+    ),
+    Task(
+        method = supptables.NetworkS2_TFmiRNA,
+        name = 'Supp Table S2, TF-miRNA network',
+    ),
+    Task(
+        method = supptables.EnzSubS3,
+        name = 'Supp Table S3, enzyme-substrate',
+    ),
+    Task(
+        method = supptables.ComplexesS4,
+        name = 'Supp Table S4, complexes',
+    ),
+    Task(
+        method = supptables.AnnotationsS5,
+        name = 'Supp Table S5, annotations',
+    ),
+    Task(
+        method = supptables.IntercellS6,
+        name = 'Supp Table S6, intercell',
+    ),
 )
 
 
@@ -85,7 +174,7 @@ class Main(session_mod.Logger):
         session_mod.Logger.__init__(self, name = 'op2.main')
         
         self._log(
-            'OmniPath2 analysis and figures '
+            'The OmniPath2 analysis and figures '
             'integrated workflow has been initialized.'
         )
     
@@ -94,66 +183,43 @@ class Main(session_mod.Logger):
         """
         Reloads the object from the module level.
         """
-
+        
+        omnipath2.data.reload()
+        omnipath2.colors.reload()
+        
+        modules = (
+            op2_settings,
+            r_preprocess,
+            network_plots,
+            annotation_plots,
+            complexes_plots,
+            intercell_plots,
+            supptables,
+        )
+        
+        for mod in modules:
+            
+            imp.reload(mod)
+        
+        for dataset in omnipath2.data.datasets:
+            
+            if hasattr(omnipath2.data, dataset):
+                
+                getattr(omnipath2.data, dataset).reload()
+        
         modname = self.__class__.__module__
         mod = __import__(modname, fromlist = [modname.split('.')[0]])
         imp.reload(mod)
         new = getattr(mod, self.__class__.__name__)
         setattr(self, '__class__', new)
-        
-        for obj in ('data', 'figpreproc'):
-            
-            if hasattr(self, obj):
-                
-                getattr(self, obj).reload()
     
     
     def main(self):
         
-        self.load_data()
-        self.data_for_r_plotting()
-        self.run_r()
-        self.make_annotation_plots()
-        self.make_intercell_plots()
-        self.make_network_plots()
-    
-    
-    def load_data(self):
+        self._log('Beginning workflow.')
         
-        self._log('Loading all databases.')
+        for task in workflow:
+            
+            task.run()
         
-        self.data = omnipath2.data
-        self.data.build()
-    
-    
-    def data_for_r_plotting(self):
-        
-        self._log(
-            'Creating `FiguresPreprocess` object '
-            'for exporting tables for R plotting.'
-        )
-        self.figpreproc = figures_preprocess.FiguresPreprocess()
-    
-    
-    def run_r(self):
-        
-        self._log('Running R plotting methods.')
-        
-        pass
-    
-    
-    def make_annotation_plots(self):
-        
-        self.annotation_plots = annotation_plots_new.AnnotationPlots()
-        self.annotation_plots.main()
-    
-    
-    def make_intercell_plots(self):
-        
-        self.intercell_plots = intercell_plots_new.IntercellPlots()
-        self.intercell_plots.main()
-    
-    
-    def make_network_plots(self):
-        
-        self.network_plots = network_plots_new.NetworkPlots()
+        self._log('Workflow finished.')

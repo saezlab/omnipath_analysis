@@ -45,6 +45,7 @@ class TableBase(omnipath2.path.PathBase):
             sep = '\t',
             header = True,
             log_label = None,
+            run = True,
             **kwargs
         ):
         
@@ -71,6 +72,10 @@ class TableBase(omnipath2.path.PathBase):
             filetype = self.filetype,
             target_dir = self.tables_dir,
         )
+        
+        if run:
+            
+            self.main()
     
     
     def main(self):
