@@ -31,7 +31,7 @@ class SuppTableBase(omnipath2.table.TableBase):
         param = {}
         param.update(kwargs)
         
-        omnipath2.table.TableBase.__init__(**param)
+        omnipath2.table.TableBase.__init__(self, **param)
     
     
     def load(self):
@@ -40,7 +40,8 @@ class SuppTableBase(omnipath2.table.TableBase):
         
         self.database.update_summaries()
         
-        self.data = self.network.summaries_tab(return_table = True)
+        self.data = self.database.summaries_tab(return_table = True)
+        self.header = self.data.pop(0)
 
 
 class NetworkS2(SuppTableBase):
@@ -51,12 +52,12 @@ class NetworkS2(SuppTableBase):
         param = {
             'fname': 'network_s2_tsv',
             'fname_param': (
-                self.dataset,
+                kwargs['dataset'],
             ),
         }
         param.update(kwargs)
         
-        SuppTableBase.__init__(**param)
+        SuppTableBase.__init__(self, **param)
 
 
 class NetworkS2_PPIall(NetworkS2):
@@ -69,7 +70,7 @@ class NetworkS2_PPIall(NetworkS2):
         }
         param.update(kwargs)
         
-        NetworkS2.__init__(**param)
+        NetworkS2.__init__(self, **param)
 
 
 class NetworkS2_PPIcurated(NetworkS2):
@@ -82,7 +83,7 @@ class NetworkS2_PPIcurated(NetworkS2):
         }
         param.update(kwargs)
         
-        NetworkS2.__init__(**param)
+        NetworkS2.__init__(self, **param)
 
 
 class NetworkS2_TFtarget(NetworkS2):
@@ -95,7 +96,7 @@ class NetworkS2_TFtarget(NetworkS2):
         }
         param.update(kwargs)
         
-        NetworkS2.__init__(**param)
+        NetworkS2.__init__(self, **param)
 
 
 class NetworkS2_miRNAmRNA(NetworkS2):
@@ -108,7 +109,7 @@ class NetworkS2_miRNAmRNA(NetworkS2):
         }
         param.update(kwargs)
         
-        NetworkS2.__init__(**param)
+        NetworkS2.__init__(self, **param)
 
 
 class NetworkS2_TFmiRNA(NetworkS2):
@@ -121,7 +122,7 @@ class NetworkS2_TFmiRNA(NetworkS2):
         }
         param.update(kwargs)
         
-        NetworkS2.__init__(**param)
+        NetworkS2.__init__(self, **param)
 
 
 class EnzSubS3(SuppTableBase):
@@ -135,7 +136,7 @@ class EnzSubS3(SuppTableBase):
         }
         param.update(kwargs)
         
-        SuppTableBase.__init__(**param)
+        SuppTableBase.__init__(self, **param)
 
 
 class ComplexesS4(SuppTableBase):
@@ -149,7 +150,7 @@ class ComplexesS4(SuppTableBase):
         }
         param.update(kwargs)
         
-        SuppTableBase.__init__(**param)
+        SuppTableBase.__init__(self, **param)
 
 
 class AnnotationsS5(SuppTableBase):
@@ -163,7 +164,7 @@ class AnnotationsS5(SuppTableBase):
         }
         param.update(kwargs)
         
-        SuppTableBase.__init__(**param)
+        SuppTableBase.__init__(self, **param)
 
 
 class IntercellS6(SuppTableBase):
@@ -177,4 +178,4 @@ class IntercellS6(SuppTableBase):
         }
         param.update(kwargs)
         
-        SuppTableBase.__init__(**param)
+        SuppTableBase.__init__(self, **param)
