@@ -19,16 +19,62 @@
 #
 
 import importlib as imp
+import collections
+import itertools
 
 from pypath import session_mod
 
 import omnipath2
 from omnipath2 import settings as op2_settings
 from omnipath2 import figures_preprocess
-from omnipath2 import annotation_plots_new
-from omnipath2 import intercell_plots_new
-from omnipath2 import network_plots_new
+from omnipath2 import annotation_plots
+from omnipath2 import intercell_plots
+from omnipath2 import network_plots
 
+
+_logger = session_mod.Logger(name = 'dataio')
+_log = _logger._log
+
+
+class ProductParam(object):
+    
+    
+    def __init__(self, **kwargs):
+        
+        self.args, self.values = tuple(zip(*kwargs.items()))
+    
+    
+    def __iter__(self):
+        
+        for val in itertools.product(*self.values):
+            
+            yield dict(zip(self.args, val))
+
+
+class Task(
+    collections.namedtuple(
+        'TaskBase',
+        [
+            'method',
+            'param',
+            'name',
+        ],
+    )
+):
+    
+    
+    def run(self):
+        
+        _log('Running task `%s`.' % self.name)
+        
+        self.method(**self.param)
+        
+        _log('Task `%s` finished.' % self.name)
+
+
+workflow = (
+    
+)
 
 
 class Main(session_mod.Logger):
