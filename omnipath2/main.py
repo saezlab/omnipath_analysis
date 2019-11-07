@@ -22,6 +22,7 @@ import importlib as imp
 import collections
 import itertools
 
+from pypath import common
 from pypath import session_mod
 
 import omnipath2
@@ -177,6 +178,7 @@ workflow = collections.OrderedDict(
                     'tf_target',
                 ),
                 mode = (
+                    'all',
                     'undirected',
                     'directed',
                     'stimulatory',
@@ -185,7 +187,55 @@ workflow = collections.OrderedDict(
             ),
             name = 'Inter-class connections table',
         ),
+        Task(
+            method = r_preprocess.IntercellClasses,
+            name = 'Inter-cell classes table',
+        ),
+        Task(
+            method = r_preprocess.IntercellCoverages,
+            param = ProductParam(
+                network_dataset = (
+                    'omnipath',
+                    'curated',
+                    'tf_target',
+                ),
+            ),
+            name = 'Inter-cell network coverage table',
+        ),
+        Task(
+            method = r_preprocess.IntercellNetworkCounts,
+            param = ProductParam(
+                network_dataset = (
+                    'omnipath',
+                    'curated',
+                ),
+                class_levels = (
+                    None,
+                    {
+                        'main',
+                        'above_main',
+                        'small_main',
+                        'misc',
+                    },
+                ),
+            ),
+            name = 'Intercell network counts table',
+        ),
+        Task(
+            method = r_preprocess.AnnotationsByEntity,
+            name = 'Annotations by entity table',
+        ),
+        Task(
+            method = r_preprocess.ComplexesByResource,
+            name = 'Complexes by resource table',
+        ),
+        Task(
+            method = r_preprocess.InterClassOverlaps,
+            name = 'Intercell class overlaps table',
+        ),
     ),
+    
+    
     
 )
 
@@ -246,6 +296,15 @@ class Main(session_mod.Logger):
     def main(self):
         
         self._log('Beginning workflow.')
+        
+        missing_parts = self.parts - set(workflow.keys())
+        
+        if missing_parts:
+            
+            self._log(
+                'Warning: part(s) not defined in '
+                'the workflow: %s.' % ', '.join(missing_parts)
+            )
         
         for part_name, part_tasks in workflow.items():
             
