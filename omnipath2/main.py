@@ -235,7 +235,34 @@ workflow = collections.OrderedDict(
         ),
     ),
     
+    complexes_plots = (
+        Task(
+            method = complexes_plots.ComplexesByResource,
+            name = 'Complexes by resource figure',
+        ),
+    ),
     
+    annotation_plots = (
+        Task(
+            method = annotation_plots.EntitiesByResource,
+            name = 'Entities by annotation resource plot',
+        ),
+        Task(
+            method = annotation_plots.RecordsByResource,
+            name = 'Records by annotation resource plot',
+        ),
+        Task(
+            method = annotation_plots.AnnotationNetworkOverlap,
+            param = ProductParam(
+                network_dataset = (
+                    'omnipath',
+                    'curated',
+                    'tf_target',
+                ),
+            ),
+            name = 'Annotation network overlap plot'
+        ),
+    ),
     
 )
 

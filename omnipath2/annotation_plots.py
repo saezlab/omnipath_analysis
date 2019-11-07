@@ -32,40 +32,6 @@ import omnipath2.plot as plot
 import omnipath2.intercell_plots_new as intercell_plots
 
 
-class AnnotationPlots(session_mod.Logger):
-    
-    
-    def __init__(self, network_dataset = 'omnipath'):
-        
-        session_mod.Logger.__init__(self, name = 'op2.annot_plots')
-        self._log('Compiling annotation plots.')
-        
-        self.network_dataset = network_dataset
-    
-    
-    def main(self):
-        
-        self.plot_entities_by_resource()
-        self.plot_records_by_resource()
-    
-    
-    def plot_entities_by_resource(self):
-        
-        self.entities_by_resource = EntitiesByResource()
-    
-    
-    def plot_records_by_resource(self):
-        
-        self.records_by_resource = RecordsByResource()
-    
-    
-    def plot_overlap_with_network(self):
-        
-        self.overlap_with_network = AnnotationNetworkOverlap(
-            network_dataset = self.network_dataset,
-        )
-
-
 class EntitiesByResource(intercell_plots.CountsScatterBase):
     
     
