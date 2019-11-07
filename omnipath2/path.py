@@ -31,7 +31,7 @@ from omnipath2 import settings as op2_settings
 class PathBase(session_mod.Logger):
     
     
-    timestamp = time.strftime('%Y%m%d')
+    timestamp = time.strftime(op2_settings.get('timestamp_format'))
     
     
     def __init__(

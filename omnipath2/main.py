@@ -126,52 +126,81 @@ class Task(
         _log('Task `%s` finished.' % self.name)
 
 
-workflow = (
-    Task(
-        method = supptables.NetworkS2_PPIall,
-        name = 'Supp Table S2, network all PPI',
+workflow = collections.OrderedDict(
+    
+    supptables = (
+        Task(
+            method = supptables.NetworkS2_PPIall,
+            name = 'Supp Table S2, network all PPI',
+        ),
+        Task(
+            method = supptables.NetworkS2_PPIcurated,
+            name = 'Supp Table S2, network curated PPI',
+        ),
+        Task(
+            method = supptables.NetworkS2_TFtarget,
+            name = 'Supp Table S2, TF-target network',
+        ),
+        Task(
+            method = supptables.NetworkS2_miRNAmRNA,
+            name = 'Supp Table S2, miRNA-mRNA network',
+        ),
+        Task(
+            method = supptables.NetworkS2_TFmiRNA,
+            name = 'Supp Table S2, TF-miRNA network',
+        ),
+        Task(
+            method = supptables.EnzSubS3,
+            name = 'Supp Table S3, enzyme-substrate',
+        ),
+        Task(
+            method = supptables.ComplexesS4,
+            name = 'Supp Table S4, complexes',
+        ),
+        Task(
+            method = supptables.AnnotationsS5,
+            name = 'Supp Table S5, annotations',
+        ),
+        Task(
+            method = supptables.IntercellS6,
+            name = 'Supp Table S6, intercell',
+        ),
     ),
-    Task(
-        method = supptables.NetworkS2_PPIcurated,
-        name = 'Supp Table S2, network curated PPI',
+    
+    r_preprocess = (
+        Task(
+            method = r_preprocess.InterClassConnections,
+            param = ProductParam(
+                network_dataset = (
+                    'omnipath',
+                    'curated',
+                    'tf_target',
+                ),
+                mode = (
+                    'undirected',
+                    'directed',
+                    'stimulatory',
+                    'inhibitory',
+                ),
+            ),
+            name = 'Inter-class connections table',
+        ),
     ),
-    Task(
-        method = supptables.NetworkS2_TFtarget,
-        name = 'Supp Table S2, TF-target network',
-    ),
-    Task(
-        method = supptables.NetworkS2_miRNAmRNA,
-        name = 'Supp Table S2, miRNA-mRNA network',
-    ),
-    Task(
-        method = supptables.NetworkS2_TFmiRNA,
-        name = 'Supp Table S2, TF-miRNA network',
-    ),
-    Task(
-        method = supptables.EnzSubS3,
-        name = 'Supp Table S3, enzyme-substrate',
-    ),
-    Task(
-        method = supptables.ComplexesS4,
-        name = 'Supp Table S4, complexes',
-    ),
-    Task(
-        method = supptables.AnnotationsS5,
-        name = 'Supp Table S5, annotations',
-    ),
-    Task(
-        method = supptables.IntercellS6,
-        name = 'Supp Table S6, intercell',
-    ),
+    
 )
 
 
 class Main(session_mod.Logger):
     
     
-    def __init__(self):
+    def __init__(
+            self,
+            parts = None,
+        ):
         
         session_mod.Logger.__init__(self, name = 'op2.main')
+        
+        self.parts = common.to_set(parts)
         
         self._log(
             'The OmniPath2 analysis and figures '
@@ -218,8 +247,16 @@ class Main(session_mod.Logger):
         
         self._log('Beginning workflow.')
         
-        for task in workflow:
+        for part_name, part_tasks in workflow.items():
             
-            task.run()
+            if self.parts and part_name not in self.parts:
+                
+                continue
+            
+            self._log('Beginning workflow part `%s`.' % part_name)
+            
+            for task in part_tasks:
+                
+                task.run()
         
         self._log('Workflow finished.')

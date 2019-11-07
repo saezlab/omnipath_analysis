@@ -43,7 +43,7 @@ class Database(session_mod.Logger):
         
         session_mod.Logger.__init__(self, name = 'op2.database')
         
-        self.timestamp = time.strftime('%Y%m%d')
+        self.timestamp = time.strftime(op2_settings.get('timestamp_format'))
         self.param = kwargs
         self.rebuild = rebuild
         self.datasets = self.get_param('datasets')

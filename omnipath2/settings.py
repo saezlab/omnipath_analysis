@@ -37,6 +37,8 @@ _defaults = {
     
     'timestamp_dirs': True,
     
+    'timestamp_format': '%Y%m%d',
+    
     # pickles
     'omnipath_pickle': 'omnipath_pw_es_lr_20190918.pickle',
     'curated_pickle': 'network_curated_20190924.pickle',
