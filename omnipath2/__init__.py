@@ -22,6 +22,7 @@ from pypath import session_mod
 from omnipath2 import settings as settings_mod
 from omnipath2 import database
 from omnipath2 import colors
+from omnipath2 import files
 
 
 _logger = session_mod.Logger(name = 'op2.init')

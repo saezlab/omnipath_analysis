@@ -23,6 +23,8 @@ from pypath import common
 
 _defaults = {
     
+    'files_json': 'files.json',
+    
     # pickle dumps of all databases
     'pickle_dir': 'pickles',
     
