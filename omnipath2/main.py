@@ -284,7 +284,11 @@ workflow = collections.OrderedDict(
     
     intercell_plots = (
         Task(
+<<<<<<< HEAD
             method = intercell_plots.InterClassDegreeHisto,
+=======
+            method = intercell_plots.IntercellDegreeHisto,
+>>>>>>> 9e48ab9de08db8d3f6302ef13aae1ad323299f98
             param = (
                 Param(
                     class0 = 'ligand',
