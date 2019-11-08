@@ -631,14 +631,25 @@ class InterClassChordplot(plot.PlotBase):
         self.edges = self.intercell.class_to_class_connections(
             **self.intercell_network_param,
         )
-        self.edges.category_a = [
-            self.intercell.class_labels[cat]
-            for cat in self.edges.category_a
-        ]
-        self.edges.category_b = [
-            self.intercell.class_labels[cat]
-            for cat in self.edges.category_b
-        ]
+        self.edges.index.set_levels(
+            [
+                [
+                    self.intercell.get_class_label(cls)
+                    for cls in self.edges.index.levels[0]
+                ],
+                [
+                    self.intercell.get_class_label(cls)
+                    for cls in self.edges.index.levels[1]
+                ],
+            ],
+            inplace = True,
+        )
+        
+        self.edges.rename('connections')
+        self.edges = (
+            self.edges.reset_index().rename(columns = {0: 'connections'})
+        )
+        
         self.adjacency = self.edges.pivot(
             index = 'category_a',
             columns = 'category_b',
