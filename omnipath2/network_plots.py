@@ -30,26 +30,6 @@ import omnipath2
 import omnipath2.plot as plot
 
 
-class NetworkPlots(session_mod.Logger):
-    
-    
-    def __init__(
-            self,
-            network_dataset = 'omnipath',
-            **kwargs
-        ):
-        
-        session_mod.Logger.__init__(self, name = 'op2.netw_plots')
-        self._log('Compiling network plots.')
-        
-        self.network_dataset = network_dataset
-    
-    
-    def main(self):
-        
-        self.edge_node_counts = EdgeNodeCounts()
-
-
 class CountsBase(plot.PlotBase):
     
     
@@ -302,6 +282,7 @@ class EdgeNodeCounts(CountsBase):
     def __init__(
         self,
         network_dataset = 'omnipath',
+        share_xaxis = True,
         **kwargs
     ):
         
@@ -323,8 +304,14 @@ class EdgeNodeCounts(CountsBase):
                 ),
             ),
             'fname': 'netw_node_edge_counts_pdf',
-            'fname_param': (network_dataset,),
+            'fname_param': (
+                network_dataset,
+                'shared-x'
+                    if share_xaxis else
+                'independent-x',
+            ),
             'network_dataset': network_dataset,
+            'share_xaxis': share_xaxis,
         }
         param.update(kwargs)
         
