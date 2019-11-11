@@ -27,10 +27,10 @@ import itertools
 
 import omnipath2
 import omnipath2.plot
-import omnipath2.intercell_plots_new as intercell_plots
+import omnipath2.intercell_plots
 
 
-class ComplexesByResource(intercell_plots.CountsScatterBase):
+class ComplexesByResource(omnipath2.intercell_plots.CountsScatterBase):
     
     
     def __init__(self, **kwargs):
@@ -46,7 +46,7 @@ class ComplexesByResource(intercell_plots.CountsScatterBase):
         }
         param.update(kwargs)
         
-        intercell_plots.CountsScatterBase.__init__(self, **param)
+        omnipath2.intercell_plots.CountsScatterBase.__init__(self, **param)
     
     
     def load_data(self):
@@ -59,6 +59,6 @@ class ComplexesByResource(intercell_plots.CountsScatterBase):
             ))
         )
         
-        intercell_plots.CountsScatterBase.load_data(self)
+        omnipath2.intercell_plots.CountsScatterBase.load_data(self)
 
 

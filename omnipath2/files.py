@@ -76,13 +76,11 @@ class Files(session_mod.Logger):
             
             if fname not in self.files['history']:
                 
-                self.files['history']:
-                    
-                    self.files['history'][fname] = []
-                
-                self.files['history'][fname].append(
-                    self.files['recent'][fname]
-                )
+                self.files['history'][fname] = []
+            
+            self.files['history'][fname].append(
+                self.files['recent'][fname]
+            )
         
         self.files['recent'][fname] = path
         

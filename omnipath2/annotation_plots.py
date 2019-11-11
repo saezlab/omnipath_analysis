@@ -33,10 +33,10 @@ import pypath.annot as annot
 import omnipath2
 import omnipath2.settings as op2_settings
 import omnipath2.plot as plot
-import omnipath2.intercell_plots_new as intercell_plots
+import omnipath2.intercell_plots
 
 
-class EntitiesByResource(intercell_plots.CountsScatterBase):
+class EntitiesByResource(omnipath2.intercell_plots.CountsScatterBase):
     
     
     def __init__(
@@ -71,7 +71,7 @@ class EntitiesByResource(intercell_plots.CountsScatterBase):
         }
         param.update(kwargs)
         
-        intercell_plots.CountsScatterBase.__init__(self, **param)
+        omnipath2.intercell_plots.CountsScatterBase.__init__(self, **param)
     
     
     def load_data(self):
@@ -85,10 +85,10 @@ class EntitiesByResource(intercell_plots.CountsScatterBase):
             for resource, annot in self.annot.annots.items()
         )
         
-        intercell_plots.CountsScatterBase.load_data(self)
+        omnipath2.intercell_plots.CountsScatterBase.load_data(self)
 
 
-class RecordsByResource(intercell_plots.CountsScatterBase):
+class RecordsByResource(omnipath2.intercell_plots.CountsScatterBase):
     
     
     def __init__(
@@ -123,7 +123,7 @@ class RecordsByResource(intercell_plots.CountsScatterBase):
         }
         param.update(kwargs)
         
-        intercell_plots.CountsScatterBase.__init__(self, **param)
+        omnipath2.intercell_plots.CountsScatterBase.__init__(self, **param)
     
     
     def load_data(self):
@@ -137,10 +137,10 @@ class RecordsByResource(intercell_plots.CountsScatterBase):
             for resource, _annot in self.annot.annots.items()
         )
         
-        intercell_plots.CountsScatterBase.load_data(self)
+        omnipath2.intercell_plots.CountsScatterBase.load_data(self)
 
 
-class AnnotationNetworkOverlap(intercell_plots.CountsScatterBase):
+class AnnotationNetworkOverlap(omnipath2.intercell_plots.CountsScatterBase):
     
     
     def __init__(
@@ -179,7 +179,7 @@ class AnnotationNetworkOverlap(intercell_plots.CountsScatterBase):
         }
         param.update(kwargs)
         
-        intercell_plots.CountsScatterBase.__init__(self, **param)
+        omnipath2.intercell_plots.CountsScatterBase.__init__(self, **param)
     
     
     def load_data(self):
@@ -205,4 +205,4 @@ class AnnotationNetworkOverlap(intercell_plots.CountsScatterBase):
             for resource, annot in self.annot.annots.items()
         )
         
-        intercell_plots.CountsScatterBase.load_data(self)
+        omnipath2.intercell_plots.CountsScatterBase.load_data(self)
