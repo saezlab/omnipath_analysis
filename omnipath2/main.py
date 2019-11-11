@@ -1,22 +1,27 @@
 #!/usr/bin/env python
-#-*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 
 #
-#  This file is part of the `omnipath2` Python module
+# Copyright 2019 Saez Lab
 #
-#  Copyright
-#  2019
-#  Heidelberg University, Uniklinik RWTH Aachen
+# OmniPath2 analysis and figures suite
 #
-#  File author(s): Dénes Türei (turei.denes@gmail.com)
-#                  Nicolàs Palacio
+# Authors:
+#
+# Nicolàs Palacio-Escat
+# nicolas.palacio@bioquant.uni-heidelberg.de
+#
+# Dénes Türei
+# turei.denes@gmail.com
+#
 #
 #  Distributed under the GPLv3 License.
 #  See accompanying file LICENSE.txt or copy at
 #      http://www.gnu.org/licenses/gpl-3.0.html
 #
-#  Website: http://pypath.omnipathdb.org/
+#  Website: http://omnipathdb.org/
 #
+
 
 import importlib as imp
 import collections

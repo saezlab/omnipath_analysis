@@ -4,7 +4,7 @@
 #
 # Copyright 2019 Saez Lab
 #
-# OmniPath2 analysis and figures suit
+# OmniPath2 analysis and figures suite
 #
 # Authors:
 #
@@ -13,6 +13,13 @@
 #
 # Dénes Türei
 # turei.denes@gmail.com
+#
+#
+#  Distributed under the GPLv3 License.
+#  See accompanying file LICENSE.txt or copy at
+#      http://www.gnu.org/licenses/gpl-3.0.html
+#
+#  Website: http://omnipathdb.org/
 #
 
 import imp
