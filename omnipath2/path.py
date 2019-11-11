@@ -139,3 +139,8 @@ class PathBase(session_mod.Logger):
         self.path = os.path.join(self.target_dir, self.fname)
         
         self._log('Output path set: `%s`.' % self.path)
+    
+    
+    def ready(self):
+        
+        omnipath2.files.update_record(self.path)

@@ -853,6 +853,8 @@ class PlotBase(omnipath2.path.PathBase):
                     
                     getattr(self.cvs, 'print_%s' % self.filetype)(fp)
         
+        self.ready()
+        
         self._log('Plot saved to `%s`.' % self.path)
         
         #self.fig.clf()

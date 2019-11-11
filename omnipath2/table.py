@@ -120,6 +120,8 @@ class TableBase(omnipath2.path.PathBase):
                 )
             )
         
+        self.ready()
+        
         self._log('Table has been written to `%s`.' % path)
     
     

@@ -32,4 +32,51 @@ class Files(session_mod.Logger):
         
         self.json_file = json_file or settings.get('files_json')
         
+        self.init()
+    
+    
+    def init(self):
         
+        self.files = {
+            'recent': {},
+            'history': {},
+        }
+        self.read_file_db()
+    
+    
+    def read_file_db(self):
+        
+        if os.path.exists(self.json_file):
+            
+            with open(self.json_file, 'r') as fp:
+                
+                self.files = json.load(self.json_file)
+    
+    
+    def write_file_db(self):
+        
+        with open(self.json_file, 'w') as fp:
+            
+            json.dump(self.files, fp)
+    
+    
+    def update_record(self, path):
+        
+        fname = os.path.basename(os.path.splitext(path)[0])
+        fname = fname.split('__')[0]
+        
+        if fname in self.files['recent']:
+            
+            if fname not in self.files['history']:
+                
+                self.files['history']:
+                    
+                    self.files['history'][fname] = []
+                
+                self.files['history'][fname].append(
+                    self.files['recent'][fname]
+                )
+        
+        self.files['recent'][fname] = path
+        
+        self.write_file_db()

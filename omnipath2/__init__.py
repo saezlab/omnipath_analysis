@@ -69,6 +69,7 @@ def init(environment = None, **kwargs):
     
     globals()['data'] = database.Database(**param)
     globals()['colors'] = colors.Colors()
+    globals()['files'] = files.Files()
 
 
 init()
