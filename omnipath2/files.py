@@ -25,6 +25,7 @@
 import os
 import json
 
+from pypath import common
 from pypath import session_mod
 
 from omnipath2 import settings
@@ -76,9 +77,12 @@ class Files(session_mod.Logger):
             
             if fname not in self.files['history']:
                 
-                self.files['history'][fname] = []
+                self.files['history'][fname] = set()
             
-            self.files['history'][fname].append(
+            self.files['history'][fname] = common.to_set(
+                self.files['history'][fname]
+            )
+            self.files['history'][fname].add(
                 self.files['recent'][fname]
             )
         

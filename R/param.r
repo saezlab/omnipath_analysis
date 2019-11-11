@@ -26,8 +26,8 @@ get_default_param <- function(){
         
         typeface = 'HelveticaNeueLT Std Lt Cn',
         font_style = 'bold',
-        dir_figures = file.path('figures', '20190925'),
-        dir_data = file.path('tables', '20190925'),
+        dir_figures = 'figures',
+        dir_tables = 'tables',
         dir_misc = 'misc',
         add_titles = TRUE,
         theme = theme_minimal,
@@ -54,7 +54,11 @@ get_default_param <- function(){
             dplyr.width = 270
         ),
         width = 4,
-        height = 3
+        height = 3,
+        timestamp_format = '%Y%m%d',
+        timestamp_dirs = TRUE,
+        timestamp_files = TRUE
+        
     )
     
 }

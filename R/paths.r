@@ -32,12 +32,12 @@ Path <- R6::R6Class(
             name,
             ext = NULL,
             type = NULL,
-            add_timestamp = TRUE
+            add_timestamp = NA
         ){
             
             self$name <- name
             self$type <- type
-            self$ext <- `if`(is.null(ext), '', sprintf('.%s', ext))
+            self$ext <- `if`(is.null(ext), '', ext)
             self$add_timestamp <- add_timestamp
             
             private$set_dir()
@@ -54,7 +54,7 @@ Path <- R6::R6Class(
         
         get_timestamp = function(){
             
-            `if`(self$add_timestamp, Sys.Date(), '')
+            format(Sys.Date(), omnipath2_settings$get(timestamp_format))
             
         },
         
@@ -62,16 +62,19 @@ Path <- R6::R6Class(
             
             self$dir <- case_when(
                 self$type == 'figure' ~ omnipath2_settings$get(dir_figures),
-                self$type == 'data' ~ omnipath2_settings$get(dir_data),
+                self$type == 'data' ~ omnipath2_settings$get(dir_tables),
                 TRUE ~ omnipath2_settings$get(dir_misc),
                 NA ~ omnipath2_settings$get(dir_misc),
             )
             
-            if(self$add_timestamp){
-                
-                self$dir <- file.path(self$dir, private$get_timestamp())
-                
-            }
+            self$dir <- `if`(
+                `||`(
+                    self$add_timestamp,
+                    omnipath2_settings$get(timestamp_dirs)
+                ),
+                file.path(self$dir, private$get_timestamp())
+                self$dir
+            )
             
             dir.create(self$dir, showWarnings = FALSE, recursive = TRUE)
             
@@ -79,13 +82,26 @@ Path <- R6::R6Class(
             
         },
         
+        timestamp_fname = function(fname){
+            
+            fname <- `if`(
+                `||`(
+                    self$add_timestamp,
+                    omnipath2_settings$get(timestamp_fname)
+                ),
+                sprintf('%s__%s', fname, private$get_timestamp()),
+                fname
+            )
+            
+            return(fname)
+            
+        },
+        
         set_fname = function(){
             
             self$fname <- sprintf(
-                '%s%s%s%s',
-                self$name,
-                `if`(self$add_timestamp, '__', ''),
-                private$get_timestamp(),
+                '%s.%s',
+                private$timestamp_fname(self$name),
                 self$ext
             )
             
