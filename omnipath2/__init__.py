@@ -27,9 +27,9 @@ import os
 from pypath import settings as pp_settings
 from pypath import session_mod
 from omnipath2 import settings as settings_mod
-from omnipath2 import database
-from omnipath2 import colors
-from omnipath2 import files
+from omnipath2 import database as _database_mod
+from omnipath2 import colors as _colors_mod
+from omnipath2 import files as _files_mod
 
 
 _logger = session_mod.Logger(name = 'op2.init')
@@ -74,9 +74,9 @@ def init(environment = None, **kwargs):
     
     setup(environment)
     
-    globals()['data'] = database.Database(**param)
-    globals()['colors'] = colors.Colors()
-    globals()['files'] = files.Files()
+    globals()['data'] = _database_mod.Database(**param)
+    globals()['colors'] = _colors_mod.Colors()
+    globals()['files'] = _files_mod.Files()
 
 
 init()

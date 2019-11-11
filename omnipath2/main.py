@@ -354,11 +354,17 @@ class Main(session_mod.Logger):
     def __init__(
             self,
             parts = None,
+            steps = None,
         ):
         
         session_mod.Logger.__init__(self, name = 'op2.main')
         
         self.parts = common.to_set(parts)
+        self.steps = (
+            steps
+                if isinstance(steps, (dict, type(None))) else
+            {'main': steps}
+        )
         
         self._log(
             'The OmniPath2 analysis and figures '
@@ -414,7 +420,9 @@ class Main(session_mod.Logger):
                 'the workflow: %s.' % ', '.join(missing_parts)
             )
         
-        for part_name, part_tasks in workflow.items():
+        _workflow = self.steps or workflow
+        
+        for part_name, part_tasks in _workflow.items():
             
             if self.parts and part_name not in self.parts:
                 

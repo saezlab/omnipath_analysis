@@ -49,19 +49,19 @@ class Files(session_mod.Logger):
             'recent': {},
             'history': {},
         }
-        self.read_file_db()
+        self.read_files_db()
     
     
-    def read_file_db(self):
+    def read_files_db(self):
         
         if os.path.exists(self.json_file):
             
             with open(self.json_file, 'r') as fp:
                 
-                self.files = json.load(self.json_file)
+                self.files = json.load(fp)
     
     
-    def write_file_db(self):
+    def write_files_db(self):
         
         with open(self.json_file, 'w') as fp:
             
@@ -72,6 +72,8 @@ class Files(session_mod.Logger):
         
         fname = os.path.basename(os.path.splitext(path)[0])
         fname = fname.split('__')[0]
+        
+        self.read_files_db()
         
         if fname in self.files['recent']:
             
@@ -88,4 +90,4 @@ class Files(session_mod.Logger):
         
         self.files['recent'][fname] = path
         
-        self.write_file_db()
+        self.write_files_db()

@@ -26,6 +26,7 @@ get_default_param <- function(){
         
         typeface = 'HelveticaNeueLT Std Lt Cn',
         font_style = 'bold',
+        files_json = 'files.json',
         dir_figures = 'figures',
         dir_tables = 'tables',
         dir_misc = 'misc',
