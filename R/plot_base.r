@@ -82,6 +82,8 @@ SinglePlot <- R6::R6Class(
             
             dev.off()
             
+            private$ready()
+            
         },
         
         preprocess = function(...){

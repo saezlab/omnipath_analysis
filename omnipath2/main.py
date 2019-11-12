@@ -238,6 +238,16 @@ workflow = collections.OrderedDict(
             method = r_preprocess.InterClassOverlaps,
             name = 'Intercell class overlaps table',
         ),
+        Task(
+            method = r_preprocess.ResourcesByEntity,
+            param = ProductParam(
+                network_dataset = (
+                    'omnipath',
+                    'curated',
+                ),
+            ),
+            name = 'Resources by entity table',
+        )
     ),
     
     complexes_plots = (

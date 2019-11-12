@@ -41,6 +41,7 @@ from pypath import dataio
 from pypath import progress
 from pypath import common
 from pypath import entity
+from pypath import data_formats
 
 import omnipath2
 from omnipath2 import settings as op2_settings

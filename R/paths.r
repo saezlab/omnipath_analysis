@@ -115,6 +115,15 @@ Path <- R6::R6Class(
             
             invisible(self)
             
+        },
+        
+        
+        ready = function(){
+            
+            omnipath2_files$update_record(self$path)
+            
+            invisible(self)
+            
         }
         
     )
