@@ -105,23 +105,24 @@ class TableBase(omnipath2.path.PathBase):
                 sep = self.sep,
                 index = False,
             )
-            return
-        
-        with open(path, 'w') as fp:
             
-            if self.header is not None:
+        else:
+            
+            with open(path, 'w') as fp:
                 
-                _ = fp.write(self.sep.join(self.header))
-                _ = fp.write('\n')
-            
-            fp.write(
-                '\n'.join(
-                    self.sep.join(
-                        str(field) for field in line
+                if self.header is not None:
+                    
+                    _ = fp.write(self.sep.join(self.header))
+                    _ = fp.write('\n')
+                
+                fp.write(
+                    '\n'.join(
+                        self.sep.join(
+                            str(field) for field in line
+                        )
+                        for line in self.data
                     )
-                    for line in self.data
                 )
-            )
         
         self.ready()
         
