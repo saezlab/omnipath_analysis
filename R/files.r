@@ -40,7 +40,7 @@ Files <- R6::R6Class(
         read_files_db = function(){
             
             self$files <- `if`(
-                files.exists(self$files_json),
+                file.exists(self$files_json),
                 rjson::fromJSON(file = self$files_json),
                 list(
                     recent = list(),
@@ -78,6 +78,21 @@ Files <- R6::R6Class(
             write(
                 rjson::toJSON(self$files),
                 self$files_json
+            )
+            
+        },
+        
+        
+        get = function(key){
+            
+            self$read_files_db()
+            
+            return(
+                `if`(
+                    key %in% names(self$files$recent),
+                    self$files$recent[[key]],
+                    NULL
+                )
             )
             
         }
