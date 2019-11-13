@@ -35,7 +35,7 @@ Path <- R6::R6Class(
             add_timestamp = NA
         ){
             
-            self$name <- name
+            self$name <- `if`(is_quosure(name), name, enquo(name))
             self$type <- type
             self$ext <- `if`(is.null(ext), '', ext)
             self$add_timestamp <- add_timestamp
@@ -61,10 +61,14 @@ Path <- R6::R6Class(
         set_dir = function(){
             
             self$dir <- case_when(
-                self$type == 'figure' ~ omnipath2_settings$get(dir_figures),
-                self$type == 'data' ~ omnipath2_settings$get(dir_tables),
-                TRUE ~ omnipath2_settings$get(dir_misc),
-                NA ~ omnipath2_settings$get(dir_misc),
+                self$type == 'figure' ~
+                    omnipath2_settings$get(dir_figures),
+                self$type %in% c('table', 'data') ~
+                    omnipath2_settings$get(dir_tables),
+                TRUE ~
+                    omnipath2_settings$get(dir_misc),
+                NA ~
+                    omnipath2_settings$get(dir_misc),
             )
             
             self$dir <- `if`(
@@ -72,7 +76,7 @@ Path <- R6::R6Class(
                     self$add_timestamp,
                     omnipath2_settings$get(timestamp_dirs)
                 ),
-                file.path(self$dir, private$get_timestamp())
+                file.path(self$dir, private$get_timestamp()),
                 self$dir
             )
             
@@ -140,11 +144,79 @@ InputPath <- R6::R6Class(
     
     public = list(
         
+        initialize = function(name, fname_param = NULL){
+            
+            self$fname_param <- as.list(fname_param)
+            
+            super$initialize(
+                name = enquo(name),
+                type = 'data',
+                add_timestamp = FALSE,
+                ext = 'tsv'
+            )
+            
+            invisible(self)
+            
+        }
+        
+    ),
+    
+    
+    private = list(
+        
+        set_dir = function(){
+            
+            return(self)
+            
+        },
+        
+        
+        set_fname = function(){
+            
+            self$name <- do.call(
+                sprintf,
+                c(
+                    list(
+                        omnipath2_settings$get(UQ(self$name))
+                    ),
+                    self$fname_param
+                )
+            )
+            self$path <- omnipath2_files$get(self$name)
+            self$dir <- dirname(self$path)
+            self$fname <- basename(self$path)
+            
+            return(self)
+            
+        },
+        
+        
+        build_path = function(){
+            
+            return(self)
+            
+        }
+        
+    )
+    
+)
+
+
+TablePath <- R6::R6Class(
+    
+    'TablePath',
+    
+    inherit = Path,
+    
+    lock_objects = FALSE,
+    
+    public = list(
+        
         initialize = function(name){
             
             super$initialize(
                 name = name,
-                type = 'data',
+                type = 'table',
                 add_timestamp = FALSE
             )
             
