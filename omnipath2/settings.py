@@ -25,6 +25,7 @@
 import collections
 
 from pypath import settings
+from pypath import settings as _pp_settings
 from pypath import common
 
 
@@ -209,7 +210,7 @@ def reset(param):
     setup(param, get_default(param))
 
 
-defaults = common._const()
+defaults = _pp_settings._const()
 
 for k, v in _defaults.items():
     

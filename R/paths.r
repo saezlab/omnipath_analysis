@@ -144,9 +144,9 @@ InputPath <- R6::R6Class(
     
     public = list(
         
-        initialize = function(name, fname_param = NULL){
+        initialize = function(name, ...){
             
-            self$fname_param <- as.list(fname_param)
+            self$fname_param <- list(...)
             
             super$initialize(
                 name = enquo(name),

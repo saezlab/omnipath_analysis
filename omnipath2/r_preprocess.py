@@ -327,7 +327,7 @@ class IntercellNetworkCounts(omnipath2.table.TableBase):
                 set()
             )
             
-            in_network = self.network.entities(entity_type = entity_type)
+            #in_network = self.network.entities(entity_type = entity_type)
             in_network0 = in_network & cls0_elements
             in_network1 = in_network & cls1_elements
             
@@ -497,13 +497,16 @@ class IntercellNetworkCounts(omnipath2.table.TableBase):
             off = False,
         )
         
-        i_ = 0
+        entity_type = 'protein' if self.only_proteins else None
+        in_network = self.network.entities(entity_type = self.entity_type)
         
         for cls0, cls1 in (
-            itertools.combinations_with_replacement(classes.keys(), 2)
+            itertools.combinations_with_replacement(
+                classes.keys(),
+                2
+            )
         ):
             
-            i_ += 1
             prg.step()
             
             add_stats_record(
@@ -511,11 +514,6 @@ class IntercellNetworkCounts(omnipath2.table.TableBase):
                 cls1,
                 annot_entities,
             )
-            
-            if i_ == 10:
-                
-                pass
-                # break
         
         prg.terminate()
         

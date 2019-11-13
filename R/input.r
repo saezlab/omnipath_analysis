@@ -33,10 +33,14 @@ Reader <- R6::R6Class(
     public = list(
         
         initialize = function(
-            name
+            name,
+            ...
         ){
             
-            super$initialize(name = name)
+            super$initialize(
+                name = enquo(name),
+                ...
+            )
             
             self$main()
             
