@@ -17,6 +17,7 @@
 #  Website: http://pypath.omnipathdb.org/
 #
 
+require(rlang)
 require(R6)
 
 
@@ -41,7 +42,12 @@ Settings <- R6::R6Class(
         
         get = function(key, override = NULL, default = NULL){
             
-            key <- quo_name(enquo(key))
+            key <- `if`(
+                is.character(as.list(match.call())$key),
+                key,
+                quo_name(enquo(key))
+            )
+            key <- quo_name(key)
             
             value <- self$settings[[key]]
             
