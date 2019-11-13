@@ -17,6 +17,7 @@
 #  Website: http://pypath.omnipathdb.org/
 #
 
+require(rlang)
 require(readr)
 require(dplyr)
 require(R6)
@@ -89,16 +90,19 @@ IntercellCategoriesPairwise <- R6::R6Class(
     
     public = list(
         
-        initialize = function(fname = NULL, entity_type = NULL, ...){
+        initialize = function(input_param, entity_type = NULL){
             
-            self$fname <- `if`(
-                is.null(fname),
-                omnipath2_settings$get(input_intercell_cat_pairwise),
-                fname
-            )
             self$entity_type <- entity_type
             
-            super$initialize(name = self$fname)
+            do.call(
+                super$initialize,
+                c(
+                    list(
+                        name = input_intercell_cat_pairwise
+                    ),
+                    input_param
+                )
+            )
             
             invisible(self)
             
@@ -117,8 +121,8 @@ IntercellCategoriesPairwise <- R6::R6Class(
                     filter(., entity == self$entity_type)
                 )} %>%
                 mutate(
-                    omnipath_covers_cls0 = size_cls0 / in_omnipath_cls0 * 100,
-                    omnipath_covers_cls1 = size_cls1 / in_omnipath_cls1 * 100,
+                    network_covers_cls0 = size_cls0 / in_network_cls0 * 100,
+                    network_covers_cls1 = size_cls1 / in_network_cls1 * 100,
                     pct_of_parent_cls0 = size_cls0 / size_parent0 * 100,
                     pct_of_parent_cls1 = size_cls1 / size_parent1 * 100
                 ) %>%
