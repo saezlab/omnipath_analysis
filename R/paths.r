@@ -186,14 +186,14 @@ InputPath <- R6::R6Class(
             self$dir <- dirname(self$path)
             self$fname <- basename(self$path)
             
-            return(self)
+            invisible(self)
             
         },
         
         
         build_path = function(){
             
-            return(self)
+            invisible(self)
             
         }
         

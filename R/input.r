@@ -39,7 +39,7 @@ Reader <- R6::R6Class(
         ){
             
             super$initialize(
-                name = enquo(name),
+                name = UQ(enquo(name)),
                 ...
             )
             
@@ -98,7 +98,7 @@ IntercellCategoriesPairwise <- R6::R6Class(
                 super$initialize,
                 c(
                     list(
-                        name = input_intercell_cat_pairwise
+                        name = quote(input_intercell_cat_pairwise_tsv)
                     ),
                     input_param
                 )
@@ -152,15 +152,9 @@ IntercellAnnotationByEntity <- R6::R6Class(
     
     public = list(
         
-        initialize = function(fname = NULL){
+        initialize = function(...){
             
-            self$fname <- `if`(
-                is.null(fname),
-                omnipath2_settings$get(input_intercell_annotation_by_entity),
-                fname
-            )
-            
-            super$initialize(name = self$fname)
+            super$initialize(input_intercell_cat_pairwise_tsv)
             
             invisible(self)
             
@@ -193,15 +187,29 @@ ResourceByEntity <- R6::R6Class(
     
     public = list(
         
-        initialize = function(fname = NULL){
+        initialize = function(input_param, ...){
             
-            self$fname <- `if`(
-                is.null(fname),
-                omnipath2_settings$get(input_resource_by_entity),
-                fname
+            
+            
+            
+            args = c(
+                list(
+                    name = enquo(input_resource_by_entity_tsv)
+                ),
+                input_param
             )
             
-            super$initialize(name = self$fname)
+            print(args)
+            
+            do.call(
+                super$initialize,
+                c(
+                    list(
+                        name = enquo(input_resource_by_entity_tsv)
+                    ),
+                    input_param
+                )
+            )
             
             invisible(self)
             
@@ -234,15 +242,9 @@ ComplexesByResource <- R6::R6Class(
     
     public = list(
         
-        initialize = function(fname = NULL){
+        initialize = function(...){
             
-            self$fname <- `if`(
-                is.null(fname),
-                omnipath2_settings$get(input_complexes_by_resource),
-                fname
-            )
-            
-            super$initialize(name = self$fname)
+            super$initialize(input_complexes_by_resource_tsv)
             
             invisible(self)
             

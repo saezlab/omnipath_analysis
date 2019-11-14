@@ -24,9 +24,7 @@
 
 import collections
 
-from pypath import settings
-from pypath import settings as _pp_settings
-from pypath import common
+import pypath.common as common
 
 
 _defaults = {
@@ -170,10 +168,23 @@ denes = {
 }
 
 
+class Settings(object):
+    
+    
+    def __init__(self, **kwargs):
+        
+        self.__dict__.update(kwargs)
+
+
+Defaults = collections.namedtuple(
+    'Defaults',
+    sorted(_defaults.keys()),
+)
+
 
 def reset_all():
     
-    settings = collections.namedtuple('Settings', list(_defaults.keys()))
+    settings = Settings()
     
     for k in _defaults.keys():
         
@@ -210,10 +221,6 @@ def reset(param):
     setup(param, get_default(param))
 
 
-defaults = _pp_settings._const()
-
-for k, v in _defaults.items():
-    
-    setattr(defaults, k, v)
+defaults = Defaults(**_defaults)
 
 reset_all()
