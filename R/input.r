@@ -189,23 +189,11 @@ ResourceByEntity <- R6::R6Class(
         
         initialize = function(input_param, ...){
             
-            
-            
-            
-            args = c(
-                list(
-                    name = enquo(input_resource_by_entity_tsv)
-                ),
-                input_param
-            )
-            
-            print(args)
-            
             do.call(
                 super$initialize,
                 c(
                     list(
-                        name = enquo(input_resource_by_entity_tsv)
+                        name = expr(input_resource_by_entity_tsv)
                     ),
                     input_param
                 )
