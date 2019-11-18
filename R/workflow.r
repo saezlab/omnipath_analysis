@@ -22,7 +22,12 @@ require(R6)
 
 omnipath2_workflow <<- list(
     
-    test = Task$new(
+    # These "tests" show if we can provide the arguments
+    # to the workflow elements using Task and Param
+    # classes.
+    # Here we just read 2 types of data tables,
+    # a number of variants each.
+    test1 = Task$new(
         method = ResourceByEntity,
         name = NULL,
         Param$new('omnipath', 'curated')

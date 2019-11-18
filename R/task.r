@@ -156,9 +156,6 @@ Task <- R6::R6Class(
         
         run_one = function(){
             
-            print('current_param')
-            print(self$current_param)
-            
             self$worker <- do.call(
                 self$method$new,
                 self$current_param
