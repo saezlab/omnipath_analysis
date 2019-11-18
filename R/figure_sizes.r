@@ -104,13 +104,18 @@ CategorySizesSeries <- R6::R6Class(
     
     public = list(
         
-        initialize = function(data = NULL, ...){
+        initialize = function(
+                data = NULL,
+                input_param = NULL,
+                ...
+            ){
             
             super$initialize(
                 data = self$data,
                 slice_var = parent0,
                 plotter = CategorySizes,
                 name = 'sizes',
+                input_param = input_param,
                 width_by = src_label0,
                 width_min = .7,
                 width_step = .23,

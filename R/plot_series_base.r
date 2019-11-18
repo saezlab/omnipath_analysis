@@ -231,9 +231,21 @@ CategoriesPairwisePlotSeries <- R6::R6Class(
     
     public = list(
         
-        initialize = function(slice_var, plotter, name, data = NULL, ...){
+        initialize = function(
+                slice_var,
+                plotter,
+                name,
+                data = NULL,
+                input_param = NULL,
+                ...
+            ){
             
             slice_var <- enquo(slice_var)
+            self$input_param <- `if`(
+                is.null(input_param),
+                list(),
+                input_param
+            )
             
             private$ensure_data(data)
             
@@ -256,7 +268,10 @@ CategoriesPairwisePlotSeries <- R6::R6Class(
             
             self$data <- `if`(
                 is.null(data),
-                IntercellCategoriesPairwise$new()$data,
+                do.call(
+                    IntercellCategoriesPairwise$new(),
+                    self$input_param
+                )$data,
                 data
             )
             

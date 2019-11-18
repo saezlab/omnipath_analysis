@@ -30,6 +30,7 @@ get_default_param <- function(){
         dir_figures = 'figures',
         dir_tables = 'tables',
         dir_misc = 'misc',
+        dir_log = 'omnipath2_log',
         add_titles = TRUE,
         theme = theme_minimal,
         theme_defaults = list(
@@ -56,7 +57,8 @@ get_default_param <- function(){
         height = 3,
         timestamp_format = '%Y%m%d',
         timestamp_dirs = TRUE,
-        timestamp_files = TRUE
+        timestamp_files = TRUE,
+        loglevel = 5
         
     )
     

@@ -73,6 +73,11 @@ class Files(session_mod.Logger):
         fname = os.path.basename(os.path.splitext(path)[0])
         fname = fname.split('__')[0]
         
+        self._update_record(self, fname, path)
+    
+    
+    def _update_record(self, fname, path):
+        
         self.read_files_db()
         
         if fname in self.files['recent']:

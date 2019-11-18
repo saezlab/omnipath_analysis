@@ -19,9 +19,23 @@
 
 .onLoad <- function(libname, pkgname){
     
+    if(!exists('omnipath2_session')){
+        
+        omnipath2_session <<- gen_session_id()
+        
+    }
+    
     omnipath2_settings <<- Settings$new()
+    omnipath2_settings$set(session_id = omnipath2_session)
     do.call(options, omnipath2_settings$get(console_settings))
+    omnipath2_log <<- Logger$new()
     
     omnipath2_files <<- Files$new()
+    
+    op2log <<- function(...){
+        
+        omnipath2_log$msg(...)
+        
+    }
     
 }

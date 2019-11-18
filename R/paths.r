@@ -88,10 +88,12 @@ Path <- R6::R6Class(
         
         timestamp_fname = function(fname){
             
+            print(quo_text(fname))
+            
             fname <- `if`(
                 `||`(
                     self$add_timestamp,
-                    omnipath2_settings$get(timestamp_fname)
+                    omnipath2_settings$get(timestamp_files)
                 ),
                 sprintf('%s__%s', fname, private$get_timestamp()),
                 fname
