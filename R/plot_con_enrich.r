@@ -295,10 +295,10 @@ ConnectionEnrichment <- R6::R6Class(
                     sym(sprintf('con_%s_inh', dir_str))
                 )),
                 universe = private$dir_sign_choice(c(
-                    sym('con_omnipath'),
-                    sym('con_omnipath_dir'),
-                    sym('con_omnipath_stim'),
-                    sym('con_omnipath_inh')
+                    sym('con_network'),
+                    sym('con_network_dir'),
+                    sym('con_network_stim'),
+                    sym('con_network_inh')
                 ))
             )
             

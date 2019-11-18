@@ -62,7 +62,12 @@ Reader <- R6::R6Class(
         
         read = function(){
             
-            self$data <- suppressMessages(readr::read_tsv(self$path))
+            self$data <- suppressMessages(
+                readr::read_tsv(
+                    self$path,
+                    progress = FALSE
+                )
+            )
             
             invisible(self)
             
@@ -116,7 +121,7 @@ IntercellCategoriesPairwise <- R6::R6Class(
             
             self$data <- self$data %>%
                 {`if`(
-                    is.null(self$entity_type),
+                    is.null(self$entity_type) || !('entity' %in% names(.)),
                     .,
                     filter(., entity == self$entity_type)
                 )} %>%
@@ -154,7 +159,7 @@ IntercellAnnotationByEntity <- R6::R6Class(
         
         initialize = function(...){
             
-            super$initialize(input_intercell_cat_pairwise_tsv)
+            super$initialize(input_intercell_annotation_by_entity_tsv)
             
             invisible(self)
             

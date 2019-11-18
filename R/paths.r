@@ -88,7 +88,7 @@ Path <- R6::R6Class(
         
         timestamp_fname = function(fname){
             
-            print(quo_text(fname))
+            fname <- quo_get_expr(fname)
             
             fname <- `if`(
                 `||`(

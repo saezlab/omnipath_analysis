@@ -73,7 +73,7 @@ class Files(session_mod.Logger):
         fname = os.path.basename(os.path.splitext(path)[0])
         fname = fname.split('__')[0]
         
-        self._update_record(self, fname, path)
+        self._update_record(fname, path)
     
     
     def _update_record(self, fname, path):

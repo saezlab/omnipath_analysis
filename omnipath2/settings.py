@@ -70,7 +70,7 @@ _defaults = {
     'main_coverage_tsv': 'main_coverage_%s', #
     'intercell_network_by_resource_tsv': 'stats_by_resource_%s_%s_%s', #
     'resources_by_entity_tsv': 'resources_by_entity_%s', #
-    'annots_by_entity_tsv': 'annotations_by_entitiy', #
+    'annots_by_entity_tsv': 'annotations_by_entity', #
     'complexes_by_resource_tsv': 'complexes_by_resource', #
     'connections_tsv': 'connections_%s_%s', #
     'category_overlaps_tsv': 'category_overlaps', #
