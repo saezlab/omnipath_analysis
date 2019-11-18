@@ -31,7 +31,15 @@ ResourceCoverage <- R6::R6Class(
     
     public = list(
         
-        initialize = function(){
+        initialize = function(
+            con_enrich_input_param,
+            res_by_entity_input_param,
+            ann_by_entity_input_param = NULL
+        ){
+            
+            self$con_enrich_input_param <- con_enrich_input_param
+            self$res_by_entity_input_param <- res_by_entity_input_param
+            self$ann_by_entity_input_param <- ann_by_entity_input_param
             
             super$initialize(
                 data = self$data,
@@ -83,15 +91,20 @@ ResourceCoverage <- R6::R6Class(
             
             self$order <- (
                 ConnectionEnrichment$new(
-                    ordering_only = TRUE
+                    ordering_only = TRUE,
+                    input_param = self$con_enrich_input_param
                 )$clustering$order_x
             )
             
-            res <- ResourceByEntity$new()$data %>%
+            res <- ResourceByEntity$new(
+                    input_param = self$res_by_entity_input_param
+                )$data %>%
                 filter(!is_complex) %>%
                 select(entity_id, resource)
             
-            icc <- IntercellAnnotationByEntity$new()$data %>%
+            icc <- IntercellAnnotationByEntity$new(
+                    input_param = self$ann_by_entity_input_param
+                )$data %>%
                 filter(!is_complex) %>%
                 select(entity_id, class_label) %>%
                 group_by(class_label) %>%

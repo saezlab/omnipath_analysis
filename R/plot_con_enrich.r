@@ -35,6 +35,7 @@ ConnectionEnrichment <- R6::R6Class(
         
         initialize = function(
             data = NULL,
+            input_param = NULL,
             theme_args = list(),
             exclude = c('sub', 'misc'),
             entity_type = 'protein',
@@ -53,6 +54,7 @@ ConnectionEnrichment <- R6::R6Class(
             self$sign <- sign
             self$order_by_undirected <- order_by_undirected
             self$ordering_only <- ordering_only
+            self$input_param <- input_param
             private$ensure_data(data)
             private$set_name()
             
@@ -187,6 +189,8 @@ ConnectionEnrichment <- R6::R6Class(
                     c('all', 'directed', 'stimulation', 'inhibition')
                 )
             )
+            
+            op2log(sprintf('Plotting `%s`.', self$name))
             
         },
         
@@ -372,6 +376,7 @@ ConnectionEnrichment <- R6::R6Class(
             self$data <- `if`(
                 is.null(data),
                 IntercellCategoriesPairwise$new(
+                    input_param = self$input_param,
                     entity_type = self$entity_type
                 )$data,
                 data
