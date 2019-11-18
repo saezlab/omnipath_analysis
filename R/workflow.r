@@ -20,10 +20,39 @@
 require(R6)
 
 
-omnipath2_workflow <- list(
+omnipath2_workflow <<- list(
+    
     test = Task$new(
         method = ResourceByEntity,
         name = NULL,
-        Param$new(list('omnipath', 'curated'))
+        Param$new('omnipath', 'curated')
+    ),
+    
+    test2 = Task$new(
+        method = IntercellCategoriesPairwise,
+        name = NULL,
+        ProductParam$new(
+            list('curated', 'omnipath'),
+            list('proteins'),
+            list(
+                'all-class-levels',
+                'above_main-main-misc-small_main'
+            )
+        )
+    ),
+    
+    test3 = Task$new(
+        method = IntercellCategoriesPairwise,
+        name = NULL,
+        Param$new(NULL),
+        Param$new(
+            'curated', 'omnipath'
+        ),
+        Param$new('proteins'),
+        Param$new(
+            'all-class-levels',
+            'above_main-main-misc-small_main'
+        )
     )
+    
 )

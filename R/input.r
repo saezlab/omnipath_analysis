@@ -90,7 +90,7 @@ IntercellCategoriesPairwise <- R6::R6Class(
     
     public = list(
         
-        initialize = function(input_param, entity_type = NULL){
+        initialize = function(entity_type = NULL, ...){
             
             self$entity_type <- entity_type
             
@@ -100,7 +100,7 @@ IntercellCategoriesPairwise <- R6::R6Class(
                     list(
                         name = quote(input_intercell_cat_pairwise_tsv)
                     ),
-                    input_param
+                    list(...) # input_param
                 )
             )
             
@@ -187,7 +187,7 @@ ResourceByEntity <- R6::R6Class(
     
     public = list(
         
-        initialize = function(input_param, ...){
+        initialize = function(...){
             
             do.call(
                 super$initialize,
@@ -195,7 +195,7 @@ ResourceByEntity <- R6::R6Class(
                     list(
                         name = expr(input_resource_by_entity_tsv)
                     ),
-                    input_param
+                    list(...) # input_param
                 )
             )
             

@@ -22,13 +22,15 @@ require(R6)
 
 list_product <- function(lst){
     
-    unlist(
-        apply(
-            unname(expand.grid(lst)),
-            1,
-            list
-        ),
-        recursive = FALSE
+    as.list(
+        unlist(
+            apply(
+                unname(expand.grid(lst)),
+                1,
+                list
+            ),
+            recursive = FALSE
+        )
     )
     
 }
@@ -46,7 +48,7 @@ ProductParam <- R6::R6Class(
             
             self$param <- unlist(
                 apply(
-                    expand.grid(list(...)),
+                    unname(expand.grid(list(...))),
                     1,
                     list
                 ),
@@ -72,7 +74,7 @@ Param <- R6::R6Class(
         
         initialize = function(...){
             
-            self$param <- list(list(...))
+            self$param <- list(...)
             
         }
         
@@ -115,6 +117,7 @@ Task <- R6::R6Class(
             for(param in private$product_param()){
                 
                 self$current_param <- param
+                
                 private$run_one()
                 
             }
@@ -142,8 +145,7 @@ Task <- R6::R6Class(
         
         product_param = function(){
             
-            do.call(
-                list_product,
+            list_product(
                 lapply(
                     self$param,
                     function(p){p$param}
@@ -153,6 +155,9 @@ Task <- R6::R6Class(
         
         
         run_one = function(){
+            
+            print('current_param')
+            print(self$current_param)
             
             self$worker <- do.call(
                 self$method$new,
