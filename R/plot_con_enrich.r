@@ -35,7 +35,7 @@ ConnectionEnrichment <- R6::R6Class(
         
         initialize = function(
             data = NULL,
-            name = con_enrich,
+            name = fig_con_enrich,
             input_param = NULL,
             fname_param = list(),
             theme_args = list(),

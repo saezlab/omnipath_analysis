@@ -58,6 +58,13 @@ omnipath2_workflow <<- list(
         name = NULL,
         con_enrich_input_param,
         res_by_entity_input_param
+    ),
+    
+    intercell_subcls_intersect = Task$new(
+        method = SubclassesIntersectionSeries,
+        name = NULL,
+        Param$new(NULL),
+        Param$new(TRUE, FALSE)
     )
     
 )

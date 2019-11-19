@@ -37,6 +37,7 @@ UpsetBase <- R6::R6Class(
                 name,
                 cat_col,
                 ent_col,
+                fname_param = list(),
                 #title = NULL,
                 data = NULL,
                 ...
@@ -47,7 +48,12 @@ UpsetBase <- R6::R6Class(
             self$ent_col <- enquo(ent_col)
             #self$title <- title
             
-            super$initialize(data = data, name = name, ...)
+            super$initialize(
+                data = data,
+                name = UQ(name),
+                fname_param = fname_param,
+                ...
+            )
             
             invisible(self)
             

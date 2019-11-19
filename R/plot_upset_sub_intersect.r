@@ -33,7 +33,8 @@ SubclassesIntersection <- R6::R6Class(
         
         initialize = function(
             data = NULL,
-            name = NULL,
+            name = fig_subcls_intersect,
+            fname_param = list(),
             width = NULL,
             height = NULL,
             plot_args = list(),
@@ -54,9 +55,10 @@ SubclassesIntersection <- R6::R6Class(
             
             super$initialize(
                 data = data,
+                fname_param = fname_param,
                 ent_col = entity_id,
                 cat_col = resource_label,
-                name = name,
+                name = enquo(name),
                 plot_args = plot_args,
                 width = width,
                 height = height,
@@ -95,8 +97,8 @@ SubclassesIntersectionSeries <- R6::R6Class(
                 data = self$data,
                 slice_var = parent,
                 plotter = SubclassesIntersection,
-                name = sprintf(
-                    'subclasses-intersection-%s',
+                name = fig_subcls_intersect,
+                fname_param = list(
                     `if`(self$complexes, 'complex', 'protein')
                 ),
                 width_by = resource_label,

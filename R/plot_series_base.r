@@ -34,6 +34,7 @@ PlotSeries <- R6::R6Class(
             slice_var,
             plotter,
             name,
+            fname_param = list(),
             plot_args = list(),
             label_mapping = NULL,
             exclude_levels = NULL,
@@ -44,7 +45,7 @@ PlotSeries <- R6::R6Class(
         ){
             
             self$data <- data
-            self$name <- name
+            self$name <- enquo(name)
             self$slice_var <- enquo(slice_var)
             self$exclude_levels <- exclude_levels
             self$label_levels <- label_levels
@@ -54,6 +55,7 @@ PlotSeries <- R6::R6Class(
             self$width_min <- width_min
             self$width_step <- width_step
             self$width <- plot_args$width
+            self$fname_param <- fname_param
             
             self$main()
             
@@ -67,7 +69,7 @@ PlotSeries <- R6::R6Class(
             self$preprocess()
             self$set_levels()
             
-            #self$plot()
+            self$plot()
             
             invisible(self)
             
@@ -116,11 +118,12 @@ PlotSeries <- R6::R6Class(
                         self$label_levels[[level]],
                         level
                     )
-                    self$slice_name <- sprintf(
-                        '%s-by-%s__%s',
-                        self$name,
-                        quo_name(self$slice_var),
-                        level
+                    self$slice_fname_param <- append(
+                        self$fname_param,
+                        list(
+                            quo_name(self$slice_var),
+                            level
+                        )
                     )
                     self$slice <- self$data %>%
                         filter(!!self$slice_var == level)
@@ -131,7 +134,7 @@ PlotSeries <- R6::R6Class(
                     
                     self$level <- NULL
                     self$slice_label <- NULL
-                    self$slice_name <- NULL
+                    self$slice_fname_param <- NULL
                     self$slice <- NULL
                     
                 }
@@ -184,7 +187,8 @@ PlotSeries <- R6::R6Class(
                 c(
                     list(
                         data = self$slice,
-                        name = self$slice_name
+                        name = self$name,
+                        fname_param = self$slice_fname_param
                     ),
                     self$plot_args
                 )
@@ -235,6 +239,7 @@ CategoriesPairwisePlotSeries <- R6::R6Class(
                 slice_var,
                 plotter,
                 name,
+                fname_param = list(),
                 data = NULL,
                 input_param = NULL,
                 ...
@@ -251,6 +256,7 @@ CategoriesPairwisePlotSeries <- R6::R6Class(
             
             super$initialize(
                 data = self$data,
+                fname_param = fname_param,
                 slice_var = !!slice_var,
                 plotter = plotter,
                 name = name,
