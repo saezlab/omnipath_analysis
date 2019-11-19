@@ -21,6 +21,7 @@
 #
 #  Website: http://omnipathdb.org/
 #
+
 from future.utils import iteritems
 
 import itertools

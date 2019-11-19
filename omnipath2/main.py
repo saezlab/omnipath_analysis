@@ -355,6 +355,13 @@ workflow = collections.OrderedDict(
         
     ),
     
+    r_plotting = (
+        Task(
+            method = r_runner.RRunner,
+            name = 'R plotting',
+        ),
+    ),
+    
 )
 
 

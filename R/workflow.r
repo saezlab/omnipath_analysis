@@ -17,8 +17,6 @@
 #  Website: http://pypath.omnipathdb.org/
 #
 
-require(R6)
-
 
 con_enrich_input_param <- ProductParam$new(
     list('curated', 'omnipath'),

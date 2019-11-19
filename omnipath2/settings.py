@@ -151,6 +151,8 @@ _defaults = {
     # default palette
     'palette': 'Nico_3',
     
+    'r_workflow_command': 'Rscript omnipath2_workflow.r'
+    
 }
 
 
