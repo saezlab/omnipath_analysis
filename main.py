@@ -24,4 +24,6 @@
 
 import omnipath2.main
 
-omnipath2.main.Main()
+workflow = omnipath2.main.Main()
+
+workflow.main()
