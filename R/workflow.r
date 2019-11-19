@@ -77,6 +77,12 @@ omnipath2_workflow <<- list(
         method = ConnectionEnrichment,
         name = NULL,
         input_param = con_enrich_input_param
+    ),
+    
+    intercell_graph = Task$new(
+        method = ConnectionGraph,
+        name = NULL,
+        con_enrich_input_param
     )
     
 )

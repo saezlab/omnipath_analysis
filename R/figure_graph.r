@@ -35,7 +35,14 @@ GraphPlot <- R6::R6Class(
     
     public = list(
         
-        initialize = function(data, name, layout = 'fr', ...){
+        initialize = function(
+                data,
+                name,
+                fname_param = list(),
+                param = list(),
+                layout = 'fr',
+                ...
+            ){
             
             assign('layout_types', c('fr', 'circle'), envir = private$static)
             
@@ -43,7 +50,8 @@ GraphPlot <- R6::R6Class(
             
             super$initialize(
                 data = data,
-                name = name,
+                name = UQ(name),
+                fname_param = fname_param,
                 ...
             )
             
@@ -231,13 +239,21 @@ ConnectionGraph <- R6::R6Class(
     
     public = list(
         
-        initialize = function(data = NULL, layout = 'fr', ...){
+        initialize = function(
+                input_param,
+                data = NULL,
+                layout = 'fr',
+                ...
+            ){
+            
+            self$input_param <- input_param
             
             private$ensure_data(data)
             
             super$initialize(
                 data = self$data,
-                name = 'intercell-classes-graph',
+                name = quote(fig_intercell_cls_graph),
+                fname_param = input_param,
                 layout = layout,
                 width = 4,
                 height = 3,
@@ -257,7 +273,9 @@ ConnectionGraph <- R6::R6Class(
             
             self$data <- `if`(
                 is.null(data),
-                IntercellCategoriesPairwise$new()$data,
+                IntercellCategoriesPairwise$new(
+                    input_param = self$input_param
+                )$data,
                 data
             )
             

@@ -24,8 +24,6 @@ list_product <- function(lst){
     
     lst_names <- names(lst)
     
-    print(lst_names)
-    
     prod_lst <- as.list(
         unlist(
             apply(
