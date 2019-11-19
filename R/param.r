@@ -58,7 +58,10 @@ get_default_param <- function(){
         timestamp_format = '%Y%m%d',
         timestamp_dirs = TRUE,
         timestamp_files = TRUE,
-        loglevel = 5
+        loglevel = 5,
+        
+        fig_res_cov = 'res-cov_%s_%s_%s_%s',
+        con_enrich = 'connection-enrichment_%s_%s_%s_%s'
         
     )
     

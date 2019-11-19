@@ -98,10 +98,15 @@ Task <- R6::R6Class(
         ){
         
             self$method <- method
+            
             self$param <- list(...)
             self$name <- `if`(
                 is.null(name),
-                as.character(expr(enquo(method))),
+                `if`(
+                    class(method) == 'R6ClassGenerator',
+                    method$classname,
+                    as.character(expr(method))
+                ),
                 name
             )
             
@@ -113,6 +118,12 @@ Task <- R6::R6Class(
         
         
         run = function(){
+            
+            op2log(
+                sprintf('Running task `%s`', self$name),
+                label = 'workflow',
+                0
+            )
             
             for(param in private$product_param()){
                 

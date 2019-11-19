@@ -34,6 +34,7 @@ SinglePlot <- R6::R6Class(
         initialize = function(
             data,
             name,
+            fname_param = list(),
             typeface = NA,
             width = NULL,
             height = NULL,
@@ -42,7 +43,10 @@ SinglePlot <- R6::R6Class(
             theme_args = list()
         ){
             
-            super$initialize(name = name)
+            super$initialize(
+                name = enquo(name),
+                fname_param = fname_param
+            )
             
             self$data <- data
             self$width <- width
@@ -83,6 +87,11 @@ SinglePlot <- R6::R6Class(
             dev.off()
             
             private$ready()
+            
+            op2log(
+                sprintf('Finished: `%s`.', class(self)[1]),
+                label = class(self)[1]
+            )
             
         },
         

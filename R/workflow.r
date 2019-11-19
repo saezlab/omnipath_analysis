@@ -20,6 +20,18 @@
 require(R6)
 
 
+con_enrich_input_param <- ProductParam$new(
+    list('curated', 'omnipath'),
+    list('proteins'),
+    list(
+        'all-class-levels',
+        'above_main-main-misc-small_main'
+    )
+)
+
+res_by_entity_input_param <- Param$new('omnipath', 'curated')
+
+
 omnipath2_workflow <<- list(
     
     # These "tests" show if we can provide the arguments
@@ -30,34 +42,22 @@ omnipath2_workflow <<- list(
     test1 = Task$new(
         method = ResourceByEntity,
         name = NULL,
-        Param$new('omnipath', 'curated')
+        res_by_entity_input_param
     ),
     
     test2 = Task$new(
         method = IntercellCategoriesPairwise,
         name = NULL,
-        ProductParam$new(
-            list('curated', 'omnipath'),
-            list('proteins'),
-            list(
-                'all-class-levels',
-                'above_main-main-misc-small_main'
-            )
-        )
+        con_enrich_input_param
     ),
     
-    test3 = Task$new(
-        method = IntercellCategoriesPairwise,
+    # actual tasks of the workflow
+    
+    resource_coverage = Task$new(
+        method = ResourceCoverage,
         name = NULL,
-        Param$new(NULL),
-        Param$new(
-            'curated', 'omnipath'
-        ),
-        Param$new('proteins'),
-        Param$new(
-            'all-class-levels',
-            'above_main-main-misc-small_main'
-        )
+        con_enrich_input_param,
+        res_by_entity_input_param
     )
     
 )

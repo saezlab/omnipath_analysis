@@ -35,7 +35,9 @@ ConnectionEnrichment <- R6::R6Class(
         
         initialize = function(
             data = NULL,
+            name = con_enrich,
             input_param = NULL,
+            fname_param = list(),
             theme_args = list(),
             exclude = c('sub', 'misc'),
             entity_type = 'protein',
@@ -47,6 +49,7 @@ ConnectionEnrichment <- R6::R6Class(
             ...
         ){
             
+            self$name <- enquo(name)
             self$entity_type <- entity_type
             self$exclude <- exclude
             self$cluster <- cluster
@@ -73,7 +76,8 @@ ConnectionEnrichment <- R6::R6Class(
             
             super$initialize(
                 data = self$data,
-                name = self$name,
+                name = UQ(self$name),
+                fname_param = self$fname_param,
                 theme_args = theme_args,
                 width = 5.075,
                 height = 4,
@@ -178,19 +182,19 @@ ConnectionEnrichment <- R6::R6Class(
         
         set_name = function(){
             
-            self$name <- sprintf(
-                'connection-enrichment-%s',
-                private$dir_sign_choice(c('undir', 'dir', 'stim', 'inh'))
+            dir_sign <- private$dir_sign_choice(
+                c('undir', 'dir', 'stim', 'inh')
+            )
+            
+            self$fname_param <- append(
+                self$input_param,
+                dir_sign
             )
             
             self$title <- sprintf(
                 'Enrichment of network connections (%s)',
-                private$dir_sign_choice(
-                    c('all', 'directed', 'stimulation', 'inhibition')
-                )
+                dir_sign
             )
-            
-            op2log(sprintf('Plotting `%s`.', self$name))
             
         },
         

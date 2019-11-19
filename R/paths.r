@@ -30,6 +30,7 @@ Path <- R6::R6Class(
         
         initialize = function(
             name,
+            fname_param = list(),
             ext = NULL,
             type = NULL,
             add_timestamp = NA
@@ -39,6 +40,7 @@ Path <- R6::R6Class(
             self$type <- type
             self$ext <- `if`(is.null(ext), '', ext)
             self$add_timestamp <- add_timestamp
+            self$fname_param <- fname_param
             
             private$set_dir()
             private$set_fname()
@@ -88,7 +90,11 @@ Path <- R6::R6Class(
         
         timestamp_fname = function(fname){
             
-            fname <- quo_get_expr(fname)
+            fname <- `if`(
+                is_quosure(fname),
+                quo_get_expr(fname),
+                fname
+            )
             
             fname <- `if`(
                 `||`(
@@ -103,11 +109,39 @@ Path <- R6::R6Class(
             
         },
         
+        
+        set_fname_key = function(){
+            
+            self$fname_key <- omnipath2_settings$get(UQ(self$name))
+            
+            invisible(self)
+            
+        },
+        
+        
+        insert_param = function(){
+            
+            self$fname_key <- do.call(
+                sprintf,
+                c(
+                    list(self$fname_key),
+                    self$fname_param
+                )
+            )
+            
+            invisible(self)
+            
+        },
+        
+        
         set_fname = function(){
+            
+            private$set_fname_key()
+            private$insert_param()
             
             self$fname <- sprintf(
                 '%s.%s',
-                private$timestamp_fname(self$name),
+                private$timestamp_fname(self$fname_key),
                 self$ext
             )
             
@@ -148,10 +182,9 @@ InputPath <- R6::R6Class(
         
         initialize = function(name, ...){
             
-            self$fname_param <- list(...)
-            
             super$initialize(
                 name = enquo(name),
+                fname_param = list(...),
                 type = 'data',
                 add_timestamp = FALSE,
                 ext = 'tsv'
@@ -175,16 +208,10 @@ InputPath <- R6::R6Class(
         
         set_fname = function(){
             
-            self$name <- do.call(
-                sprintf,
-                c(
-                    list(
-                        omnipath2_settings$get(UQ(self$name))
-                    ),
-                    self$fname_param
-                )
-            )
-            self$path <- omnipath2_files$get(self$name)
+            private$set_fname_key()
+            private$insert_param()
+            
+            self$path <- omnipath2_files$get(self$fname_key)
             self$dir <- dirname(self$path)
             self$fname <- basename(self$path)
             
@@ -214,10 +241,11 @@ TablePath <- R6::R6Class(
     
     public = list(
         
-        initialize = function(name){
+        initialize = function(name, fname_param = list()){
             
             super$initialize(
                 name = name,
+                fname_param = fname_param,
                 type = 'table',
                 add_timestamp = FALSE
             )
@@ -241,12 +269,18 @@ FigurePath <- R6::R6Class(
     
     public = list(
         
-        initialize = function(name){
+        initialize = function(name, fname_param = list()){
             
             super$initialize(
                 name = name,
+                fname_param = fname_param,
                 ext = 'pdf',
                 type = 'figure'
+            )
+            
+            op2log(
+                sprintf('Figure path set: `%s`.', self$path),
+                label = class(self)[1]
             )
             
             invisible(self)

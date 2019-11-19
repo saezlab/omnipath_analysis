@@ -34,7 +34,7 @@ ResourceCoverage <- R6::R6Class(
         initialize = function(
             con_enrich_input_param,
             res_by_entity_input_param,
-            ann_by_entity_input_param = NULL
+            ann_by_entity_input_param = list()
         ){
             
             self$con_enrich_input_param <- con_enrich_input_param
@@ -43,7 +43,12 @@ ResourceCoverage <- R6::R6Class(
             
             super$initialize(
                 data = self$data,
-                name = 'res-cov',
+                name = fig_res_cov,
+                fname_param = c(
+                    self$con_enrich_input_param,
+                    self$res_by_entity_input_param,
+                    self$ann_by_entity_input_param
+                ),
                 height = 7,
                 width = 4.5,
                 theme_args = c(
