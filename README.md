@@ -123,3 +123,30 @@ With all databases loaded Python requires maybe around 5G memory.
 The inter-cellular network data frame requires little more than 1G.
 `pandas` operations can result 1-3G peaks on top of that baseline.
 Overall it's good to have 8G RAM available.
+
+## How to run
+
+You can run the whole workflow by calling `main.py`.
+
+```
+python main.py
+```
+
+You can run selected parts or tasks only:
+
+```
+from omnipath2 import main
+
+workflow = main.Main(parts = ['intercell_plots', 'network_plots'])
+workflow.main()
+
+# only selected tasks:
+workflow = main.Main(steps = main.workflow['intercell_plots'][0])
+```
+
+The R workflow is called by the `r_plotting` part of the Python one, but
+also can be run separately:
+
+```
+Rscript omnipath2_workflow.r
+```
