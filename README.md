@@ -116,6 +116,9 @@ a timestamp can be added to each file name. The timestamps by default are
 an 8 digit representation of the date, so every day a new directory will
 be started (except if you keep running the same session over midnight, then
 still the old directory will be used).
+The `files.json` file keeps track of the most recent versions of all tables
+and figures generated both for the Python and R part as well as the earlier
+versions.
 
 ## Resource usage
 
@@ -137,11 +140,13 @@ You can run selected parts or tasks only:
 ```
 from omnipath2 import main
 
+# 2 parts selected (each a series of tasks)
 workflow = main.Main(parts = ['intercell_plots', 'network_plots'])
 workflow.main()
 
 # only selected tasks:
 workflow = main.Main(steps = main.workflow['intercell_plots'][0])
+workflow.main()
 ```
 
 The R workflow is called by the `r_plotting` part of the Python one, but
