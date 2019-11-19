@@ -38,6 +38,7 @@ from omnipath2 import intercell_plots
 from omnipath2 import network_plots
 from omnipath2 import complexes_plots
 from omnipath2 import supptables
+from omnipath2 import r_runner
 
 
 _logger = session_mod.Logger(name = 'op2.main')

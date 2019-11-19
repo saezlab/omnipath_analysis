@@ -24,7 +24,7 @@
 
 import subprocess
 
-import pypath.session_mod as session_mod
+import pypath.session_mod
 
 from omnipath2 import settings as op2_settings
 
