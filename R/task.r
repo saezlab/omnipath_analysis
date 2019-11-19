@@ -22,7 +22,11 @@ require(R6)
 
 list_product <- function(lst){
     
-    as.list(
+    lst_names <- names(lst)
+    
+    print(lst_names)
+    
+    prod_lst <- as.list(
         unlist(
             apply(
                 unname(expand.grid(lst)),
@@ -32,6 +36,17 @@ list_product <- function(lst){
             recursive = FALSE
         )
     )
+    
+    if(!is.null(lst_names)){
+        
+        prod_lst <- lapply(
+            prod_lst,
+            function(li){`names<-`(li, lst_names)}
+        )
+        
+    }
+    
+    return(prod_lst)
     
 }
 
@@ -46,14 +61,7 @@ ProductParam <- R6::R6Class(
         
         initialize = function(...){
             
-            self$param <- unlist(
-                apply(
-                    unname(expand.grid(list(...))),
-                    1,
-                    list
-                ),
-                recursive = FALSE
-            )
+            self$param <- list_product(list(...))
             
             invisible(self)
             
@@ -96,10 +104,11 @@ Task <- R6::R6Class(
             name = NULL,
             ...
         ){
-        
+            
             self$method <- method
             
             self$param <- list(...)
+            
             self$name <- `if`(
                 is.null(name),
                 `if`(
@@ -143,10 +152,14 @@ Task <- R6::R6Class(
         
         set_param = function(){
             
-            self$param <- case_when(
-                length(self$param) == 0 ~ list(Param$new()),
-                is.list(self$param) ~ self$param,
-                TRUE ~ list(self$param)
+            self$param <- `if`(
+                length(self$param) == 0,
+                list(Param$new()),
+                `if`(
+                    is.list(self$param),
+                    self$param,
+                    list(self$param)
+                )
             )
             
             invisible(self)
@@ -157,9 +170,11 @@ Task <- R6::R6Class(
         product_param = function(){
             
             list_product(
-                lapply(
+                sapply(
                     self$param,
-                    function(p){p$param}
+                    function(p){p$param},
+                    simplify = FALSE,
+                    USE.NAMES = TRUE
                 )
             )
         },
