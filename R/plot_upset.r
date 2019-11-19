@@ -55,7 +55,7 @@ UpsetComplexes <- R6::R6Class(
             super$initialize(
                 ent_col = complex_id,
                 cat_col = resource,
-                name = cplex_by_res,
+                name = quote(fig_cplex_overlap),
                 plot_args = plot_args,
                 width = 7,
                 height = 4,

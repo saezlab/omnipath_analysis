@@ -62,7 +62,7 @@ get_default_param <- function(){
         
         fig_res_cov = 'res-cov_%s_%s_%s_%s',
         fig_con_enrich = 'connection-enrichment_%s_%s_%s_%s',
-        fig_subcls_intersect = 'subclas-intersection_%s_%s_%s',
+        fig_subcls_intersect = 'subclass-intersection_%s_%s_%s',
         fig_cplex_overlap = 'complex-overlap'
         
         

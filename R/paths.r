@@ -36,7 +36,7 @@ Path <- R6::R6Class(
             add_timestamp = NA
         ){
             
-            self$name <- `if`(is_quosure(name), name, enquo(name))
+            self$name <- name
             self$type <- type
             self$ext <- `if`(is.null(ext), '', ext)
             self$add_timestamp <- add_timestamp

@@ -65,6 +65,18 @@ omnipath2_workflow <<- list(
         name = NULL,
         Param$new(NULL),
         Param$new(TRUE, FALSE)
+    ),
+    
+    complex_overlaps = Task$new(
+        method = UpsetComplexes,
+        name = NULL,
+        Param$new(NULL)
+    ),
+    
+    connection_enrichment = Task$new(
+        method = ConnectionEnrichment,
+        name = NULL,
+        input_param = con_enrich_input_param
     )
     
 )
