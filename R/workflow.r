@@ -92,3 +92,14 @@ omnipath2_workflow <<- list(
     )
     
 )
+
+
+omnipath2_run <- function(){
+    
+    for(task in omnipath2_workflow){
+        
+        task$run()
+        
+    }
+    
+}
