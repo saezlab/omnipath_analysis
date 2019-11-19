@@ -33,9 +33,13 @@ CategorySizes <- R6::R6Class(
     
     public = list(
         
-        initialize = function(data, name = NULL, theme_args = list(), ...){
+        initialize = function(
+                data,
+                name,
+                theme_args = list(),
+                ...
+            ){
             
-            name <- `if`(is.null(name), 'sizes', name)
             theme_args <- modifyList(
                 list(
                     axis.text.x = element_text(
@@ -49,7 +53,7 @@ CategorySizes <- R6::R6Class(
             
             super$initialize(
                 data = data,
-                name = name,
+                name = UQ(name),
                 theme_args = theme_args,
                 ...
             )
@@ -114,7 +118,7 @@ CategorySizesSeries <- R6::R6Class(
                 data = self$data,
                 slice_var = parent0,
                 plotter = CategorySizes,
-                name = 'sizes',
+                name = quote(fig_cat_sizes),
                 input_param = input_param,
                 width_by = src_label0,
                 width_min = .7,
@@ -132,11 +136,15 @@ CategorySizesSeries <- R6::R6Class(
             self$data <- self$data %>%
                 filter(
                     typ_cls0 == typ_cls1 &
-                    entity == 'protein' &
                     typ_cls0 != 'misc' &
                     typ_cls0 != 'small_main' &
                     !is.na(name_cls0)
-                )
+                ) %>%
+                {`if`(
+                    'entity' %in% names(.),
+                    filter(., entity == 'protein'),
+                    .
+                )}
             
             invisible(self)
             

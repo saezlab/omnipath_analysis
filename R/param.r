@@ -64,7 +64,8 @@ get_default_param <- function(){
         fig_con_enrich = 'connection-enrichment_%s_%s_%s_%s',
         fig_subcls_intersect = 'subclass-intersection_%s_%s_%s',
         fig_cplex_overlap = 'complex-overlap',
-        fig_intercell_cls_graph = 'intercell-classes-graph_%s_%s_%s'
+        fig_intercell_cls_graph = 'intercell-classes-graph_%s_%s_%s',
+        fig_cat_sizes = 'category-sizes_%s_%s_%s'
         
     )
     

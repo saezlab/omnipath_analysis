@@ -83,6 +83,12 @@ omnipath2_workflow <<- list(
         method = ConnectionGraph,
         name = NULL,
         con_enrich_input_param
+    ),
+    
+    category_sizes = Task$new(
+        method = CategorySizesSeries,
+        name = NULL,
+        input_param = con_enrich_input_param
     )
     
 )

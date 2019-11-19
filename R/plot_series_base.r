@@ -239,7 +239,6 @@ CategoriesPairwisePlotSeries <- R6::R6Class(
                 slice_var,
                 plotter,
                 name,
-                fname_param = list(),
                 data = NULL,
                 input_param = NULL,
                 ...
@@ -252,14 +251,15 @@ CategoriesPairwisePlotSeries <- R6::R6Class(
                 input_param
             )
             
+            self$input_param <- input_param
             private$ensure_data(data)
             
             super$initialize(
                 data = self$data,
-                fname_param = fname_param,
+                fname_param = input_param,
                 slice_var = !!slice_var,
                 plotter = plotter,
-                name = name,
+                name = UQ(name),
                 ...
             )
             
@@ -274,9 +274,8 @@ CategoriesPairwisePlotSeries <- R6::R6Class(
             
             self$data <- `if`(
                 is.null(data),
-                do.call(
-                    IntercellCategoriesPairwise$new(),
-                    self$input_param
+                IntercellCategoriesPairwise$new(
+                    input_param = self$input_param
                 )$data,
                 data
             )
