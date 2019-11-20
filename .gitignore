@@ -1,3 +1,7 @@
 **/*_log/
 **/*_cache
 *tmp*
+**/tables/
+**/files.json
+**/__pycache__/
+
