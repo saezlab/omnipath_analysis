@@ -254,7 +254,7 @@ class Database(session_mod.Logger):
     def get_args_tf_target(self):
         
         transcription = copy.deepcopy(data_formats.transcription)
-        transcription['tfregulons'].input_args = {
+        transcription['dorothea'].input_args = {
             'levels': self.get_param('tfregulons_levels'),
         }
         

@@ -54,7 +54,7 @@ _defaults = {
     'annotations_pickle': 'annotations2.pickle',
     'intercell_pickle': 'intercell.pickle',
     'enz_sub_pickle': 'ptms.pickle',
-    'tf_target_pickle': 'tfregulons-%s.pickle',
+    'tf_target_pickle': 'tftarget_tfregulons-%s.pickle',
     'tf_mirna_pickle': 'tfmirna.pickle',
     'mirna_mrna_pickle': 'mirna_mrna.pickle',
 
