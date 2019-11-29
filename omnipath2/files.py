@@ -64,13 +64,16 @@ class Files(session_mod.Logger):
     
     def write_files_db(self):
         
-        buffer = io.StringIO()
-        json.dump(self.files, buffer)
-        buffer.seek(0)
+        json_dump = json.dumps(
+            self.files,
+            sort_keys = True,
+            indent = 4,
+            separators = (',', ': '),
+        )
         
         with open(self.json_file, 'w') as fp:
             
-            fp.write(buffer.read())
+            fp.write(json_dump)
     
     
     def update_record(self, path):
