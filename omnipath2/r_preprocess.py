@@ -41,7 +41,7 @@ from pypath import dataio
 from pypath import progress
 from pypath import common
 from pypath import entity
-from pypath import data_formats
+from pypath import db_categories
 
 import omnipath2
 from omnipath2 import settings as op2_settings
@@ -264,6 +264,7 @@ class IntercellNetworkCounts(omnipath2.table.TableBase):
         self.network_dataset = network_dataset
         self.only_proteins = only_proteins
         self.class_levels = common.to_set(class_levels)
+        self.entity_type = 'protein'
         
         param = {
             'fname': 'intercell_network_by_resource_tsv',
@@ -747,8 +748,8 @@ class ResourcesByEntity(omnipath2.table.TableBase):
                         resource = resource,
                         is_complex = entity.Entity._is_complex(entity_id),
                         resource_class = (
-                            data_formats.categories[resource]
-                                if resource in data_formats.categories else
+                            db_categories.categories[resource]
+                                if resource in db_categories.categories else
                             'z'
                         ),
                     )
