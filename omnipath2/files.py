@@ -24,7 +24,6 @@
 
 import os
 import json
-import io
 
 from pypath import common
 from pypath import session_mod

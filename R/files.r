@@ -18,7 +18,7 @@
 #
 
 require(R6)
-require(rjson)
+require(jsonlite)
 
 Files <- R6::R6Class(
     
@@ -76,7 +76,7 @@ Files <- R6::R6Class(
         write_files_db = function(){
             
             write(
-                rjson::toJSON(self$files),
+                rjson::toJSON(self$files, pretty = TRUE),
                 self$files_json
             )
             

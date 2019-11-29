@@ -1,6 +1,6 @@
 Type: Package
 Package: omnipath2
-Version: 0.1.0
+Version: 0.2.0
 Title: Visualizations for the OmniPath 2 paper
 Description: This package built primarily on dplyr and ggplot to post-
     process and visualize data compiled and exported by pypath and the
@@ -11,9 +11,9 @@ URL: https://github.com/saezlab/omnipath2
 BugReports: turei.denes@gmail.com
 Encoding: UTF-8
 Depends: R (>= 3.1.2)
-Imports: dplyr, readr, ggplot2,  
+Imports: dplyr, readr, ggplot2,
     qgraph, tidygraph, ggraph, igraph,
-    R6
+    R6, jsonlite
 Suggests:
 VignetteBuilder: knitr
 LazyData: true
