@@ -39,7 +39,11 @@ get_default_param <- function(){
             panel.grid.major.x = element_blank()
         ),
         input_intercell_cat_pairwise_tsv = 'stats_by_resource_%s_%s_%s',
-        input_intercell_annotation_by_entity_tsv = 'annotations_by_entity',
+        input_intercell_annotation_by_entity_tsv = {
+            'intercell_annotations_by_entity'
+        },
+        input_annotation_by_entity_tsv = 'annotations_by_entity',
+        input_enzyme_substrate = 'enzyme_substrate',
         input_resource_by_entity_tsv = 'resources_by_entity_%s',
         input_complexes_by_resource_tsv = 'complexes_by_resource',
         graph_plot_defaults = list(

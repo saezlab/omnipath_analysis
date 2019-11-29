@@ -182,6 +182,52 @@ IntercellAnnotationByEntity <- R6::R6Class(
 )
 
 
+AnnotationByEntity <- R6::R6Class(
+    
+    'IntercellAnnotationByEntity',
+    
+    inherit = Reader,
+    
+    lock_objects = FALSE,
+    
+    public = list(
+        
+        initialize = function(...){
+            
+            super$initialize(input_intercell_annotation_by_entity_tsv)
+            
+            invisible(self)
+            
+        }
+        
+    )
+    
+)
+
+
+EnzymeSubstrate <- R6::R6Class(
+    
+    'EnzymeSubstrate',
+    
+    inherit = Reader,
+    
+    lock_objects = FALSE,
+    
+    public = list(
+        
+        initialize = function(...){
+            
+            super$initialize(input_enzyme_substrate_tsv)
+            
+            invisible(self)
+            
+        }
+        
+    )
+    
+)
+
+
 ResourceByEntity <- R6::R6Class(
     
     'ResourceByEntity',

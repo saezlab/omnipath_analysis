@@ -191,11 +191,11 @@ workflow = collections.OrderedDict(
                     'inhibitory',
                 ),
             ),
-            name = 'Inter-class connections table',
+            name = 'Interclass connections table',
         ),
         Task(
             method = r_preprocess.IntercellClasses,
-            name = 'Inter-cell classes table',
+            name = 'Intercell classes table',
         ),
         Task(
             method = r_preprocess.IntercellCoverages,
@@ -206,7 +206,7 @@ workflow = collections.OrderedDict(
                     'tf_target',
                 ),
             ),
-            name = 'Inter-cell network coverage table',
+            name = 'Intercell network coverage table',
         ),
         Task(
             method = r_preprocess.IntercellNetworkCounts,
@@ -228,8 +228,8 @@ workflow = collections.OrderedDict(
             name = 'Intercell network counts table',
         ),
         Task(
-            method = r_preprocess.AnnotationsByEntity,
-            name = 'Annotations by entity table',
+            method = r_preprocess.IntercellAnnotationsByEntity,
+            name = 'Intercell annotations by entity table',
         ),
         Task(
             method = r_preprocess.ComplexesByResource,
@@ -248,7 +248,15 @@ workflow = collections.OrderedDict(
                 ),
             ),
             name = 'Resources by entity table',
-        )
+        ),
+        Task(
+            method = r_preprocess.AnnotationsByEntity,
+            name = 'Annotations by entity table',
+        ),
+        Task(
+            method = r_preprocess.EnzymeSubstrate,
+            name = 'Enzyme-substrate interactions table',
+        ),
     ),
     
     complexes_plots = (

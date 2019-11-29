@@ -633,13 +633,13 @@ class IntercellNetworkCounts(omnipath2.table.TableBase):
         return collections.defaultdict(int, d)
 
 
-class AnnotationsByEntity(omnipath2.table.TableBase):
+class IntercellAnnotationsByEntity(omnipath2.table.TableBase):
     
     
     def __init__(self, **kwargs):
         
         param = {
-            'fname': 'annots_by_entity_tsv',
+            'fname': 'intercell_annots_by_entity_tsv',
         }
         param.update(kwargs)
         
@@ -694,6 +694,48 @@ class AnnotationsByEntity(omnipath2.table.TableBase):
             columns = AnnotationRecord._fields
         )
         self.header = self.data.columns
+
+
+class AnnotationsByEntity(omnipath2.table.TableBase):
+    
+    
+    def __init__(self, **kwargs):
+        
+        param = {
+            'fname': 'annots_by_entity_tsv',
+        }
+        param.update(kwargs)
+        
+        omnipath2.table.TableBase.__init__(self, **param)
+    
+    
+    def load(self):
+        
+        self.annotdb = omnipath2.data.get_db('annotations')
+        self.annotdb.make_narrow_df()
+        
+        self.data = self.annotdb.narrow_df
+
+
+class EnzymeSubstrate(omnipath2.table.TableBase):
+    
+    
+    def __init__(self, **kwargs):
+        
+        param = {
+            'fname': 'enz_sub_tsv',
+        }
+        param.update(kwargs)
+        
+        omnipath2.table.TableBase.__init__(self, **param)
+    
+    
+    def load(self):
+        
+        self.enzsubdb = omnipath2.data.get_db('enz_sub')
+        self.enzsubdb.make_df()
+        
+        self.data = self.enzsubdb.df
 
 
 class ResourcesByEntity(omnipath2.table.TableBase):
