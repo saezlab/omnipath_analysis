@@ -41,7 +41,7 @@ Files <- R6::R6Class(
             
             self$files <- `if`(
                 file.exists(self$files_json),
-                rjson::fromJSON(file = self$files_json),
+                jsonlite::fromJSON(self$files_json),
                 list(
                     recent = list(),
                     history = list()
@@ -76,7 +76,7 @@ Files <- R6::R6Class(
         write_files_db = function(){
             
             write(
-                rjson::toJSON(self$files, pretty = TRUE),
+                jsonlite::toJSON(self$files, pretty = TRUE),
                 self$files_json
             )
             

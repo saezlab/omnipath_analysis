@@ -43,7 +43,7 @@ get_default_param <- function(){
             'intercell_annotations_by_entity'
         },
         input_annotation_by_entity_tsv = 'annotations_by_entity',
-        input_enzyme_substrate = 'enzyme_substrate',
+        input_enzyme_substrate_tsv = 'enzyme_substrate',
         input_resource_by_entity_tsv = 'resources_by_entity_%s',
         input_complexes_by_resource_tsv = 'complexes_by_resource',
         graph_plot_defaults = list(
@@ -69,7 +69,9 @@ get_default_param <- function(){
         fig_subcls_intersect = 'subclass-intersection_%s_%s_%s',
         fig_cplex_overlap = 'complex-overlap',
         fig_intercell_cls_graph = 'intercell-classes-graph_%s_%s_%s',
-        fig_cat_sizes = 'category-sizes_%s_%s_%s'
+        fig_cat_sizes = 'category-sizes_%s_%s_%s',
+        fig_enzyme_substrate_shared = 'enzyme-substrate-shared',
+        fig_enzyme_substrate_self = 'enzyme-substrate-self-cplex-other'
         
     )
     

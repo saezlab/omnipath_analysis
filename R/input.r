@@ -281,9 +281,33 @@ ComplexesByResource <- R6::R6Class(
     
     public = list(
         
-        initialize = function(...){
+        initialize = function(expand_members = FALSE, ...){
+            
+            self$expand_members <- expand_members
             
             super$initialize(input_complexes_by_resource_tsv)
+            
+            invisible(self)
+            
+        },
+        
+        
+        preprocess = function(){
+            
+            self$data <- self$data %>%
+                mutate(members = sub('COMPLEX:', '', complex_id)) %>%
+                separate_rows(members, sep = '_') %>%
+                group_by(complex_id) %>%
+                mutate(n_members = n()) %>%
+                ungroup() %>%
+                {`if`(
+                    self$expand_members,
+                    .,
+                    group_by(., complex_id) %>%
+                    summarize_all(first) %>%
+                    ungroup() %>%
+                    select(-members)
+                )}
             
             invisible(self)
             
