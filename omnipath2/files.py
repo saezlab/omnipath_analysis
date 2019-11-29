@@ -24,6 +24,7 @@
 
 import os
 import json
+import io
 
 from pypath import common
 from pypath import session_mod
@@ -63,9 +64,13 @@ class Files(session_mod.Logger):
     
     def write_files_db(self):
         
+        buffer = io.StringIO()
+        json.dump(self.files, buffer)
+        buffer.seek(0)
+        
         with open(self.json_file, 'w') as fp:
             
-            json.dump(self.files, fp)
+            fp.write(buffer.read())
     
     
     def update_record(self, path):
@@ -92,6 +97,7 @@ class Files(session_mod.Logger):
             self.files['history'][fname].add(
                 self.files['recent'][fname]
             )
+            self.files['history'][fname] = list(self.files['history'][fname])
         
         self.files['recent'][fname] = path
         

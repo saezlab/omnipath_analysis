@@ -48,8 +48,8 @@ _defaults = {
     'timestamp_format': '%Y%m%d',
     
     # pickles
-    'omnipath_pickle': 'omnipath_pw_es_lr_20190918.pickle',
-    'curated_pickle': 'network_curated_20190924.pickle',
+    'omnipath_pickle': 'omnipath_pw_es_lr_20191127.pickle',
+    'curated_pickle': 'network_curated_20191127.pickle',
     'complex_pickle': 'complexes.pickle',
     'annotations_pickle': 'annotations2.pickle',
     'intercell_pickle': 'intercell.pickle',
