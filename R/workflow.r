@@ -107,6 +107,21 @@ omnipath2_workflow <<- list(
     enzyme_substrate_shared = Task$new(
         method = EnzymeSubstrateShared,
         name = NULL
+    ),
+    
+    enzyme_substrate_numof_res = Task$new(
+        method = EnzymeSubstrateNumofResources,
+        name = NULL
+    ),
+    
+    enzymes_per_substrate = Task$new(
+        method = EnzymesPerSubstrate,
+        name = NULL
+    ),
+    
+    substrates_per_enzyme = Task$new(
+        method = EnzymesPerSubstrate,
+        name = NULL
     )
     
 )

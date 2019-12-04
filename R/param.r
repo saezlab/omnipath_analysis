@@ -73,8 +73,9 @@ get_default_param <- function(){
         fig_enzyme_substrate_shared = 'enzyme-substrate-shared',
         fig_enzyme_substrate_self = 'enzyme-substrate-self-cplex-other',
         fig_enzyme_substrate_modtype = 'enzyme-substrate-modtype',
-        fig_enzyme_substrate_modtype_dot = 'fig_enzyme_substrate_modtype_dot',
-        fig_enzyme_substrate_numof_res = 'fig_enzyme_substrate_numof_res'
+        fig_enzyme_substrate_modtype_dot = 'enzyme_substrate_modtype_dot',
+        fig_enzyme_substrate_numof_res = 'enzyme_substrate_numof_res',
+        fig_enzyme_by_substrate = 'enzyme_by_substrate'
         
     )
     

@@ -531,3 +531,71 @@ EnzymeSubstrateNumofResources <- R6::R6Class(
     )
     
 )
+
+
+EnzymesPerSubstrate <- R6::R6Class(
+    
+    'EnzymesPerSubstrate',
+    
+    inherit = EnzymeSubstrateBase,
+    
+    lock_objects = FALSE,
+    
+    public = list(
+        
+        initialize = function(){
+            
+            super$initialize(
+                name = fig_enzyme_by_substrate,
+                height = 4,
+                width = 5,
+                xlab_vertical = FALSE,
+                theme_args = list(
+                    axis.text.x = element_text(size = 14)
+                )
+            )
+            
+        },
+        
+        
+        plot = function(){
+            
+            self$plt <- ggplot(
+                    self$enz_sub,
+                    aes(x = n_enzymes, y = ..scaled..)
+                ) +
+                geom_density(adjust = 2) +
+                # geom_bar(fill = 'black', stat = 'count') +
+                xlab('Number of enzymes') +
+                ylab('Number of substrates') +
+                scale_x_log10() +
+                annotation_logticks(
+                    sides = 'b'
+                )
+            
+            invisible(self)
+            
+        }
+        
+    ),
+    
+    
+    private = list(
+        
+        setup = function(){
+            
+            super$setup()
+            
+            self$enz_sub <- self$enz_sub %>%
+                group_by(substrate) %>%
+                mutate(n_enzymes = length(unique(enzyme))) %>%
+                summarize_all(first) %>%
+                ungroup()
+            
+            invisible(self)
+            
+        }
+        
+    )
+    
+)
