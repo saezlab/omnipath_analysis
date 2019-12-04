@@ -845,12 +845,12 @@ EnzymeSubstratePerReference <- R6::R6Class(
             
             self$plt <- ggplot(self$enz_sub) +
                 stat_bin(
-                        aes(x = n_references, y = cumsum(..count..)),
+                        aes(x = n_enz_sub, y = cumsum(..count..)),
                         geom = 'step',
                         binwidth = .01
                 ) +
-                xlab('Number of references') +
-                ylab('Enzyme-substrate interactions') +
+                xlab('Number of enzyme substrate interactions') +
+                ylab('References') +
                 scale_x_log10() +
                 annotation_logticks(sides = 'b')
             
@@ -868,14 +868,11 @@ EnzymeSubstratePerReference <- R6::R6Class(
             super$setup()
             
             self$enz_sub <- self$enz_sub %>%
-                mutate(
-                    n_references = sapply(
-                        str_split(references, ';'),
-                        function(s){
-                            length(unique(s))
-                        }
-                    )
-                )
+                separate_rows(references, sep = ';') %>%
+                group_by(references) %>%
+                mutate(n_enz_sub = n()) %>%
+                summarize_all(first) %>%
+                ungroup()
             
             invisible(self)
             
