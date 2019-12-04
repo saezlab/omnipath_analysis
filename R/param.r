@@ -79,7 +79,8 @@ get_default_param <- function(){
         fig_substrate_by_enzyme = 'substrate-by-enzyme_%s',
         fig_substrate_numof_sites = 'substrate-numof-sites_%s',
         fig_enzyme_substrate_numof_ref = 'enzyme-substrate-numof-ref',
-        fig_enzyme_substrate_by_ref = 'enzyme-substrate-by-ref'
+        fig_enzyme_substrate_by_ref = 'enzyme-substrate-by-ref',
+        fig_cplex_by_resource = 'complexes-by-resource'
         
     )
     

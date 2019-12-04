@@ -271,9 +271,9 @@ ResourceByEntity <- R6::R6Class(
 )
 
 
-ComplexesByResource <- R6::R6Class(
+Complexes <- R6::R6Class(
     
-    'ComplexesByResource',
+    'Complexes',
     
     inherit = Reader,
     
@@ -281,9 +281,16 @@ ComplexesByResource <- R6::R6Class(
     
     public = list(
         
-        initialize = function(expand_members = FALSE, ...){
+        initialize = function(
+            expand_members = FALSE,
+            keep_references = TRUE,
+            expand_resources = FALSE,
+            ...
+        ){
             
             self$expand_members <- expand_members
+            self$keep_references <- keep_references
+            self$expand_resources <- expand_resources
             
             super$initialize(input_complexes_by_resource_tsv)
             
@@ -295,6 +302,11 @@ ComplexesByResource <- R6::R6Class(
         preprocess = function(){
             
             self$data <- self$data %>%
+                {`if`(
+                    self$keep_references,
+                    .,
+                    select(., -references)
+                )} %>%
                 mutate(members = sub('COMPLEX:', '', complex_id)) %>%
                 separate_rows(members, sep = '_') %>%
                 group_by(complex_id) %>%
@@ -304,9 +316,20 @@ ComplexesByResource <- R6::R6Class(
                     self$expand_members,
                     .,
                     group_by(., complex_id) %>%
+                    mutate(
+                        resource = paste(
+                            unique(resource),
+                            collapse = ';'
+                        )
+                    ) %>%
                     summarize_all(first) %>%
                     ungroup() %>%
                     select(-members)
+                )} %>%
+                {`if`(
+                    self$expand_resources,
+                    separate_rows(., resource, sep = ';'),
+                    .
                 )}
             
             invisible(self)

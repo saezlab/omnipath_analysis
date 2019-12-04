@@ -824,6 +824,7 @@ class ComplexesByResource(omnipath2.table.TableBase):
             [
                 'complex_id',
                 'resource',
+                'references',
             ],
         )
         
@@ -839,6 +840,7 @@ class ComplexesByResource(omnipath2.table.TableBase):
                     ComplexRecord(
                         complex_id = cplex.__str__(),
                         resource = resource,
+                        references = ';'.join(cplex.references)
                     )
                 )
         

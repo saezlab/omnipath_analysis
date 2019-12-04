@@ -84,7 +84,7 @@ UpsetComplexes <- R6::R6Class(
         
         read_data = function(){
             
-            self$data <- ComplexesByResource$new()$data
+            self$data <- Complexes$new()$data
             
         }
         

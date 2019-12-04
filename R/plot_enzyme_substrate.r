@@ -72,7 +72,10 @@ EnzymeSubstrateBase <- R6::R6Class(
             if(self$complexes){
                 
                 complexes <- {
-                    ComplexesByResource$new(expand_members = TRUE)$data
+                    Complexes$new(
+                        expand_members = TRUE,
+                        keep_references = FALSE
+                    )$data
                 } %>%
                 mutate(complex_id = as.integer(as.factor(complex_id))) %>%
                 select(-resource, -n_members)
@@ -237,7 +240,7 @@ EnzymeSubstrateShared <- R6::R6Class(
                         `TRUE` = 'Shared',
                         `FALSE` = 'Unique'
                     ),
-                    name = 'Target of the\nenzyme-substrate\ninteraction'
+                    name = 'Enzyme-substrate\ninteractions'
                 ) +
                 xlab('Resources') +
                 ylab('Enzyme-substrate\ninteractions')
@@ -303,7 +306,7 @@ EnzymeSubstrateSelf <- R6::R6Class(
                         in_complex = 'Within complex',
                         between_entities = 'Other entity'
                     ),
-                    name = 'Enzyme-substrate\ninteractions'
+                    name = 'Target of the\nenzyme-substrate\ninteractions'
                 ) +
                 xlab('Resources') +
                 ylab('Enzyme-substrate\ninteractions')

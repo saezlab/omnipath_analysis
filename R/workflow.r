@@ -130,7 +130,12 @@ omnipath2_workflow <<- list(
         method = SubstrateNumofSites,
         name = NULL,
         cumdist = Param$new(TRUE, FALSE)
-    )
+    ),
+    
+    complexes_by_resource = Task$new(
+        method = ComplexesByResource,
+        name = NULL
+    ),
     
 )
 
