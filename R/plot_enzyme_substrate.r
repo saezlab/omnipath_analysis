@@ -475,8 +475,11 @@ EnzymeSubstrateNumofResources <- R6::R6Class(
             super$initialize(
                 name = fig_enzyme_substrate_numof_res,
                 height = 4,
-                width = 5
-                xlab_vertical = FALSE
+                width = 5,
+                xlab_vertical = FALSE,
+                theme_args = list(
+                    axis.text.x = element_text(size = 14)
+                )
             )
             
         },
@@ -485,18 +488,12 @@ EnzymeSubstrateNumofResources <- R6::R6Class(
         plot = function(){
             
             self$plt <- ggplot(
-                    self$enz_sub_by_resource,
-                    aes(y = sources, x = n_modtype, color = modification)
+                    self$enz_sub,
+                    aes(x = n_resources)
                 ) +
-                geom_point(size = 5, alpha = .7) +
-                scale_color_discrete(
-                    guide = guide_legend(
-                        title = 'Modification type'
-                    )
-                ) +
-                scale_x_log10() +
-                ylab('Resources') +
-                xlab('Enzyme-substrate interactions')
+                geom_bar(fill = 'black', stat = 'count') +
+                xlab('Number of resources') +
+                ylab('Enzyme-substrate interactions')
             
             invisible(self)
             
@@ -509,7 +506,25 @@ EnzymeSubstrateNumofResources <- R6::R6Class(
         
         setup = function(){
             
+            super$setup()
             
+            self$enz_sub <- self$enz_sub %>%
+                mutate(
+                    n_resources = as.factor(
+                        sapply(
+                            str_split(sources, ';'),
+                            function(s){
+                                s1 <- sapply(
+                                    str_split(s, '_'),
+                                    function(s0){tail(s0, n = 1)}
+                                )
+                                length(unique(s1))
+                            }
+                        )
+                    )
+                )
+            
+            invisible(self)
             
         }
         

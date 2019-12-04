@@ -107,7 +107,7 @@ omnipath2_workflow <<- list(
     enzyme_substrate_shared = Task$new(
         method = EnzymeSubstrateShared,
         name = NULL
-    ),
+    )
     
 )
 
