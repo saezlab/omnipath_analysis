@@ -87,7 +87,27 @@ omnipath2_workflow <<- list(
         method = CategorySizesSeries,
         name = NULL,
         input_param = con_enrich_input_param
-    )
+    ),
+    
+    enzyme_substrate_modtype = Task$new(
+        method = EnzymeSubstrateModtype,
+        name = NULL
+    ),
+    
+    enzyme_substrate_modtype_dot = Task$new(
+        method = EnzymeSubstrateModtypeDot,
+        name = NULL
+    ),
+    
+    enzyme_substrate_self = Task$new(
+        method = EnzymeSubstrateSelf,
+        name = NULL
+    ),
+    
+    enzyme_substrate_shared = Task$new(
+        method = EnzymeSubstrateShared,
+        name = NULL
+    ),
     
 )
 

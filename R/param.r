@@ -71,7 +71,9 @@ get_default_param <- function(){
         fig_intercell_cls_graph = 'intercell-classes-graph_%s_%s_%s',
         fig_cat_sizes = 'category-sizes_%s_%s_%s',
         fig_enzyme_substrate_shared = 'enzyme-substrate-shared',
-        fig_enzyme_substrate_self = 'enzyme-substrate-self-cplex-other'
+        fig_enzyme_substrate_self = 'enzyme-substrate-self-cplex-other',
+        fig_enzyme_substrate_modtype = 'enzyme-substrate-modtype',
+        fig_enzyme_substrate_modtype_dot = 'fig_enzyme_substrate_modtype_dot'
         
     )
     

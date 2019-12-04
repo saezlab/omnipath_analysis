@@ -35,18 +35,27 @@ EnzymeSubstrateBase <- R6::R6Class(
         initialize = function(
                 name,
                 complexes = FALSE,
-                keep_references = FALSE
+                keep_references = FALSE,
+                xlab_vertical = TRUE,
+                ...
             ){
             
             self$complexes <- complexes
             self$keep_references <- keep_references
-            theme_args <- x_vertical_labels()
+            theme_args <- `if`(xlab_vertical, x_vertical_labels(), list())
+            args <- modifyList(
+                list(
+                    data = self$data,
+                    name = enquo(name),
+                    theme_args = theme_args,
+                    width = 9
+                ),
+                list(...)
+            )
             
-            super$initialize(
-                data = self$data,
-                name = UQ(enquo(name)),
-                theme_args = theme_args,
-                width = 9
+            do.call(
+                super$initialize,
+                args
             )
             
         }
@@ -147,6 +156,9 @@ EnzymeSubstrateBase <- R6::R6Class(
                 group_by(sources) %>%
                 mutate(n_total = n()) %>%
                 ungroup() %>%
+                group_by(sources, modification) %>%
+                mutate(n_modtype = n()) %>%
+                ungroup() %>%
                 group_by(sources, shared) %>%
                 mutate(n_shared = n()) %>%
                 ungroup() %>%
@@ -162,6 +174,9 @@ EnzymeSubstrateBase <- R6::R6Class(
                 mutate(n_total = n()) %>%
                 group_by(shared) %>%
                 mutate(n_shared = n()) %>%
+                ungroup() %>%
+                group_by(modification) %>%
+                mutate(n_modtype = n()) %>%
                 ungroup() %>%
                 {`if`(
                     self$complexes,
@@ -260,10 +275,10 @@ EnzymeSubstrateSelf <- R6::R6Class(
     
     public = list(
         
-        initialize = function(){
+        initialize = function(name = NULL){
             
             super$initialize(
-                name = fig_enzyme_substrate_self,
+                name = name,
                 complexes = TRUE
             )
             
@@ -308,6 +323,193 @@ EnzymeSubstrateSelf <- R6::R6Class(
                 group_by(sources, category) %>%
                 summarize_all(first) %>%
                 ungroup()
+            
+        }
+        
+    )
+    
+)
+
+
+EnzymeSubstrateModtype <- R6::R6Class(
+    
+    'EnzymeSubstrateModtype',
+    
+    inherit = EnzymeSubstrateBase,
+    
+    lock_objects = FALSE,
+    
+    public = list(
+        
+        initialize = function(name = NULL, ...){
+            
+            name <- `if`(
+                'name' %in% names(match.call()),
+                enquo(name),
+                quo(fig_enzyme_substrate_modtype)
+            )
+            
+            args <- modifyList(
+                list(
+                    name = name,
+                    width = 9,
+                    height = 7
+                ),
+                list(...)
+            )
+            
+            do.call(super$initialize, args)
+            
+        },
+        
+        
+        plot = function(){
+            
+            self$plt <- ggplot(
+                    self$enz_sub_by_resource,
+                    aes(x = sources, y = n_modtype)
+                ) +
+                geom_col(aes(fill = modification)) +
+                scale_fill_discrete(
+                    guide = guide_legend(
+                        title = 'Modification type'
+                    )
+                ) +
+                xlab('Resources') +
+                ylab('Enzyme-substrate\ninteractions')
+            
+        }
+        
+    ),
+    
+    
+    private = list(
+        
+        setup = function(){
+            
+            super$setup()
+            
+            self$enz_sub_by_resource <- self$enz_sub_by_resource %>%
+                group_by(sources, modification) %>%
+                summarize_all(first) %>%
+                ungroup() %>%
+                mutate(modification = str_to_title(modification)) %>%
+                filter(!is.na(modification) & n_modtype > 10) %>%
+                # it does not look good by this ordering
+                arrange(desc(n_modtype)) %>%
+                mutate(
+                    modification = factor(
+                        modification,
+                        rev(unique(modification)),
+                        ordered = TRUE
+                    )
+                )
+            
+            invisible(self)
+            
+        }
+        
+    )
+    
+)
+
+
+EnzymeSubstrateModtypeDot <- R6::R6Class(
+    
+    'EnzymeSubstrateModtypeDot',
+    
+    inherit = EnzymeSubstrateModtype,
+    
+    lock_objects = FALSE,
+    
+    public = list(
+        
+        initialize = function(){
+            
+            super$initialize(
+                name = fig_enzyme_substrate_modtype_dot,
+                height = 5,
+                xlab_vertical = FALSE
+            )
+            
+        },
+        
+        
+        plot = function(){
+            
+            self$plt <- ggplot(
+                    self$enz_sub_by_resource,
+                    aes(y = sources, x = n_modtype, color = modification)
+                ) +
+                geom_point(size = 5, alpha = .7) +
+                scale_color_discrete(
+                    guide = guide_legend(
+                        title = 'Modification type'
+                    )
+                ) +
+                scale_x_log10() +
+                ylab('Resources') +
+                xlab('Enzyme-substrate interactions')
+            
+            invisible(self)
+            
+        }
+        
+    )
+    
+)
+
+
+EnzymeSubstrateNumofResources <- R6::R6Class(
+    
+    'EnzymeSubstrateNumofResources',
+    
+    inherit = EnzymeSubstrateBase,
+    
+    lock_objects = FALSE,
+    
+    public = list(
+        
+        initialize = function(){
+            
+            super$initialize(
+                name = fig_enzyme_substrate_numof_res,
+                height = 4,
+                width = 5
+                xlab_vertical = FALSE
+            )
+            
+        },
+        
+        
+        plot = function(){
+            
+            self$plt <- ggplot(
+                    self$enz_sub_by_resource,
+                    aes(y = sources, x = n_modtype, color = modification)
+                ) +
+                geom_point(size = 5, alpha = .7) +
+                scale_color_discrete(
+                    guide = guide_legend(
+                        title = 'Modification type'
+                    )
+                ) +
+                scale_x_log10() +
+                ylab('Resources') +
+                xlab('Enzyme-substrate interactions')
+            
+            invisible(self)
+            
+        }
+        
+    ),
+    
+    
+    private = list(
+        
+        setup = function(){
+            
+            
             
         }
         
