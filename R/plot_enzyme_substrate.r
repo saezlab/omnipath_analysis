@@ -533,9 +533,9 @@ EnzymeSubstrateNumofResources <- R6::R6Class(
 )
 
 
-EnzymesPerSubstrate <- R6::R6Class(
+EnzymeSubstrateBy <- R6::R6Class(
     
-    'EnzymesPerSubstrate',
+    'EnzymeSubstrateBy',
     
     inherit = EnzymeSubstrateBase,
     
@@ -543,10 +543,25 @@ EnzymesPerSubstrate <- R6::R6Class(
     
     public = list(
         
-        initialize = function(){
+        initialize = function(by, cumdist = TRUE){
+            
+            self$cumdist <- cumdist
+            
+            self$by <- enquo(by)
+            self$by_str <- quo_text(self$by)
+            self$what_str <- `if`(
+                self$by_str == 'enzyme',
+                'substrate',
+                'enzyme'
+            )
+            self$what <- parse_expr(self$what_str)
+            name <- parse_expr(
+                sprintf('fig_%s_by_%s', self$what_str, self$by_str)
+            )
             
             super$initialize(
-                name = fig_enzyme_by_substrate,
+                name = UQ(name),
+                fname_param = list(`if`(cumdist, 'cumdist', 'dens')),
                 height = 4,
                 width = 5,
                 xlab_vertical = FALSE,
@@ -560,14 +575,20 @@ EnzymesPerSubstrate <- R6::R6Class(
         
         plot = function(){
             
-            self$plt <- ggplot(
-                    self$enz_sub,
-                    aes(x = n_enzymes, y = ..scaled..)
-                ) +
-                geom_density(adjust = 2) +
-                # geom_bar(fill = 'black', stat = 'count') +
-                xlab('Number of enzymes') +
-                ylab('Number of substrates') +
+            self$plt <- ggplot(self$enz_sub) +
+                {`if`(
+                    self$cumdist,
+                    suppressWarnings(stat_bin(
+                        aes(x = counts, y = cumsum(..count..)),
+                        geom = 'step',
+                        binwidth = .01
+                    )),
+                    geom_density(
+                        aes(x = counts, y = ..scaled..), adjust = 2
+                    )
+                )} +
+                xlab(sprintf('Number of %ss', self$what_str)) +
+                ylab(sprintf('Number of %ss', self$by_str)) +
                 scale_x_log10() +
                 annotation_logticks(
                     sides = 'b'
@@ -587,10 +608,274 @@ EnzymesPerSubstrate <- R6::R6Class(
             super$setup()
             
             self$enz_sub <- self$enz_sub %>%
-                group_by(substrate) %>%
-                mutate(n_enzymes = length(unique(enzyme))) %>%
+                group_by(UQ(self$by)) %>%
+                mutate(counts = length(unique(UQ(self$what)))) %>%
                 summarize_all(first) %>%
                 ungroup()
+            
+            invisible(self)
+            
+        }
+        
+    )
+    
+)
+
+
+EnzymesPerSubstrate <- R6::R6Class(
+    
+    'EnzymesPerSubstrate',
+    
+    inherit = EnzymeSubstrateBy,
+    
+    lock_objects = FALSE,
+    
+    public = list(
+        
+        initialize = function(...){
+            
+            super$initialize(by = substrate, ...)
+            
+        }
+        
+    )
+    
+)
+
+
+SubstratesPerEnzyme <- R6::R6Class(
+    
+    'SubstratesPerEnzyme',
+    
+    inherit = EnzymeSubstrateBy,
+    
+    lock_objects = FALSE,
+    
+    public = list(
+        
+        initialize = function(...){
+            
+            super$initialize(by = enzyme, ...)
+            
+        }
+        
+    )
+    
+)
+
+
+SubstrateNumofSites <- R6::R6Class(
+    
+    'SubstrateNumofSites',
+    
+    inherit = EnzymeSubstrateBase,
+    
+    lock_objects = FALSE,
+    
+    public = list(
+        
+        initialize = function(cumdist = FALSE){
+            
+            self$cumdist <- cumdist
+            
+            super$initialize(
+                name = fig_substrate_numof_sites,
+                fname_param = list(`if`(cumdist, 'cumdist', 'dens')),
+                height = 4,
+                width = 5,
+                xlab_vertical = FALSE,
+                theme_args = list(
+                    axis.text.x = element_text(size = 14)
+                )
+            )
+            
+        },
+        
+        
+        plot = function(){
+            
+            self$plt <- ggplot(self$enz_sub) +
+                {`if`(
+                    self$cumdist,
+                    suppressWarnings(stat_bin(
+                        aes(x = n_sites, y = cumsum(..count..)),
+                        geom = 'step',
+                        binwidth = .01
+                    )),
+                    geom_density(
+                        aes(x = n_sites, y = ..scaled..), adjust = 2.5
+                    )
+                )} +
+                xlab('Number of modifications') +
+                ylab('Substrates') +
+                scale_x_log10() +
+                annotation_logticks(sides = 'b')
+            
+            invisible(self)
+            
+        }
+        
+    ),
+    
+    
+    private = list(
+        
+        setup = function(){
+            
+            super$setup()
+            
+            self$enz_sub <- self$enz_sub %>%
+                group_by(
+                    substrate, residue_type, residue_offset, modification
+                ) %>%
+                summarize_all(first) %>%
+                ungroup() %>%
+                group_by(substrate) %>%
+                mutate(n_sites = n()) %>%
+                summarize_all(first) %>%
+                ungroup()
+            
+            invisible(self)
+            
+        }
+        
+    )
+    
+)
+
+
+EnzymeSubstrateNumofReferences <- R6::R6Class(
+    
+    'EnzymeSubstrateNumofReferences',
+    
+    inherit = EnzymeSubstrateBase,
+    
+    lock_objects = FALSE,
+    
+    public = list(
+        
+        initialize = function(){
+            
+            super$initialize(
+                name = fig_enzyme_substrate_numof_ref,
+                height = 4,
+                width = 5,
+                xlab_vertical = FALSE,
+                theme_args = list(
+                    axis.text.x = element_text(size = 14)
+                ),
+                keep_references = TRUE
+            )
+            
+        },
+        
+        
+        plot = function(){
+            
+            self$plt <- ggplot(self$enz_sub) +
+                stat_bin(
+                        aes(x = n_references, y = cumsum(..count..)),
+                        geom = 'step',
+                        binwidth = .01
+                ) +
+                xlab('Number of references') +
+                ylab('Enzyme-substrate interactions') +
+                scale_x_log10() +
+                annotation_logticks(sides = 'b')
+            
+            invisible(self)
+            
+        }
+        
+    ),
+    
+    
+    private = list(
+        
+        setup = function(){
+            
+            super$setup()
+            
+            self$enz_sub <- self$enz_sub %>%
+                mutate(
+                    n_references = sapply(
+                        str_split(references, ';'),
+                        function(s){
+                            length(unique(s))
+                        }
+                    )
+                )
+            
+            invisible(self)
+            
+        }
+        
+    )
+    
+)
+
+
+EnzymeSubstratePerReference <- R6::R6Class(
+    
+    'EnzymeSubstratePerReference',
+    
+    inherit = EnzymeSubstrateBase,
+    
+    lock_objects = FALSE,
+    
+    public = list(
+        
+        initialize = function(){
+            
+            super$initialize(
+                name = fig_enzyme_substrate_by_ref,
+                height = 4,
+                width = 5,
+                xlab_vertical = FALSE,
+                theme_args = list(
+                    axis.text.x = element_text(size = 14)
+                ),
+                keep_references = TRUE
+            )
+            
+        },
+        
+        
+        plot = function(){
+            
+            self$plt <- ggplot(self$enz_sub) +
+                stat_bin(
+                        aes(x = n_references, y = cumsum(..count..)),
+                        geom = 'step',
+                        binwidth = .01
+                ) +
+                xlab('Number of references') +
+                ylab('Enzyme-substrate interactions') +
+                scale_x_log10() +
+                annotation_logticks(sides = 'b')
+            
+            invisible(self)
+            
+        }
+        
+    ),
+    
+    
+    private = list(
+        
+        setup = function(){
+            
+            super$setup()
+            
+            self$enz_sub <- self$enz_sub %>%
+                mutate(
+                    n_references = sapply(
+                        str_split(references, ';'),
+                        function(s){
+                            length(unique(s))
+                        }
+                    )
+                )
             
             invisible(self)
             

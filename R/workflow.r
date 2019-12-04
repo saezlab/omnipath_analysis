@@ -116,12 +116,20 @@ omnipath2_workflow <<- list(
     
     enzymes_per_substrate = Task$new(
         method = EnzymesPerSubstrate,
-        name = NULL
+        name = NULL,
+        cumdist = Param$new(TRUE, FALSE)
     ),
     
     substrates_per_enzyme = Task$new(
-        method = EnzymesPerSubstrate,
-        name = NULL
+        method = SubstratesPerEnzyme,
+        name = NULL,
+        cumdist = Param$new(TRUE, FALSE)
+    ),
+    
+    substrate_numof_sites = Task$new(
+        method = SubstrateNumofSites,
+        name = NULL,
+        cumdist = Param$new(TRUE, FALSE)
     )
     
 )
