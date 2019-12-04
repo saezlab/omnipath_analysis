@@ -97,6 +97,8 @@ class Files(session_mod.Logger):
                 self.files['history'][fname]
             )
             self.files['history'][fname].add(
+                self.files['recent'][fname][0]
+                    if isinstance(self.files['recent'][fname], list) else
                 self.files['recent'][fname]
             )
             self.files['history'][fname] = list(self.files['history'][fname])

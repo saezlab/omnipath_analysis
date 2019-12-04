@@ -135,7 +135,7 @@ omnipath2_workflow <<- list(
     complexes_by_resource = Task$new(
         method = ComplexesByResource,
         name = NULL
-    ),
+    )
     
 )
 

@@ -285,12 +285,14 @@ Complexes <- R6::R6Class(
             expand_members = FALSE,
             keep_references = TRUE,
             expand_resources = FALSE,
+            keep_stoichiometry = FALSE,
             ...
         ){
             
             self$expand_members <- expand_members
             self$keep_references <- keep_references
             self$expand_resources <- expand_resources
+            self$keep_stoichiometry <- keep_stoichiometry
             
             super$initialize(input_complexes_by_resource_tsv)
             
@@ -306,6 +308,11 @@ Complexes <- R6::R6Class(
                     self$keep_references,
                     .,
                     select(., -references)
+                )} %>%
+                {`if`(
+                    self$keep_stoichiometry,
+                    .,
+                    select(., -stoichiometry)
                 )} %>%
                 mutate(members = sub('COMPLEX:', '', complex_id)) %>%
                 separate_rows(members, sep = '_') %>%
