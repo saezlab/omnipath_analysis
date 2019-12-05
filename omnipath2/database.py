@@ -147,14 +147,6 @@ class Database(session_mod.Logger):
 
         pickle_fname = self.get_param('%s_pickle' % dataset)
 
-        if dataset == 'tf_target':
-
-            pickle_fname = (
-                pickle_fname % ''.join(
-                    sorted(self.get_param('tfregulons_levels'))
-                )
-            )
-
         return os.path.join(
             self.get_param('pickle_dir'),
             pickle_fname,
@@ -254,9 +246,18 @@ class Database(session_mod.Logger):
     def get_args_tf_target(self):
 
         transcription = copy.deepcopy(data_formats.transcription)
-        transcription['dorothea'].input_args = {
-            'levels': self.get_param('tfregulons_levels'),
-        }
+        dorothea = {}
+        
+        for level in self.get_param('tfregulons_levels'):
+            
+            dorothea['dorothea_%s' % level] = copy.deepcopy(
+                transcription['dorothea']
+            )
+            dorothea['dorothea_%s' % level].name = 'DoRothEA_%s' % level
+            dorothea['dorothea_%s' % level].input_args = {'levels': {level}}
+        
+        del transcription['dorothea']
+        transcription.update(dorothea)
 
         return {'lst': transcription}
 
