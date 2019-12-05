@@ -83,7 +83,8 @@ get_default_param <- function(){
         fig_cplex_by_resource = 'complexes-by-resource',
         fig_cplex_n_comp = 'complexes-numof-components',
         fig_refs_by_cplex = 'references-by-complex',
-        fig_complexes_by_ref = 'complexes-by-ref'
+        fig_complexes_by_ref = 'complexes-by-ref',
+        fig_cplex_by_comp = 'complexes-by-components'
         
     )
     

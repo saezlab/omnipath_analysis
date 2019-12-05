@@ -135,6 +135,26 @@ omnipath2_workflow <<- list(
     complexes_by_resource = Task$new(
         method = ComplexesByResource,
         name = NULL
+    ),
+    
+    complexes_numof_comp = Task$new(
+        method = ComplexesNumofComponents,
+        name = NULL
+    ),
+    
+    refs_by_complex = Task$new(
+        method = RefsPerComplex,
+        name = NULL
+    ),
+    
+    complexes_by_ref = Task$new(
+        method = ComplexesPerRef,
+        name = NULL
+    ),
+    
+    complexes_by_components = Task$new(
+        method = ComplexesByComponents,
+        name = NULL
     )
     
 )

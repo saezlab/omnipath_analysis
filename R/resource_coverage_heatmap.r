@@ -133,6 +133,8 @@ ResourceCoverage <- R6::R6Class(
             
             self$data <- icc
             
+            self$height <- length(unique(icc$resource)) / 5
+            
             invisible(self)
             
         }

@@ -233,6 +233,71 @@ ComplexesNumofComponents <- R6::R6Class(
 )
 
 
+ComplexesByComponents <- R6::R6Class(
+    
+    'ComplexesByComponents',
+    
+    inherit = ComplexBase,
+    
+    lock_objects = FALSE,
+    
+    public = list(
+        
+        initialize = function(){
+            
+            super$initialize(
+                name = fig_cplex_by_comp,
+                expand_resources = FALSE,
+                expand_members = TRUE,
+                xlab_vertical = FALSE
+            )
+            
+            invisible(self)
+            
+        },
+        
+        
+        plot = function(){
+            
+            self$plt <- ggplot(self$complexes) +
+                stat_bin(
+                        aes(x = n_members, y = cumsum(..count..)),
+                        geom = 'step',
+                        binwidth = .01
+                ) +
+                xlab('Number of complexes') +
+                ylab('Components') +
+                scale_x_log10() +
+                annotation_logticks(sides = 'b')
+            
+            invisible(self)
+            
+        }
+        
+    ),
+    
+    
+    private = list(
+        
+        setup = function(){
+            
+            super$setup()
+            
+            self$complexes <- self$complexes %>%
+                group_by(members) %>%
+                mutate(n_complexes = n_distinct(complex_id)) %>%
+                summarize_all(first) %>%
+                ungroup()
+            
+            invisible(self)
+            
+        }
+        
+    )
+    
+)
+
+
 RefsPerComplex <- R6::R6Class(
     
     'RefsPerComplex',
