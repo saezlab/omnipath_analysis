@@ -76,7 +76,9 @@ omnipath2_workflow <<- list(
         method = ConnectionEnrichment,
         name = NULL,
         input_param = con_enrich_input_param,
-        only_main_classes = Param$new(TRUE, FALSE),
+        directed = Param$new(TRUE, FALSE),
+        sign = Param$new(NULL, 'stim', 'inh'),
+        only_main_classes = Param$new(FALSE, TRUE),
         heatmap_variables = Param$new('enrich-count', 'enrich', 'count')
     ),
     
