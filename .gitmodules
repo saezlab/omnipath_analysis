@@ -1,0 +1,6 @@
+[submodule "latex"]
+	path = latex
+	url = git@github.com:saezlab/omnipath2_latex.git
+[submodule "pypath_repo"]
+	path = pypath_repo
+	url = git@github.com:saezlab/pypath.git

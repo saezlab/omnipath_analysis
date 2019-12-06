@@ -40,6 +40,12 @@ _defaults = {
     # directory for figures
     'figures_dir': 'figures',
     
+    # directory for LaTeX
+    'latex_dir': 'latex',
+    
+    # directory for auto-generated LaTeX snippets
+    'latex_auto_dir': 'inc_auto',
+    
     # directory with palettes
     'palette_dir': 'palettes',
     
