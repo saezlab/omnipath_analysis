@@ -141,7 +141,7 @@ ConnectionEnrichment <- R6::R6Class(
                 scale_color_gradient,
                 scale_fill_gradient
             )(
-                low = '#FFFFFF',
+                low = '#CCCCCC',
                 high = '#333333',
                 na.value = '#FFFFFF',
                 limits = c(0, 5),
