@@ -123,39 +123,24 @@ ConnectionEnrichment <- R6::R6Class(
                     sym2 = ifelse(enrich_dir, "\u25E2", "\u25E4")
                 )
             
-            self$plt <- ggplot(
-                mapping = aes(
-                    x = cls_label0,
-                    y = cls_label1,
-                    label = sym1
-                )
-            ) +
-            geom_text(
-                data = data,
-                mapping = aes(
-                    color = enrichment_log2
-                ),
-                size = 4.2
-            ) +
-            scale_color_viridis_c(
+            scale_enrich <- `if`(
+                self$heatmap_variables == 'enrich-count',
+                scale_color_viridis_c,
+                scale_fill_viridis_c
+            )(
                 na.value = '#FFFFFF',
                 guide = guide_colorbar(
                     title = 'Enrichment of\nconnections (log2)',
                     barheight = unit(.5, 'inches')
                 ),
                 limits = c(-2, 2)
-            ) +
-            new_scale_color() +
-            geom_text(
-                data = data,
-                mapping = aes(
-                    x = cls_label1,
-                    y = cls_label0,
-                    color = numof_con_log10,
-                    label = sym2
-                )
-            ) +
-            scale_color_gradient(
+            )
+            
+            scale_count <- `if`(
+                self$heatmap_variables == 'enrich-count',
+                scale_color_gradient,
+                scale_fill_gradient
+            )(
                 low = '#FFFFFF',
                 high = '#333333',
                 na.value = '#FFFFFF',
@@ -164,7 +149,66 @@ ConnectionEnrichment <- R6::R6Class(
                     title = 'Number of\nconnections (log10)',
                     barheight = unit(.5, 'inches')
                 )
+            )
+            
+            self$plt <- ggplot(
+                mapping = aes(
+                    x = cls_label0,
+                    y = cls_label1,
+                    label = sym1
+                )
             ) +
+            {`if`(
+                self$heatmap_variables == 'enrich-count',
+                list(
+                    geom_text(
+                        data = data,
+                        mapping = aes(
+                            color = enrichment_log2
+                        ),
+                        size = 4.2
+                    ),
+                    scale_enrich,
+                    new_scale_color(),
+                    geom_text(
+                        data = data,
+                        mapping = aes(
+                            x = cls_label1,
+                            y = cls_label0,
+                            color = numof_con_log10,
+                            label = sym2
+                        )
+                    ),
+                    scale_count
+                ),
+                NULL
+            )} +
+            {`if`(
+                self$heatmap_variables == 'enrich',
+                list(
+                    geom_tile(
+                        data = data,
+                        mapping = aes(fill = enrichment_log2)
+                    ),
+                    scale_enrich
+                ),
+                NULL
+            )} +
+            {`if`(
+                self$heatmap_variables == 'count',
+                list(
+                    geom_tile(
+                        data = data,
+                        mapping = aes(
+                            x = cls_label1,
+                            y = cls_label0,
+                            fill = numof_con_log10
+                        )
+                    ),
+                    scale_count
+                ),
+                NULL
+            )} +
             ggtitle(self$title) +
             xlab('Inter-cellular\ncommunication roles') +
             ylab('Inter-cellular\ncommunication roles')
@@ -413,15 +457,15 @@ ConnectionEnrichment <- R6::R6Class(
                     self$only_main_classes,
                     filter(
                         .,
-                        cls0 %in% main_classes &
-                        cls1 %in% main_classes
+                        name_cls0 %in% main_classes &
+                        name_cls1 %in% main_classes
                     ),
                     .
                 )}
             
             invisible(self)
             
-        }
+        },
         
         
         upper_triangle = function(...){
@@ -442,8 +486,6 @@ ConnectionEnrichment <- R6::R6Class(
             
             order_x <- levels(data$cls_label0)
             order_y <- levels(data$cls_label1)
-            
-            #return(data)
             
             (
                 data %>%
