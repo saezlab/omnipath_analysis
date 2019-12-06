@@ -397,8 +397,31 @@ ConnectionEnrichment <- R6::R6Class(
                 )$data,
                 data
             )
+            private$filter_classes()
+            
+            invisible(self)
             
         },
+        
+        
+        filter_classes = function(){
+            
+            main_classes <- omnipath2_settings$get(intercell_main_classes)
+            
+            self$data <- self$data %>%
+                {`if`(
+                    self$only_main_classes,
+                    filter(
+                        .,
+                        cls0 %in% main_classes &
+                        cls1 %in% main_classes
+                    ),
+                    .
+                )}
+            
+            invisible(self)
+            
+        }
         
         
         upper_triangle = function(...){
