@@ -34,12 +34,14 @@ ResourceCoverage <- R6::R6Class(
         initialize = function(
             con_enrich_input_param,
             res_by_entity_input_param,
-            ann_by_entity_input_param = list()
+            ann_by_entity_input_param = list(),
+            only_main_classes = FALSE
         ){
             
             self$con_enrich_input_param <- con_enrich_input_param
             self$res_by_entity_input_param <- res_by_entity_input_param
             self$ann_by_entity_input_param <- ann_by_entity_input_param
+            self$only_main_classes <- only_main_classes
             
             super$initialize(
                 data = self$data,
@@ -47,7 +49,14 @@ ResourceCoverage <- R6::R6Class(
                 fname_param = c(
                     self$con_enrich_input_param,
                     self$res_by_entity_input_param,
-                    self$ann_by_entity_input_param
+                    self$ann_by_entity_input_param,
+                    list(
+                        `if`(
+                            only_main_classes,
+                            'main-classes',
+                            'all-classes'
+                        )
+                    )
                 ),
                 height = 7,
                 width = 4.5,
@@ -97,7 +106,8 @@ ResourceCoverage <- R6::R6Class(
             self$order <- (
                 ConnectionEnrichment$new(
                     ordering_only = TRUE,
-                    input_param = self$con_enrich_input_param
+                    input_param = self$con_enrich_input_param,
+                    only_main_classes = self$only_main_classes
                 )$clustering$order_x
             )
             
@@ -110,6 +120,16 @@ ResourceCoverage <- R6::R6Class(
             icc <- IntercellAnnotationByEntity$new(
                     input_param = self$ann_by_entity_input_param
                 )$data %>%
+                {`if`(
+                    self$only_main_classes,
+                    filter(
+                        .,
+                        cls %in% omnipath2_settings$get(
+                            intercell_main_classes
+                        )
+                    ),
+                    .
+                )} %>%
                 filter(!is_complex) %>%
                 select(entity_id, class_label) %>%
                 group_by(class_label) %>%
@@ -134,6 +154,7 @@ ResourceCoverage <- R6::R6Class(
             self$data <- icc
             
             self$height <- length(unique(icc$resource)) / 5
+            self$width <- length(unique(icc$class_label)) / 6.6 + 2.6
             
             invisible(self)
             

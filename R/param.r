@@ -64,7 +64,17 @@ get_default_param <- function(){
         timestamp_files = TRUE,
         loglevel = 5,
         
-        fig_res_cov = 'res-cov_%s_%s_%s_%s',
+        intercell_main_classes = list(
+            'ecm',
+            'adhesion',
+            'ligand',
+            'receptor',
+            'surface_enzyme',
+            'extracellular_enzyme',
+            'transporter'
+        ),
+        
+        fig_res_cov = 'res-cov_%s_%s_%s_%s_%s',
         fig_con_enrich = 'connection-enrichment_%s_%s_%s_%s_%s_%s',
         fig_subcls_intersect = 'subclass-intersection_%s_%s_%s',
         fig_cplex_overlap = 'complex-overlap',

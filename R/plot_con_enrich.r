@@ -46,7 +46,7 @@ ConnectionEnrichment <- R6::R6Class(
             sign = NULL,
             order_by_undirected = TRUE,
             ordering_only = FALSE,
-            only_main_categories = FALSE,
+            only_main_classes = FALSE,
             heatmap_variables = 'enrich-count',
             ...
         ){
@@ -59,7 +59,7 @@ ConnectionEnrichment <- R6::R6Class(
             self$sign <- sign
             self$order_by_undirected <- order_by_undirected
             self$ordering_only <- ordering_only
-            self$only_main_categories <- only_main_categories
+            self$only_main_classes <- only_main_classes
             self$heatmap_variables <- heatmap_variables
             self$input_param <- input_param
             private$ensure_data(data)
@@ -190,15 +190,17 @@ ConnectionEnrichment <- R6::R6Class(
                 c('undir', 'dir', 'stim', 'inh')
             )
             
-            self$fname_param <- append(
+            self$fname_param <- c(
                 self$input_param,
-                dir_sign,
-                `if`(
-                    self$only_main_categories,
-                    'main-categories',
-                    'all-categories'
-                ),
-                self$heatmap_variables
+                list(
+                    dir_sign,
+                    `if`(
+                        self$only_main_classes,
+                        'main-categories',
+                        'all-categories'
+                    ),
+                    self$heatmap_variables
+                )
             )
             
             self$title <- sprintf(

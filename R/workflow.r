@@ -55,7 +55,8 @@ omnipath2_workflow <<- list(
         method = ResourceCoverage,
         name = NULL,
         con_enrich_input_param,
-        res_by_entity_input_param
+        res_by_entity_input_param,
+        only_main_classes = Param$new(TRUE, FALSE)
     ),
     
     intercell_subcls_intersect = Task$new(
@@ -74,7 +75,9 @@ omnipath2_workflow <<- list(
     connection_enrichment = Task$new(
         method = ConnectionEnrichment,
         name = NULL,
-        input_param = con_enrich_input_param
+        input_param = con_enrich_input_param,
+        only_main_classes = Param$new(TRUE, FALSE),
+        heatmap_variables = Param$new('enrich-count', 'enrich', 'count')
     ),
     
     intercell_graph = Task$new(
