@@ -86,8 +86,8 @@ omnipath2_workflow <<- list(
         con_enrich_input_param
     ),
     
-    category_sizes = Task$new(
-        method = CategorySizesSeries,
+    intercell_class_sizes = Task$new(
+        method = IntercellClassSizesSeries,
         name = NULL,
         input_param = con_enrich_input_param
     ),

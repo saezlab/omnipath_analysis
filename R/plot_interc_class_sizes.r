@@ -23,9 +23,9 @@ require(stringr)
 require(R6)
 
 
-CategorySizes <- R6::R6Class(
+IntercellClassSizes <- R6::R6Class(
     
-    'CategorySizes',
+    'IntercellClassSizes',
     
     inherit = SinglePlot,
     
@@ -98,9 +98,9 @@ CategorySizes <- R6::R6Class(
 )
 
 
-CategorySizesSeries <- R6::R6Class(
+IntercellClassSizesSeries <- R6::R6Class(
     
-    'CategorySizesSeries',
+    'IntercellClassSizesSeries',
     
     inherit = CategoriesPairwisePlotSeries,
     
@@ -117,7 +117,7 @@ CategorySizesSeries <- R6::R6Class(
             super$initialize(
                 data = self$data,
                 slice_var = parent0,
-                plotter = CategorySizes,
+                plotter = IntercellClassSizes,
                 name = quote(fig_cat_sizes),
                 input_param = input_param,
                 width_by = src_label0,
