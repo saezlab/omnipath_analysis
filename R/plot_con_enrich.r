@@ -108,7 +108,9 @@ ConnectionEnrichment <- R6::R6Class(
         
         plot = function(){
             
-            data <- bind_rows(
+            data <- {`if`(
+                self$heatmap_variables == 'enrich-count',
+                bind_rows(
                     private$upper_triangle(
                         self$data %>% filter(enrich_dir)
                     ),
@@ -121,7 +123,17 @@ ConnectionEnrichment <- R6::R6Class(
                 mutate(
                     sym1 = ifelse(enrich_dir, "\u25E4", "\u25E2"),
                     sym2 = ifelse(enrich_dir, "\u25E2", "\u25E4")
+                ),
+                bind_rows(
+                    private$upper_triangle(
+                        self$data %>% filter(enrich_dir)
+                    ),
+                    private$lower_triangle(
+                        self$data %>% filter(!enrich_dir)
+                    ) %>%
+                    filter(cls_label0 != cls_label1)
                 )
+            )}
             
             scale_enrich <- `if`(
                 self$heatmap_variables == 'enrich-count',
@@ -151,12 +163,21 @@ ConnectionEnrichment <- R6::R6Class(
                 )
             )
             
-            self$plt <- ggplot(
-                mapping = aes(
-                    x = cls_label0,
-                    y = cls_label1,
-                    label = sym1
+            mapping_param <- `if`(
+                self$heatmap_variables == 'enrich-count',
+                list(
+                    x = quo(cls_label0),
+                    y = quo(cls_label1),
+                    label = quo(sym1)
+                ),
+                list(
+                    x = quo(cls_label0),
+                    y = quo(cls_label1)
                 )
+            )
+            
+            self$plt <- ggplot(
+                mapping = do.call(aes, mapping_param)
             ) +
             {`if`(
                 self$heatmap_variables == 'enrich-count',
