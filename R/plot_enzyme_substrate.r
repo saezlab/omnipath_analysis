@@ -548,9 +548,7 @@ EnzymeSubstrateBy <- R6::R6Class(
     
     public = list(
         
-        initialize = function(by, cumdist = TRUE){
-            
-            self$cumdist <- cumdist
+        initialize = function(by){
             
             self$by <- enquo(by)
             self$by_str <- quo_text(self$by)
@@ -678,15 +676,12 @@ SubstrateNumofSites <- R6::R6Class(
     
     public = list(
         
-        initialize = function(cumdist = FALSE){
-            
-            self$cumdist <- cumdist
+        initialize = function(){
             
             super$initialize(
                 name = fig_substrate_numof_sites,
-                fname_param = list(`if`(cumdist, 'cumdist', 'dens')),
                 height = 4,
-                width = 5,
+                width = 7,
                 xlab_vertical = FALSE,
                 theme_args = list(
                     axis.text.x = element_text(size = 14)
@@ -698,24 +693,22 @@ SubstrateNumofSites <- R6::R6Class(
         
         plot = function(){
             
-            self$plt <- ggplot(self$enz_sub) +
-                {`if`(
-                    self$cumdist,
-                    suppressWarnings(stat_bin(
-                        aes(x = n_sites, y = cumsum(..count..)),
-                        geom = 'step',
-                        binwidth = .01
-                    )),
-                    geom_density(
-                        aes(x = n_sites, y = ..scaled..), adjust = 2.5
-                    )
-                )} +
-                xlab('Number of modifications') +
-                ylab('Substrates') +
-                scale_x_log10() +
-                annotation_logticks(sides = 'b')
+            DistDensHist$new(
+                obj = self,
+                data = self$enz_sub,
+                x = n_sites,
+                ylab = 'Substrates',
+                xlab = 'Number of modification\nsites on the substrate',
+                density_adjust = 2.5
+            )
             
             invisible(self)
+            
+        },
+            
+        save = function(){
+            
+            super$save(print_open = FALSE)
             
         }
         
