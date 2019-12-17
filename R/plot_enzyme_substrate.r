@@ -280,12 +280,21 @@ EnzymeSubstrateSelf <- R6::R6Class(
     
     public = list(
         
-        initialize = function(name = NULL){
+        initialize = function(name = NULL, log_y = FALSE, bar = TRUE){
+            
+            self$log_y <- log_y
+            self$bar <- bar
             
             super$initialize(
                 name = fig_enzyme_substrate_self,
+                fname_param = list(
+                    `if`(self$log_y, 'dodge', 'stack'),
+                    `if`(self$bar, 'bar', 'dot')
+                ),
                 complexes = TRUE
             )
+            
+            invisible(self)
             
         },
         
@@ -310,8 +319,11 @@ EnzymeSubstrateSelf <- R6::R6Class(
                     ),
                     name = 'Target of the\nenzyme-substrate\ninteractions'
                 ) +
+                coord_flip() +
                 xlab('Resources') +
                 ylab('Enzyme-substrate\ninteractions')
+            
+            invisible(self)
             
         }
         

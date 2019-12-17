@@ -104,6 +104,97 @@ SimpleBar <- R6::R6Class(
 )
 
 
+StackedGroupedBarDot <- R6::R6Class(
+    
+    'StackedGroupedBarDot',
+    
+    lock_objects = FALSE,
+    
+    public = list(
+        initialize = function(
+            obj,
+            data,
+            xvar,
+            yvar,
+            fillvar,
+            xlab,
+            ylab,
+            log_y = FALSE,
+            bar = TRUE,
+            color_values = NULL,
+            color_labels = NULL,
+            legend_title = NULL
+        ){
+            
+            self$obj <- obj
+            self$data <- data
+            self$xvar <- enquo(xvar)
+            self$yvar <- enquo(yvar)
+            self$fillvar <- enquo(fillvar)
+            self$xlab <- xlab
+            self$ylab <- ylab
+            self$log_y <- log_y
+            self$bar <- bar
+            self$color_values <- color_values
+            self$color_labels <- color_labels
+            self$legend_title <- legend_title
+            
+            self$main()
+            
+            invisible(self)
+            
+        },
+        
+        main = function(){
+            
+            self$obj$plt <- ggplot(
+                    self$data,
+                    aes(
+                        y = !!self$yvar,
+                        x = !!self$xvar
+                    )
+                ) %>%
+                `+`(
+                    {`if`(
+                        self$bar,
+                        geom_col(
+                            aes(fill = !!self$fillvar),
+                            position = `if`(self$log_y, 'dodge', 'stack')
+                        ),
+                        geom_point(aes(color = !!self$fillvar), size = 5)
+                    )}
+                ) %>%
+                `+`(
+                    {`if`(
+                        self$bar,
+                        scale_fill_manual,
+                        scale_color_manual
+                    )(
+                        values = self$color_values,
+                        labels = self$color_labels,
+                        name = self$legend_title
+                    )}
+                ) %>%
+                `+`(
+                    {`if`(
+                        self$log_y,
+                        scale_y_log10(),
+                        NULL
+                    )}
+                ) %>%
+                `+`(coord_flip()) %>%
+                `+`(xlab(self$xlab)) %>%
+                `+`(ylab(self$ylab))
+            
+            invisible(self)
+            
+        }
+        
+    )
+    
+)
+
+
 SizesBar <- R6::R6Class(
     
     'SizesBar',

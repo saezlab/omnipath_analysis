@@ -128,41 +128,29 @@ ComplexesByResource <- R6::R6Class(
         
         plot = function(){
             
-            self$plt <- ggplot(
-                    self$complexes,
-                    aes(y = n_complexes, x = resource)
-                ) +
-                {`if`(
-                    self$bar,
-                    geom_col(
-                        aes(fill = shared),
-                        position = `if`(self$log_y, 'dodge', 'stack')
-                    ),
-                    geom_point(aes(color = shared), size = 5)
-                )}+
-                {`if`(
-                    self$bar,
-                    scale_fill_manual,
-                    scale_color_manual
-                )(
-                    values = c(
-                        `TRUE` = '#4268B3',
-                        `FALSE` = '#B3C5E9'
-                    ),
-                    labels = c(
-                        `TRUE` = 'Shared',
-                        `FALSE` = 'Unique'
-                    ),
-                    name = 'Number of\ncomplexes'
-                )} +
-                {`if`(
-                    self$log_y,
-                    scale_y_log10(),
-                    NULL
-                )} +
-                coord_flip() +
-                xlab('Resouces') +
-                ylab(sprintf('Complexes%s', `if`(self$log_y, ' (log)', '')))
+            StackedGroupedBarDot$new(
+                obj = self,
+                data = self$complexes,
+                xvar = resource,
+                yvar = n_complexes,
+                fillvar = shared,
+                xlab = 'Resource',
+                ylab = sprintf(
+                    'Complexes%s',
+                    `if`(self$log_y, ' (log)', '')
+                ),
+                log_y = self$log_y,
+                bar = self$bar,
+                color_values = c(
+                    `TRUE` = '#4268B3',
+                    `FALSE` = '#B3C5E9'
+                ),
+                color_labels = c(
+                    `TRUE` = 'Shared',
+                    `FALSE` = 'Unique'
+                ),
+                legend_title = 'Number of\ncomplexes'
+            )
             
             invisible(self)
             
@@ -179,17 +167,19 @@ ComplexesByResource <- R6::R6Class(
             
             super$setup()
             
-            self$complexes <- self$complexes %>%
+            self$complexes <-self$complexes %>%
                 group_by(complex_id) %>%
                 mutate(
                     shared = length(setdiff(resource, secondary_sources)) > 1
                 ) %>%
                 ungroup() %>%
+                mutate(resource = as.character(resource)) %>%
                 full_join(
                     expand.grid(
-                        resource = unique(self$complexes$resource),
+                        resource =unique(self$complexes$resource),
                         shared = c(TRUE, FALSE)
-                    ),
+                    ) %>%
+                    mutate(resource = as.character(resource)),
                     by = c('resource', 'shared')
                 )
             
