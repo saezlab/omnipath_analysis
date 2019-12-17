@@ -148,7 +148,7 @@ ConnectionEnrichment <- R6::R6Class(
                 limits = c(-2, 2)
             )
             
-            count_guide <- guide_colorbar(
+            guide_count <- guide_colorbar(
                 title = 'Number of\nconnections (log10)',
                 barheight = unit(.5, 'inches')
             )
@@ -160,12 +160,11 @@ ConnectionEnrichment <- R6::R6Class(
                     high = '#333333',
                     na.value = '#FFFFFF',
                     limits = c(0, 5),
-                    guide = count_guide
+                    guide = guide_count
                 ),
-                scale_color_viridis_c(
+                scale_fill_viridis_c(
                     na.value = '#450D54',
-                    guide = count_guide,
-                    limits = c(-2, 2)
+                    guide = guide_count,
                 )
             )
             
@@ -180,6 +179,12 @@ ConnectionEnrichment <- R6::R6Class(
                     x = quo(cls_label0),
                     y = quo(cls_label1)
                 )
+            )
+            
+            data <- `if`(
+                self$directed,
+                data,
+                data %>% filter(cls_label0 >= cls_label1)
             )
             
             self$plt <- ggplot(
