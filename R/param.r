@@ -35,8 +35,8 @@ get_default_param <- function(){
         theme = theme_minimal,
         theme_defaults = list(
             axis.text.x = element_text(color = '#000000'),
-            axis.text.y = element_text(color = '#000000'),
-            panel.grid.major.x = element_blank()
+            axis.text.y = element_text(color = '#000000')
+            #panel.grid.minor.x = element_blank()
         ),
         input_intercell_cat_pairwise_tsv = 'stats_by_resource_%s_%s_%s',
         input_intercell_annotation_by_entity_tsv = {

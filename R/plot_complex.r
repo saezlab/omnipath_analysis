@@ -40,18 +40,28 @@ ComplexBase <- R6::R6Class(
             expand_members = FALSE,
             expand_resources = TRUE,
             xlab_vertical = TRUE,
+            width = 5,
             ...
         ){
             
             self$expand_members <- expand_members
             self$expand_resources <- expand_resources
             theme_args <- `if`(xlab_vertical, x_vertical_labels(), list())
+            args <- list(...)
+            theme_args <- modifyList(
+                theme_args,
+                `if`(
+                    !is.null(args$theme_args),
+                    args$theme_args,
+                    list()
+                )
+            )
             
             args <- modifyList(
                 list(
                     data = self$data,
                     name = enquo(name),
-                    width = 5,
+                    width = width,
                     theme_args = theme_args
                 ),
                 list(...)
@@ -205,7 +215,8 @@ ComplexesNumofComponents <- R6::R6Class(
             super$initialize(
                 name = fig_cplex_n_comp,
                 expand_resources = FALSE,
-                xlab_vertical = FALSE
+                xlab_vertical = FALSE,
+                width = 7
             )
             
             invisible(self)
@@ -226,25 +237,40 @@ ComplexesNumofComponents <- R6::R6Class(
                 ) +
                 xlab('Number of components') +
                 ylab('Complexes') +
-                scale_x_log10() +
+                scale_x_log10(expand = c(.01, 0)) +
                 annotation_logticks(sides = 'b')
             
             private$post_plot()
             self$dist <- self$plt
             
             self$plt <- ggplot(self$complexes) +
-                geom_density(aes(x = n_members, y = ..scaled..), adjust = 2) +
-                ylab('Complexes (frequency)') +
+                geom_density(aes(x = n_members, y = ..count..), adjust = 2) +
+                ylab('Complexes') +
                 xlab('Number of components') +
-                scale_x_log10() +
+                scale_x_log10(expand = c(.01, 0)) +
                 annotation_logticks(sides = 'b')
             
             private$post_plot()
             self$dens <- self$plt
             
+            self$plt <- ggplot(self$complexes) +
+                geom_histogram(
+                    aes(x = n_members, y = ..count..),
+                    fill = 'black',
+                    binwidth = .25
+                ) +
+                ylab('Complexes') +
+                xlab('Number of components') +
+                scale_x_log10(expand = c(.01, 0)) +
+                annotation_logticks(sides = 'b')
+            
+            private$post_plot()
+            self$hist <- self$plt
+            
             self$plt <- grid.arrange(
                 self$dist,
                 self$dens,
+                self$hist,
                 nrow = 1
             )
             

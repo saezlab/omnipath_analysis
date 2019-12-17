@@ -20,6 +20,15 @@
 require(ggplot2)
 require(R6)
 
+update.list <- function(x, y){
+    
+    for(name in names(y)){
+        x[[name]] <- y[[name]]
+    }
+    
+    x
+    
+}
 
 SinglePlot <- R6::R6Class(
     
@@ -53,7 +62,8 @@ SinglePlot <- R6::R6Class(
             self$height <- height
             self$preproc_args <- preproc_args
             self$plot_args <- plot_args
-            self$theme_args <- modifyList(
+            
+            self$theme_args <- update.list(
                 omnipath2_settings$get(theme_defaults),
                 theme_args
             )
