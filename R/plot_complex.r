@@ -106,9 +106,20 @@ ComplexesByResource <- R6::R6Class(
     
     public = list(
         
-        initialize = function(){
+        initialize = function(log_y = FALSE, bar = TRUE){
             
-            super$initialize(name = fig_cplex_by_resource)
+            self$log_y <- log_y
+            self$bar <- bar
+            
+            super$initialize(
+                name = fig_cplex_by_resource,
+                fname_param = list(
+                    `if`(log_y, 'log', 'stacked'),
+                    `if`(bar, 'bar', 'dot')
+                ),
+                height = 4,
+                width = 4
+            )
             
             invisible(self)
             
@@ -121,7 +132,10 @@ ComplexesByResource <- R6::R6Class(
                     self$complexes,
                     aes(y = n_complexes, x = resource)
                 ) +
-                geom_col(aes(fill = shared)) +
+                geom_col(
+                    aes(fill = shared),
+                    position = `if`(self$log_y, 'dodge', 'stack')
+                ) +
                 scale_fill_manual(
                     values = c(
                         `TRUE` = '#4268B3',
@@ -133,8 +147,14 @@ ComplexesByResource <- R6::R6Class(
                     ),
                     name = 'Number of\ncomplexes'
                 ) +
+                {`if`(
+                    self$log_y,
+                    scale_y_log10(),
+                    NULL
+                )} +
+                coord_flip() +
                 xlab('Resouces') +
-                ylab('Complexes')
+                ylab(sprintf('Complexes%s', `if`(self$log_y, ' (log)', '')))
             
             invisible(self)
             
@@ -156,13 +176,20 @@ ComplexesByResource <- R6::R6Class(
                 mutate(
                     shared = length(setdiff(resource, secondary_sources)) > 1
                 ) %>%
-                ungroup()
+                ungroup() %>%
+                full_join(
+                    expand.grid(
+                        resource = unique(self$complexes$resource),
+                        shared = c(TRUE, FALSE)
+                    ),
+                    by = c('resource', 'shared')
+                )
             
             self$complexes <- bind_rows(
                 
                 self$complexes %>%
                     group_by(resource, shared) %>%
-                    mutate(n_complexes = n()) %>%
+                    mutate(n_complexes = n_distinct(complex_id)) %>%
                     summarize_all(first) %>%
                     ungroup(),
                 
@@ -173,7 +200,7 @@ ComplexesByResource <- R6::R6Class(
                     group_by(shared) %>%
                     mutate(
                         n_complexes = n(),
-                        resource = 'Total'
+                        resource = 'OmniPath'
                     ) %>%
                     summarize_all(first) %>%
                     ungroup()
