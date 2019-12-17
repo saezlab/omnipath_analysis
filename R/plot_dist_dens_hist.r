@@ -35,7 +35,8 @@ DistDensHist <- R6::R6Class(
             data,
             x,
             ylab,
-            xlab
+            xlab,
+            density_adjust = 2
         ){
             
             self$obj <- obj
@@ -43,6 +44,7 @@ DistDensHist <- R6::R6Class(
             self$x <- enquo(x)
             self$ylab <- ylab
             self$xlab <- xlab
+            self$density_adjust <- density_adjust
             
             self$main()
             
@@ -70,7 +72,10 @@ DistDensHist <- R6::R6Class(
             self$obj$dist <- self$obj$plt
             
             self$obj$plt <- ggplot(self$data) +
-                geom_density(aes(x = !!self$x, y = ..count..), adjust = 2) +
+                geom_density(
+                    aes(x = !!self$x, y = ..count..),
+                    adjust = self$density_adjust
+                ) +
                 ylab(self$ylab) +
                 xlab(self$xlab) +
                 scale_x_log10(expand = c(.01, 0)) +

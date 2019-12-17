@@ -317,7 +317,7 @@ Complexes <- R6::R6Class(
                 mutate(members = sub('COMPLEX:', '', complex_id)) %>%
                 separate_rows(members, sep = '_') %>%
                 group_by(complex_id) %>%
-                mutate(n_members = n()) %>%
+                mutate(n_members = n_distinct(members)) %>%
                 ungroup() %>%
                 {`if`(
                     self$expand_members,

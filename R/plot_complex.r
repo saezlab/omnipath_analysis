@@ -231,7 +231,8 @@ ComplexesNumofComponents <- R6::R6Class(
                 data = self$complexes,
                 x = n_members,
                 ylab = 'Complexes',
-                xlab = 'Number of components'
+                xlab = 'Number of components\nin the complex',
+                density_adjust = 3
             )
             
             invisible(self)
@@ -265,7 +266,8 @@ ComplexesByComponents <- R6::R6Class(
                 name = fig_cplex_by_comp,
                 expand_resources = FALSE,
                 expand_members = TRUE,
-                xlab_vertical = FALSE
+                xlab_vertical = FALSE,
+                width = 7
             )
             
             invisible(self)
@@ -275,18 +277,22 @@ ComplexesByComponents <- R6::R6Class(
         
         plot = function(){
             
-            self$plt <- ggplot(self$complexes) +
-                stat_bin(
-                        aes(x = n_members, y = cumsum(..count..)),
-                        geom = 'step',
-                        binwidth = .01
-                ) +
-                xlab('Number of complexes') +
-                ylab('Components') +
-                scale_x_log10() +
-                annotation_logticks(sides = 'b')
+            DistDensHist$new(
+                obj = self,
+                data = self$complexes,
+                x = n_complexes,
+                ylab = 'Components',
+                xlab = 'Number of complexes\nincluding the component',
+                density_adjust = 3.5
+            )
             
             invisible(self)
+            
+        },
+        
+        save = function(){
+            
+            super$save(print_open = FALSE)
             
         }
         
@@ -301,71 +307,6 @@ ComplexesByComponents <- R6::R6Class(
             
             self$complexes <- self$complexes %>%
                 group_by(members) %>%
-                mutate(n_complexes = n_distinct(complex_id)) %>%
-                summarize_all(first) %>%
-                ungroup()
-            
-            invisible(self)
-            
-        }
-        
-    )
-    
-)
-
-
-RefsPerComplex <- R6::R6Class(
-    
-    'RefsPerComplex',
-    
-    inherit = ComplexBase,
-    
-    lock_objects = FALSE,
-    
-    public = list(
-        
-        initialize = function(){
-            
-            super$initialize(
-                name = fig_refs_by_cplex,
-                expand_resources = FALSE,
-                xlab_vertical = FALSE
-            )
-            
-            invisible(self)
-            
-        },
-        
-        
-        plot = function(){
-            
-            self$plt <- ggplot(self$complexes) +
-                stat_bin(
-                        aes(x = n_complexes, y = cumsum(..count..)),
-                        geom = 'step',
-                        binwidth = .01
-                ) +
-                xlab('Number of references') +
-                ylab('Complexes') +
-                scale_x_log10() +
-                annotation_logticks(sides = 'b')
-            
-            invisible(self)
-            
-        }
-        
-    ),
-    
-    
-    private = list(
-        
-        setup = function(){
-            
-            super$setup()
-            
-            self$complexes <- self$complexes %>%
-                separate_rows(references, sep = ';') %>%
-                group_by(references) %>%
                 mutate(n_complexes = n_distinct(complex_id)) %>%
                 summarize_all(first) %>%
                 ungroup()
@@ -394,7 +335,8 @@ ComplexesPerRef <- R6::R6Class(
             super$initialize(
                 name = fig_complexes_by_ref,
                 expand_resources = FALSE,
-                xlab_vertical = FALSE
+                xlab_vertical = FALSE,
+                width = 7
             )
             
             invisible(self)
@@ -404,18 +346,92 @@ ComplexesPerRef <- R6::R6Class(
         
         plot = function(){
             
-            self$plt <- ggplot(self$complexes) +
-                stat_bin(
-                        aes(x = n_refs, y = cumsum(..count..)),
-                        geom = 'step',
-                        binwidth = .01
-                ) +
-                xlab('Number of complexes') +
-                ylab('References') +
-                scale_x_log10() +
-                annotation_logticks(sides = 'b')
+            DistDensHist$new(
+                obj = self,
+                data = self$complexes,
+                x = n_complexes,
+                ylab = 'References',
+                xlab = 'Number of complexes\nfrom a reference',
+                density_adjust = 4
+            )
             
             invisible(self)
+            
+        },
+        
+        save = function(){
+            
+            super$save(print_open = FALSE)
+            
+        }
+        
+    ),
+    
+    
+    private = list(
+        
+        setup = function(){
+            
+            super$setup()
+            
+            self$complexes <- self$complexes %>%
+                separate_rows(references, sep = ';') %>%
+                group_by(references) %>%
+                mutate(n_complexes = n_distinct(complex_id)) %>%
+                summarize_all(first) %>%
+                ungroup()
+            
+            invisible(self)
+            
+        }
+        
+    )
+    
+)
+
+
+RefsPerComplex <- R6::R6Class(
+    
+    'RefsPerComplex',
+    
+    inherit = ComplexBase,
+    
+    lock_objects = FALSE,
+    
+    public = list(
+        
+        initialize = function(){
+            
+            super$initialize(
+                name = fig_refs_by_cplex,
+                expand_resources = FALSE,
+                xlab_vertical = FALSE,
+                width = 7
+            )
+            
+            invisible(self)
+            
+        },
+        
+        
+        plot = function(){
+            
+            DistDensHist$new(
+                obj = self,
+                data = self$complexes,
+                x = n_refs,
+                ylab = 'Complexes',
+                xlab = 'Number of references\nfor a complex',
+                density_adjust = 5
+            )
+            
+            invisible(self)
+            
+        },
+        
+        save = function(){
+            
+            super$save(print_open = FALSE)
             
         }
         
