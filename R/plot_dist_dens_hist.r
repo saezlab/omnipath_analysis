@@ -17,8 +17,8 @@
 #  Website: http://pypath.omnipathdb.org/
 #
 
-require(ggplot)
-reqire(gridExtra)
+require(ggplot2)
+require(gridExtra)
 require(R6)
 
 
@@ -40,9 +40,13 @@ DistDensHist <- R6::R6Class(
             
             self$obj <- obj
             self$data <- data
-            self$x <- x
+            self$x <- enquo(x)
             self$ylab <- ylab
             self$xlab <- xlab
+            
+            self$main()
+            
+            invisible(self)
             
         },
         
@@ -95,6 +99,8 @@ DistDensHist <- R6::R6Class(
                 self$obj$hist,
                 nrow = 1
             )
+            
+            invisible(self)
         
         }
         

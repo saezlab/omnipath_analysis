@@ -75,6 +75,22 @@ UpsetBase <- R6::R6Class(
             
             invisible(self)
             
+        },
+        
+        
+        post_plot = function(){
+            
+            if(!is.null(self$title)){
+                
+                grid.text(
+                    self$title,
+                    x = 0.65,
+                    y = 0.95,
+                    gp = gpar(fontsize = 20)
+                )
+                
+            }
+            
         }
         
     ),
@@ -125,22 +141,6 @@ UpsetBase <- R6::R6Class(
             if(is.null(self$plot_args$nsets)){
                 
                 self$plot_args$nsets <- length(self$names)
-                
-            }
-            
-        },
-        
-        
-        post_plot = function(){
-            
-            if(!is.null(self$title)){
-                
-                grid.text(
-                    self$title,
-                    x = 0.65,
-                    y = 0.95,
-                    gp = gpar(fontsize = 20)
-                )
                 
             }
             

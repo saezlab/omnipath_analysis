@@ -134,6 +134,13 @@ GraphPlot <- R6::R6Class(
             
             invisible(self)
             
+        },
+        
+        
+        post_plot = function(){
+            
+            invisible(self)
+            
         }
         
     ),
@@ -183,13 +190,6 @@ GraphPlot <- R6::R6Class(
         build_graph = function(){
             
             make_empty_graph()
-            
-        },
-        
-        
-        post_plot = function(){
-            
-            invisible(self)
             
         },
         

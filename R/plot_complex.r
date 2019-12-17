@@ -226,52 +226,12 @@ ComplexesNumofComponents <- R6::R6Class(
         
         plot = function(){
             
-            private$open_device()
-            plot.new()
-            
-            self$plt <- ggplot(self$complexes) +
-                stat_bin(
-                        aes(x = n_members, y = cumsum(..count..)),
-                        geom = 'step',
-                        binwidth = .01
-                ) +
-                xlab('Number of components') +
-                ylab('Complexes') +
-                scale_x_log10(expand = c(.01, 0)) +
-                annotation_logticks(sides = 'b')
-            
-            private$post_plot()
-            self$dist <- self$plt
-            
-            self$plt <- ggplot(self$complexes) +
-                geom_density(aes(x = n_members, y = ..count..), adjust = 2) +
-                ylab('Complexes') +
-                xlab('Number of components') +
-                scale_x_log10(expand = c(.01, 0)) +
-                annotation_logticks(sides = 'b')
-            
-            private$post_plot()
-            self$dens <- self$plt
-            
-            self$plt <- ggplot(self$complexes) +
-                geom_histogram(
-                    aes(x = n_members, y = ..count..),
-                    fill = 'black',
-                    binwidth = .25
-                ) +
-                ylab('Complexes') +
-                xlab('Number of components') +
-                scale_x_log10(expand = c(.01, 0)) +
-                annotation_logticks(sides = 'b')
-            
-            private$post_plot()
-            self$hist <- self$plt
-            
-            self$plt <- grid.arrange(
-                self$dist,
-                self$dens,
-                self$hist,
-                nrow = 1
+            DistDensHist$new(
+                obj = self,
+                data = self$complexes,
+                x = n_members,
+                ylab = 'Complexes',
+                xlab = 'Number of components'
             )
             
             invisible(self)

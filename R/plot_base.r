@@ -78,7 +78,7 @@ SinglePlot <- R6::R6Class(
             private$setup()
             do.call(self$preprocess, self$preproc_args)
             do.call(self$plot, self$plot_args)
-            private$post_plot()
+            self$post_plot()
             self$save()
             
         },
@@ -87,7 +87,7 @@ SinglePlot <- R6::R6Class(
             
             if(print_open){
                 
-                private$open_device()
+                self$open_device()
                 print(self$plt)
                 
             }
@@ -115,16 +115,6 @@ SinglePlot <- R6::R6Class(
             
             invisible(self)
             
-        }
-        
-    ),
-    
-    private = list(
-        
-        setup = function(){
-            
-            invisible(self)
-            
         },
         
         
@@ -132,6 +122,28 @@ SinglePlot <- R6::R6Class(
             
             private$set_typeface()
             private$set_theme()
+            
+            invisible(self)
+            
+        },
+        
+        
+        open_device = function(){
+            
+            cairo_pdf(
+                self$path,
+                width = omnipath2_settings$get(width, self$width),
+                height = omnipath2_settings$get(height, self$height),
+                family = omnipath2_settings$get(typeface)
+            )
+            
+        }
+        
+    ),
+    
+    private = list(
+        
+        setup = function(){
             
             invisible(self)
             
@@ -159,18 +171,6 @@ SinglePlot <- R6::R6Class(
                 do.call(theme, self$theme_args) +
                 do.call(theme, omnipath2_settings$get(theme_defaults)) +
                 theme(text = do.call(element_text, self$typeface))
-            
-        },
-        
-        
-        open_device = function(){
-            
-            cairo_pdf(
-                self$path,
-                width = omnipath2_settings$get(width, self$width),
-                height = omnipath2_settings$get(height, self$height),
-                family = omnipath2_settings$get(typeface)
-            )
             
         }
         
