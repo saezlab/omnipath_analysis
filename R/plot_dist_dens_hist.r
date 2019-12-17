@@ -88,7 +88,8 @@ DistDensHist <- R6::R6Class(
                 geom_histogram(
                     aes(x = !!self$x, y = ..count..),
                     fill = 'black',
-                    binwidth = .25
+                    binwidth = .25,
+                    boundary = 1
                 ) +
                 ylab(self$ylab) +
                 xlab(self$xlab) +

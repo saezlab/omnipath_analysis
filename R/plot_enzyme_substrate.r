@@ -19,6 +19,7 @@
 
 require(ggplot2)
 require(dplyr)
+require(stringr)
 require(R6)
 
 
@@ -37,6 +38,7 @@ EnzymeSubstrateBase <- R6::R6Class(
                 complexes = FALSE,
                 keep_references = FALSE,
                 xlab_vertical = TRUE,
+                width = 9,
                 ...
             ){
             
@@ -48,7 +50,7 @@ EnzymeSubstrateBase <- R6::R6Class(
                     data = self$data,
                     name = enquo(name),
                     theme_args = theme_args,
-                    width = 9
+                    width = width
                 ),
                 list(...)
             )
@@ -564,13 +566,12 @@ EnzymeSubstrateBy <- R6::R6Class(
             
             super$initialize(
                 name = UQ(name),
-                fname_param = list(`if`(cumdist, 'cumdist', 'dens')),
                 height = 4,
-                width = 5,
                 xlab_vertical = FALSE,
                 theme_args = list(
                     axis.text.x = element_text(size = 14)
-                )
+                ),
+                width = 7
             )
             
         },
@@ -578,26 +579,26 @@ EnzymeSubstrateBy <- R6::R6Class(
         
         plot = function(){
             
-            self$plt <- ggplot(self$enz_sub) +
-                {`if`(
-                    self$cumdist,
-                    suppressWarnings(stat_bin(
-                        aes(x = counts, y = cumsum(..count..)),
-                        geom = 'step',
-                        binwidth = .01
-                    )),
-                    geom_density(
-                        aes(x = counts, y = ..scaled..), adjust = 2
-                    )
-                )} +
-                xlab(sprintf('Number of %ss', self$what_str)) +
-                ylab(sprintf('Number of %ss', self$by_str)) +
-                scale_x_log10() +
-                annotation_logticks(
-                    sides = 'b'
-                )
+            DistDensHist$new(
+                obj = self,
+                data = self$enz_sub,
+                x = counts,
+                ylab = sprintf('%ss', str_to_title(self$by_str)),
+                xlab = sprintf(
+                    'Number of %ss\nper %s',
+                    self$what_str,
+                    self$by_str
+                ),
+                density_adjust = 2
+            )
             
             invisible(self)
+            
+        },
+            
+        save = function(){
+            
+            super$save(print_open = FALSE)
             
         }
         
