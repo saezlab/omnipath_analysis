@@ -73,16 +73,14 @@ SinglePlot <- R6::R6Class(
             
         },
         
-        save = function(){
+        save = function(print_open = TRUE){
             
-            cairo_pdf(
-                self$path,
-                width = omnipath2_settings$get(width, self$width),
-                height = omnipath2_settings$get(height, self$height),
-                family = omnipath2_settings$get(typeface)
-            )
-            
-            print(self$plt)
+            if(print_open){
+                
+                private$open_device()
+                print(self$plt)
+                
+            }
             
             dev.off()
             
@@ -151,6 +149,18 @@ SinglePlot <- R6::R6Class(
                 do.call(theme, self$theme_args) +
                 do.call(theme, omnipath2_settings$get(theme_defaults)) +
                 theme(text = do.call(element_text, self$typeface))
+            
+        },
+        
+        
+        open_device = function(){
+            
+            cairo_pdf(
+                self$path,
+                width = omnipath2_settings$get(width, self$width),
+                height = omnipath2_settings$get(height, self$height),
+                family = omnipath2_settings$get(typeface)
+            )
             
         }
         

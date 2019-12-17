@@ -18,6 +18,8 @@
 #
 
 require(ggplot2)
+require(grid)
+require(gridExtra)
 require(dplyr)
 require(rlang)
 require(R6)
@@ -213,6 +215,9 @@ ComplexesNumofComponents <- R6::R6Class(
         
         plot = function(){
             
+            private$open_device()
+            plot.new()
+            
             self$plt <- ggplot(self$complexes) +
                 stat_bin(
                         aes(x = n_members, y = cumsum(..count..)),
@@ -224,7 +229,32 @@ ComplexesNumofComponents <- R6::R6Class(
                 scale_x_log10() +
                 annotation_logticks(sides = 'b')
             
+            private$post_plot()
+            self$dist <- self$plt
+            
+            self$plt <- ggplot(self$complexes) +
+                geom_density(aes(x = n_members, y = ..scaled..), adjust = 2) +
+                ylab('Complexes (frequency)') +
+                xlab('Number of components') +
+                scale_x_log10() +
+                annotation_logticks(sides = 'b')
+            
+            private$post_plot()
+            self$dens <- self$plt
+            
+            self$plt <- grid.arrange(
+                self$dist,
+                self$dens,
+                nrow = 1
+            )
+            
             invisible(self)
+            
+        },
+            
+        save = function(){
+            
+            super$save(print_open = FALSE)
             
         }
         
