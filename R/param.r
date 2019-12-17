@@ -53,6 +53,9 @@ get_default_param <- function(){
             vertex.label.color = '#4C4B6B'
         ),
         graph_layout_default = 'fr',
+        
+        two_shades_1 = c('#4268B3', '#B3C5E9'),
+        
         console_settings = list(
             width = 270,
             dplyr.width = 270

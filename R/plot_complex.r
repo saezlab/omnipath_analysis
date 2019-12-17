@@ -141,9 +141,9 @@ ComplexesByResource <- R6::R6Class(
                 ),
                 log_y = self$log_y,
                 bar = self$bar,
-                color_values = c(
-                    `TRUE` = '#4268B3',
-                    `FALSE` = '#B3C5E9'
+                color_values = `names<-`(
+                    omnipath2_settings$get(two_shades_1),
+                    c(TRUE, FALSE)
                 ),
                 color_labels = c(
                     `TRUE` = 'Shared',
