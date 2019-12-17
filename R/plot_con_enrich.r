@@ -140,7 +140,7 @@ ConnectionEnrichment <- R6::R6Class(
                 scale_color_viridis_c,
                 scale_fill_viridis_c
             )(
-                na.value = '#FFFFFF',
+                na.value = '#450D54',
                 guide = guide_colorbar(
                     title = 'Enrichment of\nconnections (log2)',
                     barheight = unit(.5, 'inches')
@@ -148,18 +148,24 @@ ConnectionEnrichment <- R6::R6Class(
                 limits = c(-2, 2)
             )
             
+            count_guide <- guide_colorbar(
+                title = 'Number of\nconnections (log10)',
+                barheight = unit(.5, 'inches')
+            )
+            
             scale_count <- `if`(
                 self$heatmap_variables == 'enrich-count',
-                scale_color_gradient,
-                scale_fill_gradient
-            )(
-                low = '#CCCCCC',
-                high = '#333333',
-                na.value = '#FFFFFF',
-                limits = c(0, 5),
-                guide = guide_colorbar(
-                    title = 'Number of\nconnections (log10)',
-                    barheight = unit(.5, 'inches')
+                scale_color_gradient(
+                    low = '#CCCCCC',
+                    high = '#333333',
+                    na.value = '#FFFFFF',
+                    limits = c(0, 5),
+                    guide = count_guide
+                ),
+                scale_color_viridis_c(
+                    na.value = '#450D54',
+                    guide = count_guide,
+                    limits = c(-2, 2)
                 )
             )
             

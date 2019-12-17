@@ -281,7 +281,7 @@ EnzymeSubstrateSelf <- R6::R6Class(
         initialize = function(name = NULL){
             
             super$initialize(
-                name = name,
+                name = fig_enzyme_substrate_self,
                 complexes = TRUE
             )
             

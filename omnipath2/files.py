@@ -59,6 +59,14 @@ class Files(session_mod.Logger):
             with open(self.json_file, 'r') as fp:
                 
                 self.files = json.load(fp)
+            
+            self.files['recent'] = dict(
+                (
+                    label,
+                    path[0] if isinstance(path, list) else path
+                )
+                for label, path in self.files['recent'].items()
+            )
     
     
     def write_files_db(self):

@@ -346,3 +346,26 @@ Complexes <- R6::R6Class(
     )
     
 )
+
+
+Annotations <- R6::R6Class(
+    
+    'Annotations',
+    
+    inherit = Reader,
+    
+    lock_objects = FALSE,
+    
+    public = list(
+        
+        initialize = function(...){
+            
+            super$initialize(input_annotation_by_entity_tsv)
+            
+            invisible(self)
+            
+        }
+        
+    )
+    
+)
