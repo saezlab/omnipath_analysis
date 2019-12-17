@@ -834,10 +834,10 @@ EnzymeSubstratePerReference <- R6::R6Class(
             super$initialize(
                 name = fig_enzyme_substrate_by_ref,
                 height = 4,
-                width = 5,
+                width = 7,
                 xlab_vertical = FALSE,
                 theme_args = list(
-                    axis.text.x = element_text(size = 14)
+                    axis.text.x = element_text(size = 11)
                 ),
                 keep_references = TRUE
             )
@@ -847,18 +847,25 @@ EnzymeSubstratePerReference <- R6::R6Class(
         
         plot = function(){
             
-            self$plt <- ggplot(self$enz_sub) +
-                stat_bin(
-                        aes(x = n_enz_sub, y = cumsum(..count..)),
-                        geom = 'step',
-                        binwidth = .01
-                ) +
-                xlab('Number of enzyme substrate interactions') +
-                ylab('References') +
-                scale_x_log10() +
-                annotation_logticks(sides = 'b')
+            DistDensHist$new(
+                obj = self,
+                data = self$enz_sub,
+                x = n_enz_sub,
+                ylab = 'References',
+                xlab = paste0(
+                    'Number of enzyme-substrate\n',
+                    'interactions from one reference'
+                ),
+                density_adjust = 6
+            )
             
             invisible(self)
+            
+        },
+            
+        save = function(){
+            
+            super$save(print_open = FALSE)
             
         }
         
