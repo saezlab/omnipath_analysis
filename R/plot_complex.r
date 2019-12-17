@@ -132,11 +132,19 @@ ComplexesByResource <- R6::R6Class(
                     self$complexes,
                     aes(y = n_complexes, x = resource)
                 ) +
-                geom_col(
-                    aes(fill = shared),
-                    position = `if`(self$log_y, 'dodge', 'stack')
-                ) +
-                scale_fill_manual(
+                {`if`(
+                    self$bar,
+                    geom_col(
+                        aes(fill = shared),
+                        position = `if`(self$log_y, 'dodge', 'stack')
+                    ),
+                    geom_point(aes(color = shared), size = 5)
+                )}+
+                {`if`(
+                    self$bar,
+                    scale_fill_manual,
+                    scale_color_manual
+                )(
                     values = c(
                         `TRUE` = '#4268B3',
                         `FALSE` = '#B3C5E9'
@@ -146,7 +154,7 @@ ComplexesByResource <- R6::R6Class(
                         `FALSE` = 'Unique'
                     ),
                     name = 'Number of\ncomplexes'
-                ) +
+                )} +
                 {`if`(
                     self$log_y,
                     scale_y_log10(),
