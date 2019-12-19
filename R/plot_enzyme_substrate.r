@@ -175,7 +175,7 @@ EnzymeSubstrateBase <- R6::R6Class(
                     .
                 )},
                 self$enz_sub %>%
-                mutate(sources = 'Total') %>%
+                mutate(sources = 'OmniPath') %>%
                 mutate(n_total = n()) %>%
                 group_by(shared) %>%
                 mutate(n_shared = n()) %>%
@@ -291,8 +291,13 @@ EnzymeSubstrateSelf <- R6::R6Class(
                     `if`(self$log_y, 'dodge', 'stack'),
                     `if`(self$bar, 'bar', 'dot')
                 ),
-                complexes = TRUE
+                complexes = TRUE,
+                width = 6,
+                height = 6,
+                xlab_vertical = FALSE
             )
+            
+            gc()
             
             invisible(self)
             
@@ -301,27 +306,30 @@ EnzymeSubstrateSelf <- R6::R6Class(
         
         plot = function(){
             
-            self$plt <- ggplot(
-                    self$enz_sub_by_resource,
-                    aes(x = sources, y = n_by_category)
-                ) +
-                geom_col(aes(fill = category)) +
-                scale_fill_manual(
-                    values = c(
-                        self = '#4268B3',
-                        in_complex = '#6F8DCF',
-                        between_entities = '#B3C5E9'
-                    ),
-                    labels = c(
+            StackedGroupedBarDot$new(
+                obj = self,
+                data = self$enz_sub_by_resource,
+                xvar = sources,
+                yvar = n_by_category,
+                fillvar = category,
+                xlab = 'Resources',
+                ylab = sprintf(
+                    'Enzyme-substrate\ninteractions%s',
+                    `if`(self$log_y, ' (log)', '')
+                ),
+                log_y = self$log_y,
+                bar = self$bar,
+                color_values = `names<-`(
+                    omnipath2_settings$get(three_shades_1),
+                    c('self', 'in_complex', 'between_entities')
+                ),
+                color_labels = c(
                         self = 'Self',
                         in_complex = 'Within complex',
                         between_entities = 'Other entity'
                     ),
-                    name = 'Target of the\nenzyme-substrate\ninteractions'
-                ) +
-                coord_flip() +
-                xlab('Resources') +
-                ylab('Enzyme-substrate\ninteractions')
+                legend_title = 'Target of the\nenzyme-substrate\ninteractions'
+            )
             
             invisible(self)
             

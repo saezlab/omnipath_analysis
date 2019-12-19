@@ -55,6 +55,7 @@ get_default_param <- function(){
         graph_layout_default = 'fr',
         
         two_shades_1 = c('#4268B3', '#B3C5E9'),
+        three_shades_1 = c('#4268B3', '#6F8DCF', '#B3C5E9'),
         
         console_settings = list(
             width = 270,

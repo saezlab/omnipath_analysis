@@ -118,7 +118,8 @@ ComplexesByResource <- R6::R6Class(
                     `if`(bar, 'bar', 'dot')
                 ),
                 height = 4,
-                width = 4
+                width = 4,
+                xlab_vertical = FALSE
             )
             
             invisible(self)
