@@ -43,11 +43,19 @@ class SuppTableBase(omnipath2.table.TableBase):
     
     def load(self):
         
+        self.load_summaries()
+        self.load_table()
+    
+    
+    def load_summaries(self):
+        
         self.database = omnipath2.data.get_db(self.dataset)
-        
         self.database.update_summaries()
-        
         self.data = self.database.summaries_tab(return_table = True)
+    
+    
+    def load_table(self):
+        
         self.header = self.data.pop(0)
 
 
