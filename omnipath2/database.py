@@ -31,7 +31,7 @@ import copy
 import collections
 import itertools
 
-from pypath import data_formats
+import pypath.resources.network as netres
 from pypath import annot
 from pypath import intercell
 from pypath import main
@@ -343,16 +343,28 @@ class Database(session_mod.Logger):
         return self.network_dfs[dataset]['by_source']
 
 
-    def _network_df(self, pp_obj, **kwargs):
-
-        return network.Network.from_igraph(pp_obj, **kwargs)
+    def _network_df(self, obj, **kwargs):
+        
+        if not isinstance(obj, network.Network):
+            
+            obj = network.Network.from_igraph(obj)
+        
+        obj.make_df(**kwargs)
+        
+        return obj.df
 
 
     def _add_network_df(self, dataset):
 
         obj = getattr(self, dataset)
 
-        if hasattr(obj, 'graph') and isinstance(obj.graph, main.igraph.Graph):
+        if (
+            (
+                hasattr(obj, 'graph') and
+                isinstance(obj.graph, main.igraph.Graph)
+            ) or
+            isinstance(obj, network.Network)
+        ):
 
             network_df = self._network_df(obj, by_source = False)
             network_df_by_source = self._network_df(obj, by_source = True)
