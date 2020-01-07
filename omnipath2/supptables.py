@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 #
-# Copyright 2019 Saez Lab
+# Copyright 2019-2020 Saez Lab
 #
 # OmniPath2 analysis and figures suite
 #
