@@ -41,7 +41,6 @@ from pypath import dataio
 from pypath import progress
 from pypath import common
 from pypath import entity
-from pypath import db_categories
 
 import omnipath2
 from omnipath2 import settings as op2_settings
@@ -485,10 +484,6 @@ class IntercellNetworkCounts(omnipath2.table.TableBase):
         classes = self.intercell.classes
         class_labels = self.intercell.class_labels
         resource_labels = self.intercell.resource_labels
-        network = (
-            set(self.network_df.records.id_a) |
-            set(self.network_df.records.id_b)
-        )
         class_types = self.intercell.class_types
         
         self._log('Building the intercell network by resource table.')
@@ -781,36 +776,33 @@ class ResourcesByEntity(omnipath2.table.TableBase):
                 'entity_id',
                 'resource',
                 'is_complex',
-                'resource_class',
+                'interaction_type',
+                'data_model',
             ],
         )
         
-        self.network = omnipath2.data.network_df(self.network_dataset)
+        self.network = omnipath2.data.get_db(self.network_dataset)
         
-        all_entities = set(
-            itertools.chain(
-                *self.network.records[['id_a', 'id_b']].values
-            )
+        all_entities = self.network.get_entities()
+        
+        entities_by_resource = (
+            self.network.\
+                entities_by_interaction_type_and_data_model_and_resource()
         )
-        
-        entities_by_resource = self.network.entities_by_resource()
         
         self.data = []
         
-        for resource, entities in iteritems(entities_by_resource):
+        for (itype, dmodel, res), entities in iteritems(entities_by_resource):
             
-            for entity_id in entities:
+            for en in entities:
                 
                 self.data.append(
                     ResourceRecord(
-                        entity_id = entity_id,
-                        resource = resource,
-                        is_complex = entity.Entity._is_complex(entity_id),
-                        resource_class = (
-                            db_categories.categories[resource]
-                                if resource in db_categories.categories else
-                            'z'
-                        ),
+                        entity_id = en.identifier,
+                        resource = res,
+                        is_complex = en.is_complex(),
+                        interaction_type = itype,
+                        data_model = dmodel,
                     )
                 )
         
