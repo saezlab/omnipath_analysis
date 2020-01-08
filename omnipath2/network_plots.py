@@ -46,23 +46,21 @@ class CountsBase(plot.PlotBase):
             entity_type = 'protein',
             variables = (
                 'entities',
-                'interactions_undirected',
+                'interactions_0',
             ),
             variables2 = (
                 (
-                    'by_resource',
-                    'shared',
-                    'shared_res_cat',
+                    'n_collection',
+                    'n_shared_within_data_model',
                 ),
                 (
-                    'by_resource',
-                    'shared',
-                    'shared_res_cat',
+                    'n_collection',
+                    'n_shared_within_data_model',
                 ),
             ),
             by_category = True,
             split_by_categories = True,
-            order_by = ('entities', 'by_resource'),
+            order_by = ('entities', 'n_collection'),
             palette = None,
             share_xaxis = True,
             **kwargs
@@ -105,58 +103,85 @@ class CountsBase(plot.PlotBase):
                 var,
                 getattr(
                     self.network,
-                    '%s_stats' % var,
+                    'collect_%s' % var,
                 )(
                     entity_type = self.entity_type,
                 ),
             )
+            
+            this_var = getattr(self, var)
+            
+            del this_var.n_collection[('all', 'all', 'Total')]
+            
+            # adding totals by interaction type
+            for s_u in ('shared', 'unique'):
+                
+                for k, v in getattr(
+                    this_var,
+                    'n_%s_by_interaction_type' % s_u
+                ).items():
+                    
+                    if k == 'all':
+                        
+                        continue
+                    
+                    getattr(
+                        this_var,
+                        'n_%s_within_data_model' % s_u
+                    )[(k, 'all', 'Total')] = v
+
         
         self.main_var = getattr(self, self.order_by[0])
         
-        self.labels = np.array([
+        self.keys = [
             it[0] for it in
             sorted(
                 getattr(
-                    self.main_var.counts,
+                    self.main_var,
                     self.order_by[1]
                 ).items(),
                 key = lambda it: (
                     (
-                        (
-                            self.main_var.counts.resource_cat[it[0]]
-                                if it[0] in self.main_var.counts.resource_cat
-                                else
-                            it[0]
-                        ,)
+                        it[0][:2] # interaction type and data model
                             if self.by_category else
                         ()
                     ) +
                     (it[1],)
-                        if it[0] != 'Total' else
-                    ('ZZZ', 99999)
+                        if it[0][2] != 'Total' else
+                    ('ZZZ', 'ZZZ', 9999999)
                 )
             )
+        ]
+        
+        
+        self.labels = np.array([
+            (
+                key[2]
+                    if key[2] != 'Total' else
+                key[1].replace('_', ' ').capitalize()
+                    if key[1] != 'all' else
+                key[0].replace('_', ' ').capitalize()
+            )
+            for key in self.keys
         ])
         
         if self.split_by_categories:
             
             self.cat_split = np.array([
-                'Total'
-                    if lab == 'Total' else
-                self.main_var.counts.resource_cat[lab]
-                for lab in self.labels
+                '__'.join(key[:2])
+                for key in self.keys
             ])
         
-        self.tick_loc = range(len(self.labels))
+        self.tick_loc = range(len(self.keys))
         
         self.values = [
             [
                 np.array([
                     getattr(
-                        getattr(self, var1).counts,
+                        getattr(self, var1),
                         var2,
-                    )[lab]
-                    for lab in self.labels
+                    )[key]
+                    for key in self.keys
                 ])
                 for var2 in self.variables2[ivar]
             ]
@@ -180,7 +205,7 @@ class CountsBase(plot.PlotBase):
             cat_counts = collections.Counter(self.cat_split)
             self.categories = sorted(
                 cat_counts.keys(),
-                key = lambda lab: 'ZZZ' if lab == 'Total' else lab
+                key = lambda lab: 'ZZZ' if lab.endswith('all') else lab
             )
             self.grid_hratios = [cat_counts[cat] for cat in self.categories]
     

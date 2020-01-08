@@ -627,10 +627,7 @@ class IntercellNetworkCounts(omnipath2.table.TableBase):
     
         self._log('Counting connections in the network.')
         
-        self.con_network = (
-            self.network.count_interactions_non_directed_0() +
-            self.network.interactions_directed()
-        )
+        self.con_network = self.network.count_interactions_0()
         self.con_network_undir = (
             self.network.count_interactions_non_directed_0()
         )
