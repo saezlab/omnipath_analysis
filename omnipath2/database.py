@@ -271,6 +271,11 @@ class Database(session_mod.Logger):
         return {'resources': netres.mirna_target}
 
 
+    def get_args_lncrna_mrna(self):
+
+        return {'resources': netres.lncrna_target}
+
+
     def compile_tables(self):
 
         self.foreach_dataset(method = self.compile_table)

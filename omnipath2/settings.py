@@ -54,8 +54,8 @@ _defaults = {
     'timestamp_format': '%Y%m%d',
     
     # pickles
-    'omnipath_pickle': 'omnipath_pw_es_lr_20191127.pickle',
-    'curated_pickle': 'network_curated_20191127.pickle',
+    'omnipath_pickle': 'omnipath_pw_es_lr_20200108.pickle',
+    'curated_pickle': 'network_curated_20200108.pickle',
     'complex_pickle': 'complexes.pickle',
     'annotations_pickle': 'annotations2.pickle',
     'intercell_pickle': 'intercell.pickle',
@@ -63,6 +63,7 @@ _defaults = {
     'tf_target_pickle': 'tftarget.pickle',
     'tf_mirna_pickle': 'tfmirna.pickle',
     'mirna_mrna_pickle': 'mirna_mrna.pickle',
+    'lncrna_mrna_pickle': 'lncrna_mrna.pickle',
 
     # supplementary tables
     'network_s2_tsv': 'S2_network_%s',
@@ -96,6 +97,7 @@ _defaults = {
        'tf_target',
        'tf_mirna',
        'mirna_mrna',
+       'lncrna_mrna',
        'enz_sub',
     ],
     
@@ -108,6 +110,7 @@ _defaults = {
     'tf_target_mod': 'network',
     'tf_mirna_mod': 'network',
     'mirna_mrna_mod': 'network',
+    'lncrna_mrna_mod': 'network',
     
     'omnipath_args': {
         'use_omnipath': True,
