@@ -34,7 +34,6 @@ import itertools
 import pypath.resources.network as netres
 from pypath import annot
 from pypath import intercell
-from pypath import main
 from pypath import complex
 from pypath import ptm
 from pypath import session_mod
@@ -237,15 +236,15 @@ class Database(session_mod.Logger):
 
     def get_args_curated(self):
 
-        resources = copy.deepcopy(data_formats.pathway)
-        resources.update(copy.deepcopy(data_formats.enzyme_substrate))
+        resources = copy.deepcopy(netres.pathway)
+        resources.update(copy.deepcopy(netres.enzyme_substrate))
 
-        return {'lst': resources}
+        return {'resources': resources}
 
 
     def get_args_tf_target(self):
 
-        transcription = copy.deepcopy(data_formats.transcription)
+        transcription = copy.deepcopy(netres.transcription)
         dorothea = {}
         
         for level in self.get_param('tfregulons_levels'):
@@ -259,17 +258,17 @@ class Database(session_mod.Logger):
         del transcription['dorothea']
         transcription.update(dorothea)
 
-        return {'lst': transcription}
+        return {'resources': transcription}
 
 
     def get_args_tf_mirna(self):
 
-        return {'lst': data_formats.tf_mirna}
+        return {'resources': netres.tf_mirna}
 
 
     def get_args_mirna_mrna(self):
 
-        return {'lst': data_formats.mirna_target}
+        return {'resources': netres.mirna_target}
 
 
     def compile_tables(self):

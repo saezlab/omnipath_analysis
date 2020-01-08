@@ -99,15 +99,15 @@ _defaults = {
        'enz_sub',
     ],
     
-    'omnipath_mod': 'main',
-    'curated_mod': 'main',
+    'omnipath_mod': 'network',
+    'curated_mod': 'network',
     'complex_mod': 'complex',
     'annotations_mod': 'annot',
     'intercell_mod': 'intercell',
     'enz_sub_mod': 'ptm',
-    'tf_target_mod': 'main',
-    'tf_mirna_mod': 'main',
-    'mirna_mrna_mod': 'main',
+    'tf_target_mod': 'network',
+    'tf_mirna_mod': 'network',
+    'mirna_mrna_mod': 'network',
     
     'omnipath_args': {
         'use_omnipath': True,
