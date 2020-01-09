@@ -45,7 +45,7 @@ get_default_param <- function(){
         input_annotation_by_entity_tsv = 'annotations_by_entity',
         input_enzyme_substrate_tsv = 'enzyme_substrate',
         input_resource_by_entity_tsv = 'resources_by_entity_%s',
-        input_complexes_by_resource_tsv = 'complexes_by_resource',
+        input_complexes_by_resource_tsv = 'complexes_by_resource_tsv',
         graph_plot_defaults = list(
             vertex.frame.color = NA,
             vertex.color = '#FDC70F',

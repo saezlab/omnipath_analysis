@@ -151,6 +151,8 @@ ClusteringBase <- R6::R6Class(
         
         clustering = function(mat){
             
+            mat[is.na(mat)] <- 0
+            
             do.call(
                 hclust,
                 c(

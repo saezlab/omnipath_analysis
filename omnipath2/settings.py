@@ -80,7 +80,7 @@ _defaults = {
     'intercell_annots_by_entity_tsv': 'intercell_annotations_by_entity', #
     'annots_by_entity_tsv': 'annotations_by_entity', #
     'enz_sub_tsv': 'enzyme_substrate', #
-    'complexes_by_resource_tsv': 'complexes_by_resource', #
+    'complexes_by_resource_tsv': 'complexes_by_resource_tsv', #
     'connections_tsv': 'connections_%s_%s', #
     'category_overlaps_tsv': 'category_overlaps', #
 

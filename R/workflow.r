@@ -63,7 +63,9 @@ omnipath2_workflow <<- list(
         method = SubclassesIntersectionSeries,
         name = NULL,
         Param$new(NULL),
-        Param$new(TRUE, FALSE)
+        Param$new(TRUE
+            #FALSE
+        )
     ),
     
     complex_overlaps = Task$new(
@@ -137,8 +139,8 @@ omnipath2_workflow <<- list(
     complexes_by_resource = Task$new(
         method = ComplexesByResource,
         name = NULL,
-        log_y = c(TRUE, FALSE),
-        bar = c(TRUE, FALSE)
+        log_y = Param$new(TRUE, FALSE),
+        bar = Param$new(TRUE, FALSE)
     ),
     
     complexes_numof_comp = Task$new(

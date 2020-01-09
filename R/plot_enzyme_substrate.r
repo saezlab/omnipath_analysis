@@ -221,7 +221,7 @@ EnzymeSubstrateShared <- R6::R6Class(
         
         initialize = function(){
             
-            super$initialize(name = fig_enzyme_substrate_self)
+            super$initialize(name = fig_enzyme_substrate_shared)
             
         },
         
