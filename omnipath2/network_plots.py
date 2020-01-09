@@ -182,7 +182,7 @@ class CountsBase(plot.PlotBase):
         if self.split_by_categories:
             
             self.cat_split = np.array([
-                '__'.join(key[:2])
+                k[1].capitalize().replace('_', ' ')
                 for key in self.keys
             ])
         
@@ -298,7 +298,11 @@ class CountsBase(plot.PlotBase):
                 else:
                     
                     self.ax.set_xlabel(
-                        'Number of %s' % ' '.join(reversed(var1.split('_')))
+                        'Number of %s' % (
+                            ' '.join(
+                                reversed(var1.split('_'))
+                            ).replace('0 ', '')
+                        )
                     )
         
         if self.share_xaxis:
@@ -306,16 +310,16 @@ class CountsBase(plot.PlotBase):
             for ivar1 in range(len(self.variables)):
                 
                 xmins, xmaxs = zip(*(
-                    self.axes[ivar2][ivar1].get_xlim()
-                    for ivar2 in range(len(self.variables2[ivar1]))
+                    ax[ivar1].get_xlim()
+                    for ax in self.axes
                 ))
                 
                 xmin = min(xmins)
                 xmax = max(xmaxs)
                 
                 _ = list(
-                    self.axes[ivar2][ivar1].set_xlim(xmin, xmax)
-                    for ivar2 in range(len(self.variables2[ivar1]))
+                    ax[ivar1].set_xlim(xmin, xmax)
+                    for ax in self.axes
                 )
 
 
