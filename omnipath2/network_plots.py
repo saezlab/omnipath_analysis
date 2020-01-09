@@ -129,6 +129,20 @@ class CountsBase(plot.PlotBase):
                         this_var,
                         'n_%s_within_data_model' % s_u
                     )[(k, 'all', 'Total')] = v
+                
+                for k, v in getattr(
+                    this_var,
+                    'n_%s_by_data_model' % s_u
+                ).items():
+                    
+                    if k[1] == 'all':
+                        
+                        continue
+                    
+                    getattr(
+                        this_var,
+                        'n_%s_within_interaction_type' % s_u
+                    )[k + ('Total',)] = v
 
         
         self.main_var = getattr(self, self.order_by[0])
@@ -318,18 +332,18 @@ class EdgeNodeCounts(CountsBase):
         param = {
             'variables': (
                 'entities',
-                'interactions_all',
+                'interactions_0',
             ),
             'variables2': (
                 (
-                    'by_resource',
-                    'shared',
-                    'shared_res_cat',
+                    'n_collection',
+                    'n_shared_within_interaction_type',
+                    'n_shared_within_data_model',
                 ),
                 (
-                    'by_resource',
-                    'shared',
-                    'shared_res_cat',
+                    'n_collection',
+                    'n_shared_within_interaction_type',
+                    'n_shared_within_data_model',
                 ),
             ),
             'fname': 'netw_node_edge_counts_pdf',

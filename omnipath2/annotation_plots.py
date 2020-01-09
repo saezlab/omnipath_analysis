@@ -187,11 +187,9 @@ class AnnotationNetworkOverlap(omnipath2.intercell_plots.CountsScatterBase):
         self.network = omnipath2.data.get_db(self.network_dataset)
         self.annot = omnipath2.data.get_db('annotations')
         self.in_network = {
-            entity
-            for entity in self.network.graph.vs['name']
-            if annot.AnnotationBase._match_entity_type(
-                entity,
-                entity_types = self.entity_types,
+            _id
+            for _id in self.network.get_identifiers(
+                entity_type = self.entity_types
             )
         }
         self.counts = dict(

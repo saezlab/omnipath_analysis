@@ -327,9 +327,6 @@ class IntercellNetworkCounts(omnipath2.table.TableBase):
                 set()
             )
             
-            in_network = self.network.get_identifiers(
-                entity_type = entity_type
-            )
             in_network0 = in_network & cls0_elements
             in_network1 = in_network & cls1_elements
             
@@ -496,7 +493,9 @@ class IntercellNetworkCounts(omnipath2.table.TableBase):
         )
         
         entity_type = 'protein' if self.only_proteins else None
-        in_network = self.network.entities(entity_type = self.entity_type)
+        in_network = self.network.get_identifiers(
+            entity_type = self.entity_type
+        )
         
         for cls0, cls1 in (
             itertools.combinations_with_replacement(
@@ -632,8 +631,8 @@ class IntercellNetworkCounts(omnipath2.table.TableBase):
             self.network.count_interactions_non_directed_0()
         )
         self.con_network_dir = self.network.count_interactions_directed()
-        self.con_network_stim = self.network.count_interactions_stimulatory()
-        self.con_network_inh = self.network.count_interactions_inhibitory()
+        self.con_network_stim = self.network.count_interactions_positive()
+        self.con_network_inh = self.network.count_interactions_negative()
     
     
     @staticmethod
