@@ -182,7 +182,7 @@ class CountsBase(plot.PlotBase):
         if self.split_by_categories:
             
             self.cat_split = np.array([
-                k[1].capitalize().replace('_', ' ')
+                '__'.join(key[:2])
                 for key in self.keys
             ])
         
@@ -284,7 +284,9 @@ class CountsBase(plot.PlotBase):
                 
                 if ivar1 == 0:
                     
-                    self.ax.set_ylabel(cat)
+                    self.ax.set_ylabel(
+                        cat.split('__')[1].replace('_', ' ').capitalize()
+                    )
                     
                 else:
                     
