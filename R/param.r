@@ -83,7 +83,7 @@ get_default_param <- function(){
         fig_subcls_intersect = 'subclass-intersection_%s_%s_%s',
         fig_cplex_overlap = 'complex-overlap',
         fig_intercell_cls_graph = 'intercell-classes-graph_%s_%s_%s',
-        fig_cat_sizes = 'category-sizes_%s_%s_%s',
+        fig_cat_sizes = 'category-sizes_%s_%s_%s_%s_%s',
         fig_enzyme_substrate_shared = 'enzyme-substrate-shared',
         fig_enzyme_substrate_self = 'enzyme-substrate-self-cplex-other_%s_%s',
         fig_enzyme_substrate_modtype = 'enzyme-substrate-modtype',
