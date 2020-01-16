@@ -67,9 +67,9 @@ IntercellClassSizes <- R6::R6Class(
                 group_by(name_cls0) %>%
                 summarize_all(first) %>%
                 mutate(
-                    label0 = ifelse(is.na(src_label0), 'Total', src_label0)
+                    label0 = ifelse(is.na(src_label0), 'OmniPath', src_label0)
                 ) %>%
-                arrange(desc(size_cls0)) %>%
+                arrange(desc(label0 == 'OmniPath'), desc(size_cls0)) %>%
                 mutate(
                     label0 = factor(
                         label0, levels = unique(label0), ordered = TRUE
@@ -87,7 +87,13 @@ IntercellClassSizes <- R6::R6Class(
                 geom_col(fill = 'black') +
                 xlab('Resources') +
                 ylab('Number of proteins') +
-                ggtitle(first(str_to_title(self$data$parent0)))
+                ggtitle(
+                    gsub(
+                        '_',
+                        ' ',
+                        first(str_to_title(self$data$parent0))
+                    )
+                )
             
             invisible(self)
             
