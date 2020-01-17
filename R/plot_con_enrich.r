@@ -4,7 +4,7 @@
 #  This file is part of the `omnipath2` R package
 #
 #  Copyright
-#  2019
+#  2019-2020
 #  Heidelberg University, Uniklinik RWTH Aachen
 #
 #  File author(s): Dénes Türei (turei.denes@gmail.com)
