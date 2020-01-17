@@ -4,7 +4,7 @@
 #  This file is part of the `omnipath2` R package
 #
 #  Copyright
-#  2019
+#  2019-2020
 #  Heidelberg University, Uniklinik RWTH Aachen
 #
 #  File author(s): Dénes Türei (turei.denes@gmail.com)
@@ -160,18 +160,6 @@ IntercellAnnotationByEntity <- R6::R6Class(
         initialize = function(...){
             
             super$initialize(input_intercell_annotation_by_entity_tsv)
-            
-            invisible(self)
-            
-        },
-        
-        
-        preprocess = function(...){
-            
-            self$data <- self$data %>%
-                mutate(
-                    is_complex = is_complex == 'True'
-                )
             
             invisible(self)
             
