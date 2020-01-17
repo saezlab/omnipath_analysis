@@ -125,7 +125,7 @@ IntercellClassSizesDots <- R6::R6Class(
                 data = self$data,
                 name = fig_cat_sizes_dots,
                 width = 4,
-                height = 5,
+                height = 5.5,
                 theme_args = x_vertical_labels()
             )
             
@@ -142,20 +142,31 @@ IntercellClassSizesDots <- R6::R6Class(
                         x = cls,
                         y = database,
                         size = size,
-                        color = database == 'OmniPath'
+                        color = database == 'OmniPath',
+                        alpha = total_unique
                     )
                 ) +
-                geom_point(
-                    alpha = 1.
-                ) +
+                geom_point(stroke = 0) +
                 scale_color_manual(
                     values = omnipath2_settings$get(palette),
+                    guide = FALSE
+                ) +
+                scale_alpha_manual(
+                    values = c(
+                        'total' = .66,
+                        'unique' = 1.
+                    ),
                     guide = FALSE
                 ) +
                 xlab('Inter-cellular\ncommunication roles') +
                 ylab('Resources') +
                 scale_size_area(
-                    guide = guide_legend(title = 'Number of\nproteins')
+                    guide = guide_legend(
+                        title = 'Number of\nproteins',
+                        override.aes = list(
+                            color = omnipath2_settings$get(palette)[1]
+                        )
+                    )
                 )
             
             invisible(self)
@@ -173,6 +184,45 @@ IntercellClassSizesDots <- R6::R6Class(
                     filter(typ_cls0 == 'main')
                 )$cls_label0
             )
+            
+            huge_classes <- unique(
+                (
+                    self$data %>%
+                    filter(typ_cls0 == 'above_main')
+                )$cls_label0
+            )
+            
+            self$by_entity <- self$by_entity %>%
+                filter(
+                    !is_complex &
+                    class_type == 'sub' &
+                    !(class_label %in% huge_classes) &
+                    !is.na(resource_label)
+                ) %>%
+                group_by(entity_id, class_label) %>%
+                mutate(is_unique = n() == 1) %>%
+                ungroup() %>%
+                filter(is_unique) %>%
+                group_by(class_label, resource_label) %>%
+                mutate(n_unique = n()) %>%
+                summarize_all(first) %>%
+                ungroup() %>%
+                select(
+                    database = resource_label,
+                    cls = class_label,
+                    size = n_unique
+                ) %>%
+                bind_rows(
+                    {.} %>%
+                    group_by(cls) %>%
+                    filter(database != 'ComPPI' | cls != 'Extracellular') %>%
+                    mutate(
+                        size = sum(size),
+                        database = 'OmniPath'
+                    ) %>%
+                    summarize_all(first) %>%
+                    ungroup()
+                )
             
             data_full <- expand.grid(
                     database = databases,
@@ -195,9 +245,14 @@ IntercellClassSizesDots <- R6::R6Class(
                 ) %>%
                 rename(size = size_cls0) %>%
                 mutate(
-                    database = replace_na(database, 'OmniPath')
+                    database = replace_na(database, 'OmniPath'),
+                    total_unique = 'total'
                 ) %>%
                 filter(!is.na(size)) %>%
+                bind_rows(
+                    self$by_entity %>%
+                    mutate(total_unique = 'unique')
+                ) %>%
                 arrange(desc(database == 'OmniPath'), database) %>%
                 mutate(
                     database = factor(
@@ -227,6 +282,8 @@ IntercellClassSizesDots <- R6::R6Class(
                 )$data,
                 self$data
             )
+            
+            self$by_entity <- IntercellAnnotationByEntity$new()$data
             
             invisible(self)
             
