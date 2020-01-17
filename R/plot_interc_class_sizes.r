@@ -4,7 +4,7 @@
 #  This file is part of the `omnipath2` R package
 #
 #  Copyright
-#  2019
+#  2019-2020
 #  Heidelberg University, Uniklinik RWTH Aachen
 #
 #  File author(s): Dénes Türei (turei.denes@gmail.com)
@@ -94,6 +94,139 @@ IntercellClassSizes <- R6::R6Class(
                         first(str_to_title(self$data$parent0))
                     )
                 )
+            
+            invisible(self)
+            
+        }
+        
+    )
+    
+)
+
+
+IntercellClassSizesDots <- R6::R6Class(
+    
+    'IntercellClassSizesDots',
+    
+    inherit = SinglePlot,
+    
+    lock_objects = FALSE,
+    
+    public = list(
+        
+        initialize = function(
+            data = NULL,
+            ...
+        ){
+            
+            self$input_param <- c('omnipath', 'proteins', 'all-class-levels')
+            
+            super$initialize(
+                data = self$data,
+                name = fig_cat_sizes_dots,
+                width = 4,
+                height = 5,
+                theme_args = x_vertical_labels()
+            )
+            
+            invisible(self)
+            
+        },
+        
+        
+        plot = function(...){
+            
+            self$plt <- ggplot(
+                    self$data,
+                    aes(
+                        x = cls,
+                        y = database,
+                        size = size,
+                        color = database == 'OmniPath'
+                    )
+                ) +
+                geom_point(
+                    alpha = 1.
+                ) +
+                scale_color_manual(
+                    values = omnipath2_settings$get(palette),
+                    guide = FALSE
+                ) +
+                xlab('Inter-cellular\ncommunication roles') +
+                ylab('Resources') +
+                scale_size_area(
+                    guide = guide_legend(title = 'Number of\nproteins')
+                )
+            
+            invisible(self)
+            
+        },
+        
+        
+        preprocess = function(...){
+            
+            databases <- unique(self$data$src_label0)
+            
+            classes <- unique(
+                (
+                    self$data %>%
+                    filter(typ_cls0 == 'main')
+                )$cls_label0
+            )
+            
+            data_full <- expand.grid(
+                    database = databases,
+                    cls = classes
+                ) %>%
+                mutate(
+                    database = as.character(database),
+                    cls = as.character(cls)
+                ) %>%
+                left_join(
+                    self$data %>%
+                    select(cls_label0, src_label0, size_cls0) %>%
+                    group_by(cls_label0, src_label0) %>%
+                    summarize_all(first) %>%
+                    ungroup(),
+                    by = c(
+                        'database' = 'src_label0',
+                        'cls' = 'cls_label0'
+                    )
+                ) %>%
+                rename(size = size_cls0) %>%
+                mutate(
+                    database = replace_na(database, 'OmniPath')
+                ) %>%
+                filter(!is.na(size)) %>%
+                arrange(desc(database == 'OmniPath'), database) %>%
+                mutate(
+                    database = factor(
+                        database,
+                        levels = unique(database),
+                        ordered = TRUE
+                    )
+                )
+            
+            self$data <- data_full
+            
+            invisible(self)
+            
+        }
+        
+    ),
+    
+    
+    private = list(
+        
+        setup = function(){
+            
+            self$data <- `if`(
+                is.null(self$data),
+                IntercellCategoriesPairwise$new(
+                    input_param = self$input_param
+                )$data,
+                self$data
+            )
             
             invisible(self)
             

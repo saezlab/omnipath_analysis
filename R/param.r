@@ -4,7 +4,7 @@
 #  This file is part of the `omnipath2` R package
 #
 #  Copyright
-#  2019
+#  2019-2020
 #  Heidelberg University, Uniklinik RWTH Aachen
 #
 #  File author(s): Dénes Türei (turei.denes@gmail.com)
@@ -56,6 +56,7 @@ get_default_param <- function(){
         
         two_shades_1 = c('#4268B3', '#B3C5E9'),
         three_shades_1 = c('#4268B3', '#6F8DCF', '#B3C5E9'),
+        palette = c('#176FC1', '#00AAB0'),
         
         console_settings = list(
             width = 270,
@@ -84,6 +85,7 @@ get_default_param <- function(){
         fig_cplex_overlap = 'complex-overlap',
         fig_intercell_cls_graph = 'intercell-classes-graph_%s_%s_%s',
         fig_cat_sizes = 'category-sizes_%s_%s_%s_%s_%s',
+        fig_cat_sizes_dots = 'category-sizes-dots',
         fig_enzyme_substrate_shared = 'enzyme-substrate-shared',
         fig_enzyme_substrate_self = 'enzyme-substrate-self-cplex-other_%s_%s',
         fig_enzyme_substrate_modtype = 'enzyme-substrate-modtype',
