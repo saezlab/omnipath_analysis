@@ -28,7 +28,7 @@ import collections
 import itertools
 
 from pypath.share import common
-from pypath.share import session
+from pypath.share import session as session_mod
 
 import omnipath2
 from omnipath2 import settings as op2_settings
