@@ -138,6 +138,19 @@ SubclassesIntersectionSeries <- R6::R6Class(
                 data
             )
             
+        },
+        
+        
+        check_slice = function(){
+            
+            return(
+                length(
+                    self$slice %>%
+                    pull(resource_label) %>%
+                    unique()
+                ) > 1
+            )
+            
         }
         
     )

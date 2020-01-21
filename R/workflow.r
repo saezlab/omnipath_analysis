@@ -63,8 +63,8 @@ omnipath2_workflow <<- list(
         method = SubclassesIntersectionSeries,
         name = NULL,
         Param$new(NULL),
-        Param$new(TRUE
-            #FALSE
+        Param$new(FALSE
+            #TRUE
         )
     ),
     

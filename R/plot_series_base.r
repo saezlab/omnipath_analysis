@@ -152,7 +152,11 @@ PlotSeries <- R6::R6Class(
             
             while(!is.null(self$slice)){
                 
-                private$single_plot()
+                if(private$check_slice()){
+                    
+                    private$single_plot()
+                    
+                }
                 
                 slice_iterator()
                 
@@ -217,6 +221,13 @@ PlotSeries <- R6::R6Class(
                     select(!!self$width_by) %>%
                     unique %>% unlist %>% length
             )
+            
+        },
+        
+        
+        check_slice = function(){
+            
+            return(TRUE)
             
         }
         

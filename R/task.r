@@ -134,7 +134,11 @@ Task <- R6::R6Class(
             
             for(param in private$product_param()){
                 
-                self$current_param <- param
+                self$current_param <- `if`(
+                    is.null(unlist(param)),
+                    list(),
+                    param
+                )
                 
                 private$run_one()
                 
@@ -152,7 +156,7 @@ Task <- R6::R6Class(
             
             self$param <- `if`(
                 length(self$param) == 0,
-                list(Param$new()),
+                list(Param$new(list())),
                 `if`(
                     is.list(self$param),
                     self$param,
