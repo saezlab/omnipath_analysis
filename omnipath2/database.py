@@ -189,7 +189,7 @@ class Database(session_mod.Logger):
     def ensure_module(self, dataset, reset = True):
 
         mod_str = self.get_param('%s_mod' % dataset)
-        mod = sys.modules['pypath.%s' % mod_str]
+        mod = sys.modules['pypath.core.%s' % mod_str]
 
         if reset and hasattr(mod, 'db'):
 
