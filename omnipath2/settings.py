@@ -54,10 +54,10 @@ _defaults = {
     'timestamp_format': '%Y%m%d',
 
     # pickles
-    'omnipath_pickle': 'omnipath_pw_es_lr_20200108.pickle',
-    'curated_pickle': 'network_curated_20200108.pickle',
+    'omnipath_pickle': 'network_omnipath.pickle',
+    'curated_pickle': 'network_curated.pickle',
     'complex_pickle': 'complexes.pickle',
-    'annotations_pickle': 'annotations2.pickle',
+    'annotations_pickle': 'annotations.pickle',
     'intercell_pickle': 'intercell.pickle',
     'enz_sub_pickle': 'ptms.pickle',
     'tf_target_pickle': 'tftarget.pickle',
@@ -66,7 +66,7 @@ _defaults = {
     'lncrna_mrna_pickle': 'lncrna_mrna.pickle',
 
     # supplementary tables
-    'network_s2_tsv': 'S2_network_%s',
+    'network_s2_tsv': 'S2_network_%s%s',
     'enzsub_s3_tsv': 'S3_enz-sub',
     'complexes_s4_tsv': 'S4_complexes',
     'annotations_s5_tsv': 'S5_annotations',

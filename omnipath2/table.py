@@ -92,7 +92,11 @@ class TableBase(omnipath2.path.PathBase):
     def load(self):
 
         self.data = self.data or []
-        self.header = []
+        self.header = self.header or []
+        
+        if self.header == True:
+            
+            self.header = self.data.pop(0)
 
 
     def export(self, fname = None):

@@ -68,11 +68,33 @@ class NetworkS2(SuppTableBase):
             'fname': 'network_s2_tsv',
             'fname_param': (
                 kwargs['dataset'],
+                '',
             ),
         }
         param.update(kwargs)
         
         SuppTableBase.__init__(self, **param)
+        
+        self.export_with_compact_header()
+    
+    
+    def export_with_compact_header(self):
+        
+        data = self.database.summaries_tab(
+            return_table = True,
+            label_type = 0,
+        )
+        header = list(data.pop(0))
+        
+        tbl = omnipath2.table.TableBase(
+            fname = 'network_s2_tsv',
+            fname_param = (
+                self.dataset,
+                '_for-r',
+            ),
+            data = self.data,
+            header = header,
+        )
 
 
 class NetworkS2_PPIall(NetworkS2):
