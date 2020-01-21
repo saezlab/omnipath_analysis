@@ -25,8 +25,8 @@
 import os
 import copy
 
-from pypath import settings as pp_settings
-from pypath import session_mod
+from pypath.share import settings as pp_settings
+from pypath.share import session
 from omnipath2 import settings as settings_mod
 from omnipath2 import database as _database_mod
 from omnipath2 import colors as _colors_mod

@@ -27,7 +27,7 @@ import collections
 
 import numpy as np
 
-from pypath import session_mod
+from pypath.share import session as session_mod
 
 
 import omnipath2
@@ -35,11 +35,11 @@ import omnipath2.plot as plot
 
 
 class CountsBase(plot.PlotBase):
-    
-    
+
+
     lightness_steps = (1.0, 1.33, 1.66, 2.0, 2.33)
-    
-    
+
+
     def __init__(
             self,
             network_dataset = 'omnipath',
@@ -65,7 +65,7 @@ class CountsBase(plot.PlotBase):
             share_xaxis = True,
             **kwargs
         ):
-        
+
         self.network_dataset = network_dataset
         self.entity_type = entity_type
         self.variables = variables
@@ -75,9 +75,9 @@ class CountsBase(plot.PlotBase):
         self.order_by = order_by
         self.palette = palette
         self.share_xaxis = share_xaxis
-        
+
         cols = len(variables2)
-        
+
         param = {
             'ylab': 'Resources',
             'height': 9,
@@ -86,18 +86,18 @@ class CountsBase(plot.PlotBase):
             'legend': False,
         }
         param.update(kwargs)
-        
+
         plot.PlotBase.set_palette(self)
         plot.PlotBase.__init__(self, **param)
-    
-    
+
+
     def load_data(self):
-        
+
         self.data = omnipath2.data
         self.network = self.data.get_db(self.network_dataset)
-        
+
         for var in self.variables:
-            
+
             setattr(
                 self,
                 var,
@@ -108,45 +108,45 @@ class CountsBase(plot.PlotBase):
                     entity_type = self.entity_type,
                 ),
             )
-            
+
             this_var = getattr(self, var)
-            
+
             del this_var.n_collection[('all', 'all', 'Total')]
-            
+
             # adding totals by interaction type
             for s_u in ('shared', 'unique'):
-                
+
                 for k, v in getattr(
                     this_var,
                     'n_%s_by_interaction_type' % s_u
                 ).items():
-                    
+
                     if k == 'all':
-                        
+
                         continue
-                    
+
                     getattr(
                         this_var,
                         'n_%s_within_data_model' % s_u
                     )[(k, 'all', 'Total')] = v
-                
+
                 for k, v in getattr(
                     this_var,
                     'n_%s_by_data_model' % s_u
                 ).items():
-                    
+
                     if k[1] == 'all':
-                        
+
                         continue
-                    
+
                     getattr(
                         this_var,
                         'n_%s_within_interaction_type' % s_u
                     )[k + ('Total',)] = v
 
-        
+
         self.main_var = getattr(self, self.order_by[0])
-        
+
         self.keys = [
             it[0] for it in
             sorted(
@@ -166,8 +166,8 @@ class CountsBase(plot.PlotBase):
                 )
             )
         ]
-        
-        
+
+
         self.labels = np.array([
             (
                 key[2]
@@ -178,16 +178,16 @@ class CountsBase(plot.PlotBase):
             )
             for key in self.keys
         ])
-        
+
         if self.split_by_categories:
-            
+
             self.cat_split = np.array([
                 '__'.join(key[:2])
                 for key in self.keys
             ])
-        
+
         self.tick_loc = range(len(self.keys))
-        
+
         self.values = [
             [
                 np.array([
@@ -201,7 +201,7 @@ class CountsBase(plot.PlotBase):
             ]
             for ivar, var1 in enumerate(self.variables)
         ]
-        
+
         self.colors = [
             np.array([
                 omnipath2.colors.lightness(
@@ -212,9 +212,9 @@ class CountsBase(plot.PlotBase):
             ])
             for ivar, var1 in enumerate(self.variables)
         ]
-        
+
         if self.split_by_categories:
-            
+
             self.grid_rows = len(set(self.cat_split))
             cat_counts = collections.Counter(self.cat_split)
             self.categories = sorted(
@@ -222,28 +222,28 @@ class CountsBase(plot.PlotBase):
                 key = lambda lab: 'ZZZ' if lab.endswith('all') else lab
             )
             self.grid_hratios = [cat_counts[cat] for cat in self.categories]
-    
-    
+
+
     def make_plots(self):
-        
+
         for icat, cat in enumerate(
             self.categories
                 if self.split_by_categories else
             ('Resources',)
         ):
-            
+
             for ivar1, var1 in enumerate(self.variables):
-                
+
                 self.get_subplot(icat, ivar1)
-                
+
                 for ivar2 in range(len(self.variables2[ivar1])):
-                    
+
                     tick_loc = (
                         range((self.cat_split == cat).sum())
                             if self.split_by_categories else
                         self.tick_loc
                     )
-                    
+
                     self.ax.barh(
                         tick_loc,
                         self.values[ivar1][ivar2][
@@ -255,11 +255,11 @@ class CountsBase(plot.PlotBase):
                         # for scatterplot:
                         # facecolors = 'none',
                     )
-                
+
                 self.ax.set_yticks(tick_loc)
-                
+
                 if ivar1 == 0:
-                    
+
                     self.ax.set_yticklabels(
                         self.labels[
                             self.cat_split == cat
@@ -267,38 +267,38 @@ class CountsBase(plot.PlotBase):
                             np.array([True] * len(tick_loc))
                         ]
                     )
-                    
+
                 else:
-                    
+
                     self.ax.set_yticklabels([])
-                
+
                 self.ax.tick_params(axis = 'both', length = 0)
                 self.ax.locator_params(nbins = 6, axis = 'x')
-                
+
                 self.ax.grid()
                 #self.ax.legend(loc = 0)
                 self.ax.set_ylim(-1, len(tick_loc))
                 self.ax.set_axisbelow(True)
-                
+
                 self.post_subplot_hook()
-                
+
                 if ivar1 == 0:
-                    
+
                     self.ax.set_ylabel(
                         cat.split('__')[1].replace('_', ' ').capitalize()
                     )
-                    
+
                 else:
-                    
+
                     self.ax.get_yaxis().label.set_visible(False)
-                
+
                 if self.share_xaxis and icat != self.grid_rows - 1:
-                    
+
                     self.ax.set_xticklabels([])
                     self.ax.get_xaxis().label.set_visible(False)
-                    
+
                 else:
-                    
+
                     self.ax.set_xlabel(
                         'Number of %s' % (
                             ' '.join(
@@ -306,19 +306,19 @@ class CountsBase(plot.PlotBase):
                             ).replace('0 ', '')
                         )
                     )
-        
+
         if self.share_xaxis:
-            
+
             for ivar1 in range(len(self.variables)):
-                
+
                 xmins, xmaxs = zip(*(
                     ax[ivar1].get_xlim()
                     for ax in self.axes
                 ))
-                
+
                 xmin = min(xmins)
                 xmax = max(xmaxs)
-                
+
                 _ = list(
                     ax[ivar1].set_xlim(xmin, xmax)
                     for ax in self.axes
@@ -326,15 +326,15 @@ class CountsBase(plot.PlotBase):
 
 
 class EdgeNodeCounts(CountsBase):
-    
-    
+
+
     def __init__(
         self,
         network_dataset = 'omnipath',
         share_xaxis = True,
         **kwargs
     ):
-        
+
         param = {
             'variables': (
                 'entities',
@@ -363,5 +363,5 @@ class EdgeNodeCounts(CountsBase):
             'share_xaxis': share_xaxis,
         }
         param.update(kwargs)
-        
+
         CountsBase.__init__(self, **param)

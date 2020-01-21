@@ -27,8 +27,8 @@ import importlib as imp
 import collections
 import itertools
 
-from pypath import common
-from pypath import session_mod
+from pypath.share import common
+from pypath.share import session
 
 import omnipath2
 from omnipath2 import settings as op2_settings
@@ -46,45 +46,45 @@ _log = _logger._log
 
 
 class ProductParam(object):
-    
-    
+
+
     def __init__(self, **kwargs):
-        
+
         self.args, self.values = tuple(zip(*kwargs.items()))
-    
-    
+
+
     def __iter__(self):
-        
+
         for val in itertools.product(*self.values):
-            
+
             yield dict(zip(self.args, val))
 
 
 class IterParam(object):
-    
-    
+
+
     def __init__(self, *args):
-        
+
         self.args = args
-    
-    
+
+
     def __iter__(self):
-        
+
         for arg in self.args:
-            
+
             yield arg
 
 
 class Param(object):
-    
-    
+
+
     def __init__(self, **kwargs):
-        
+
         self.param = kwargs
-    
-    
+
+
     def __iter__(self):
-        
+
         yield self.param
 
 
@@ -98,27 +98,27 @@ class Task(
         ],
     )
 ):
-    
-    
+
+
     def __new__(cls, method, param = None, name = 'unknown'):
-        
+
         param = param or Param()
-        
+
         if not isinstance(param, (tuple, list)):
-            
+
             param = param,
-        
+
         return super(Task, cls).__new__(cls, method, param, name)
-    
-    
+
+
     def run(self):
-        
+
         _log('Running task `%s`.' % self.name)
-        
+
         for param in itertools.product(*self.param):
-            
+
             param = dict(itertools.chain(*(par.items() for par in param)))
-            
+
             _log(
                 'Running with param `%s`.' % (
                     ', '.join(
@@ -127,14 +127,14 @@ class Task(
                     )
                 )
             )
-            
+
             self.method(**param)
-        
+
         _log('Task `%s` finished.' % self.name)
 
 
 workflow = collections.OrderedDict(
-    
+
     supptables = (
         Task(
             method = supptables.NetworkS2_PPIall,
@@ -173,7 +173,7 @@ workflow = collections.OrderedDict(
             name = 'Supp Table S6, intercell',
         ),
     ),
-    
+
     r_preprocess = (
         Task(
             method = r_preprocess.InterClassConnections,
@@ -258,14 +258,14 @@ workflow = collections.OrderedDict(
             name = 'Enzyme-substrate interactions table',
         ),
     ),
-    
+
     complexes_plots = (
         Task(
             method = complexes_plots.ComplexesByResource,
             name = 'Complexes by resource figure',
         ),
     ),
-    
+
     annotation_plots = (
         Task(
             method = annotation_plots.EntitiesByResource,
@@ -287,7 +287,7 @@ workflow = collections.OrderedDict(
             name = 'Annotation network overlap plot',
         ),
     ),
-    
+
     network_plots = (
         Task(
             method = network_plots.EdgeNodeCounts,
@@ -305,7 +305,7 @@ workflow = collections.OrderedDict(
             name = 'Network node and edge counts plot',
         ),
     ),
-    
+
     intercell_plots = (
         Task(
             method = intercell_plots.InterClassDegreeHisto,
@@ -361,51 +361,51 @@ workflow = collections.OrderedDict(
             ),
             name = 'Intercell class connections chordplot',
         ),
-        
+
     ),
-    
+
     r_plotting = (
         Task(
             method = r_runner.RRunner,
             name = 'R plotting',
         ),
     ),
-    
+
 )
 
 
 class Main(session_mod.Logger):
-    
-    
+
+
     def __init__(
             self,
             parts = None,
             steps = None,
         ):
-        
+
         session_mod.Logger.__init__(self, name = 'op2.main')
-        
+
         self.parts = common.to_set(parts)
         self.steps = (
             steps
                 if isinstance(steps, (dict, type(None))) else
             {'main': steps}
         )
-        
+
         self._log(
             'The OmniPath2 analysis and figures '
             'integrated workflow has been initialized.'
         )
-    
-    
+
+
     def reload(self):
         """
         Reloads the object from the module level.
         """
-        
+
         omnipath2.data.reload()
         omnipath2.colors.reload()
-        
+
         modules = (
             op2_settings,
             r_preprocess,
@@ -415,49 +415,49 @@ class Main(session_mod.Logger):
             intercell_plots,
             supptables,
         )
-        
+
         for mod in modules:
-            
+
             imp.reload(mod)
-        
+
         for dataset in omnipath2.data.datasets:
-            
+
             if hasattr(omnipath2.data, dataset):
-                
+
                 getattr(omnipath2.data, dataset).reload()
-        
+
         modname = self.__class__.__module__
         mod = __import__(modname, fromlist = [modname.split('.')[0]])
         imp.reload(mod)
         new = getattr(mod, self.__class__.__name__)
         setattr(self, '__class__', new)
-    
-    
+
+
     def main(self):
-        
+
         self._log('Beginning workflow.')
-        
+
         missing_parts = self.parts - set(workflow.keys())
-        
+
         if missing_parts:
-            
+
             self._log(
                 'Warning: part(s) not defined in '
                 'the workflow: %s.' % ', '.join(missing_parts)
             )
-        
+
         _workflow = self.steps or workflow
-        
+
         for part_name, part_tasks in _workflow.items():
-            
+
             if self.parts and part_name not in self.parts:
-                
+
                 continue
-            
+
             self._log('Beginning workflow part `%s`.' % part_name)
-            
+
             for task in part_tasks:
-                
+
                 task.run()
-        
+
         self._log('Workflow finished.')

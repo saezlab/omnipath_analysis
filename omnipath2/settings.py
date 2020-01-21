@@ -24,35 +24,35 @@
 
 import collections
 
-import pypath.common as common
+from pypath.share import common
 
 
 _defaults = {
-    
+
     'files_json': 'files.json',
-    
+
     # pickle dumps of all databases
     'pickle_dir': 'pickles',
-    
+
     # directory for exported tables
     'tables_dir': 'tables',
-    
+
     # directory for figures
     'figures_dir': 'figures',
-    
+
     # directory for LaTeX
     'latex_dir': 'latex',
-    
+
     # directory for auto-generated LaTeX snippets
     'latex_auto_dir': 'inc_auto',
-    
+
     # directory with palettes
     'palette_dir': 'palettes',
-    
+
     'timestamp_dirs': True,
-    
+
     'timestamp_format': '%Y%m%d',
-    
+
     # pickles
     'omnipath_pickle': 'omnipath_pw_es_lr_20200108.pickle',
     'curated_pickle': 'network_curated_20200108.pickle',
@@ -71,7 +71,7 @@ _defaults = {
     'complexes_s4_tsv': 'S4_complexes',
     'annotations_s5_tsv': 'S5_annotations',
     'intercell_s6_tsv': 'S6_intercell',
-    
+
     # for R plotting
     'intercell_classes_tsv': 'intercell_classes', #
     'main_coverage_tsv': 'main_coverage_%s', #
@@ -100,7 +100,7 @@ _defaults = {
        'lncrna_mrna',
        'enz_sub',
     ],
-    
+
     'omnipath_mod': 'network',
     'curated_mod': 'network',
     'complex_mod': 'complex',
@@ -111,19 +111,19 @@ _defaults = {
     'tf_mirna_mod': 'network',
     'mirna_mrna_mod': 'network',
     'lncrna_mrna_mod': 'network',
-    
+
     'omnipath_args': {
         'use_omnipath': True,
         'kinase_substrate_extra': True,
         'ligand_receptor_extra': True,
         'pathway_extra': True,
     },
-    
+
     'dependencies': {
         'intercell': ('annotations',),
         'annotations': ('complex',),
     },
-    
+
     # figures graphic param defaults
     'font_family': [
         # we want to use this:
@@ -146,7 +146,7 @@ _defaults = {
     },
     'fig_height': 3,
     'fig_width': 4,
-    
+
     # figure filenames
     'inter_class_degree_pdf': 'inter_class_degree_%s_%s_%s_%s',
     'counts_by_class_pdf': 'counts_by_class_%s_%s',
@@ -158,12 +158,12 @@ _defaults = {
     'annot_entities_in_network_pdf': 'annot_%s_in_network_%s',
     'netw_node_edge_counts_pdf': 'nodes_edges_%s_%s',
     'complexes_by_resource_pdf': 'complexes_by_resource',
-    
+
     # default palette
     'palette': 'Nico_3',
-    
+
     'r_workflow_command': 'Rscript omnipath2_workflow.r'
-    
+
 }
 
 
@@ -182,10 +182,10 @@ denes = {
 
 
 class Settings(object):
-    
-    
+
+
     def __init__(self, **kwargs):
-        
+
         self.__dict__.update(kwargs)
 
 
@@ -196,41 +196,41 @@ Defaults = collections.namedtuple(
 
 
 def reset_all():
-    
+
     settings = Settings()
-    
+
     for k in _defaults.keys():
-        
+
         val = getattr(defaults, k)
-        
+
         setattr(settings, k, val)
-    
+
     globals()['settings'] = settings
 
 
 def setup(**kwargs):
-    
+
     for param, value in kwargs.items():
-        
+
         setattr(settings, param, value)
 
 
 def get(param):
-    
+
     if isinstance(param, common.basestring) and hasattr(settings, param):
-        
+
         return getattr(settings, param)
 
 
 def get_default(param):
-    
+
     if isinstance(param, common.basestring) and hasattr(defaults, param):
-        
+
         return getattr(defaults, param)
 
 
 def reset(param):
-    
+
     setup(param, get_default(param))
 
 

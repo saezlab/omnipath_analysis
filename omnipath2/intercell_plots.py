@@ -30,8 +30,8 @@ import matplotlib as mpl
 import matplotlib.cm
 import pattern.en
 
-from pypath import session_mod
-from pypath import common
+from pypath.share import session as session_mod
+from pypath.share import common
 
 import data_tools
 from data_tools.iterables import subsets
@@ -46,8 +46,8 @@ from omnipath2 import plot
 
 
 class InterClassDegreeHisto(plot.PlotBase):
-    
-    
+
+
     def __init__(
             self,
             class0,
@@ -62,9 +62,9 @@ class InterClassDegreeHisto(plot.PlotBase):
             log_y = False,
             **kwargs,
         ):
-        
+
         self.network_dataset = network_dataset
-        
+
         self.class0 = class0
         self.class1 = class1
         _class0, _class1 = (
@@ -79,7 +79,7 @@ class InterClassDegreeHisto(plot.PlotBase):
         self.only_effect = only_effect
         self.log_y = log_y
         self.degrees_of = degrees_of
-        
+
         param = {
             'fname': 'inter_class_degree_pdf',
             'fname_param': (
@@ -100,12 +100,12 @@ class InterClassDegreeHisto(plot.PlotBase):
             'legend': False,
         }
         param.update(kwargs)
-        
+
         plot.PlotBase.__init__(self, **param)
-    
-    
+
+
     def load_data(self):
-        
+
         self.data = omnipath2.data
         self.intercell = self.data.get_db('intercell')
         self.data.ensure_dataset(self.network_dataset)
@@ -122,24 +122,24 @@ class InterClassDegreeHisto(plot.PlotBase):
             only_effect = self.only_effect,
             degrees_of = self.degrees_of,
         )
-    
-    
+
+
     def make_plots(self):
-        
+
         self.get_subplot()
         _ = self.plot_args.pop('cmap', None)
         self.ax.hist(self.degrees, bins = self.nbins, **self.plot_args)
-        
+
         if self.log_y:
-            
+
             self.ax.set_yscale('log')
-        
+
         self.post_subplot_hook()
 
 
 class CountsScatterBase(plot.PlotBase):
-    
-    
+
+
     def __init__(
             self,
             entity_types = 'protein',
@@ -147,11 +147,11 @@ class CountsScatterBase(plot.PlotBase):
             xscale_log = False,
             **kwargs,
         ):
-        
+
         self.entity_types = common.to_set(entity_types)
         self.class_types = common.to_set(class_types)
         self.xscale_log = xscale_log
-        
+
         param = {
             'maketitle': True,
             'xlab': 'Number of %s' % (
@@ -162,18 +162,18 @@ class CountsScatterBase(plot.PlotBase):
             'legend': False,
         }
         param.update(kwargs)
-        
+
         plot.PlotBase.__init__(self, **param)
-    
-    
+
+
     def load_data(self):
-        
+
         self.counts_nonzero = dict(
             it
             for it in self.counts.items()
             if it[1] != 0
         )
-        
+
         self.labels, self.values = zip(*(
             sorted(
                 self.counts_nonzero.items(),
@@ -181,10 +181,10 @@ class CountsScatterBase(plot.PlotBase):
                 reverse = True,
             )
         ))
-    
-    
+
+
     def make_plots(self):
-        
+
         self.get_subplot()
         self.ax.set_yticks(range(len(self.counts_nonzero)))
         self.ax.grid()
@@ -192,27 +192,27 @@ class CountsScatterBase(plot.PlotBase):
         self.ax.set_axisbelow(True)
         self.ax.set_yticklabels(labels = self.labels)
         self.ax.set_ylim(-1, len(self.counts_nonzero))
-        
+
         if self.xscale_log:
-            
+
             self.ax.set_xscale('log')
-        
+
         self.post_subplot_hook()
 
 
 class CountsByClass(CountsScatterBase):
-    
-    
+
+
     def __init__(
         self,
         entity_types = 'protein',
         class_types = 'main',
         **kwargs,
     ):
-        
+
         self.entity_types = common.to_set(entity_types)
         self.class_types = common.to_set(class_types)
-        
+
         param = {
             'title': 'Entities by inter-cellular communication role',
             'fname': 'counts_by_class_pdf',
@@ -223,17 +223,17 @@ class CountsByClass(CountsScatterBase):
             ),
         }
         param.update(kwargs)
-        
+
         CountsScatterBase.__init__(
             self,
             entity_types = entity_types,
             class_types = class_types,
             **param
         )
-    
-    
+
+
     def load_data(self):
-        
+
         self.data = omnipath2.data
         self.intercell = self.data.get_db('intercell')
         countsdf = self.intercell.counts_by_class(
@@ -245,18 +245,18 @@ class CountsByClass(CountsScatterBase):
 
 
 class CountsByResource(CountsScatterBase):
-    
-    
+
+
     def __init__(
         self,
         entity_types = 'protein',
         class_types = 'main',
         **kwargs,
     ):
-        
+
         self.entity_types = common.to_set(entity_types)
         self.class_types = common.to_set(class_types)
-        
+
         param = {
             'title': (
                 'Entities in inter-cellular communication\n'
@@ -270,20 +270,20 @@ class CountsByResource(CountsScatterBase):
             'height': 5,
         }
         param.update(kwargs)
-        
+
         CountsScatterBase.__init__(
             self,
             entity_types = entity_types,
             class_types = class_types,
             **param
         )
-    
-    
+
+
     def load_data(self):
-        
+
         self.data = omnipath2.data
         self.intercell = self.data.get_db('intercell')
-        
+
         self.counts = self.intercell.counts_by_resource(
             entity_types = self.entity_types
         )
@@ -294,8 +294,8 @@ class ClassSimilarities(plot.PlotBase):
     """
     Following ``data_tools.plots.cluster_hmap``.
     """
-    
-    
+
+
     def __init__(
             self,
             class_types = 'main',
@@ -305,13 +305,13 @@ class ClassSimilarities(plot.PlotBase):
             dendrogram_lwd = .5,
             **kwargs,
         ):
-        
+
         self.entity_types = common.to_set(entity_types)
         self.class_types = common.to_set(class_types)
         self.link_param = link_param or {}
         self.dendro_param = dendro_param or {}
         self.dendrogram_lwd = dendrogram_lwd
-        
+
         param = {
             'maketitle': True,
             'grid_rows': 2,
@@ -331,17 +331,17 @@ class ClassSimilarities(plot.PlotBase):
             'tight_layout': True,
         }
         param.update(kwargs)
-        
+
         plot.PlotBase.__init__(self, **param)
-    
-    
+
+
     def load_data(self):
-        
+
         self.data = omnipath2.data
         self.data.ensure_dataset('intercell')
-        
+
         self.sims = []
-        
+
         main_classes = sorted([
             cls
             for cls in self.data.intercell.classes.keys()
@@ -350,9 +350,9 @@ class ClassSimilarities(plot.PlotBase):
                 self.data.intercell.class_types[cls] == 'main'
             )
         ])
-        
+
         for class0, class1 in itertools.product(main_classes, repeat = 2):
-            
+
             self.sims.append(
                 similarity(
                     self.data.intercell.classes[class0],
@@ -360,7 +360,7 @@ class ClassSimilarities(plot.PlotBase):
                     mode = 'ss'
                 )
             )
-        
+
         self.sims = np.array(self.sims).reshape(
             len(main_classes),
             len(main_classes),
@@ -373,18 +373,18 @@ class ClassSimilarities(plot.PlotBase):
             self.sims,
             **self.link_param
         )
-        
+
         self.labels = np.array([
             self.data.intercell.class_labels[cls] for cls in main_classes
         ])
-    
-    
+
+
     def make_plots(self):
-        
+
         self.make_dendrogram_right()
         self.make_dendrogram_top()
         self.make_heatmap()
-        
+
         self.axes[1][0].get_shared_x_axes().join(
             self.axes[0][0],
             self.axes[1][0],
@@ -393,7 +393,7 @@ class ClassSimilarities(plot.PlotBase):
             self.axes[1][1],
             self.axes[1][0],
         )
-        
+
         self.get_subplot(1, 2)
         self.colorbar = self.fig.colorbar(
             self.heatmap,
@@ -406,10 +406,10 @@ class ClassSimilarities(plot.PlotBase):
         self.fig.subplots_adjust(wspace = 0)
         self.colorbar.outline.set_visible(False)
 
-    
-    
+
+
     def make_heatmap(self):
-        
+
         sims_ordered = self.sims[
             :,
             self.top_dendro['leaves']
@@ -419,47 +419,47 @@ class ClassSimilarities(plot.PlotBase):
         ]
         xlabels_ordered = self.labels[self.top_dendro['leaves']]
         ylabels_ordered = self.labels[self.right_dendro['leaves']]
-        
-        
+
+
         self.get_subplot(1, 0)
-        
+
         self.heatmap = self.ax.imshow(
             sims_ordered,
             interpolation = 'none',
             cmap = self.palette,
             aspect = 'auto',
         )
-        
+
         self.ax.set_xticks(range(len(xlabels_ordered)))
         self.ax.set_yticks(range(len(ylabels_ordered)))
-        
+
         self.ax.set_xticklabels(xlabels_ordered, rotation = 90)
         self.ax.set_yticklabels(ylabels_ordered)
         ylim = self.ax.get_ylim()
         self.ax.set_ylim(ylim[0] + .5, ylim[1] - .5)
         self.ax.tick_params(axis = 'both', which = 'both', length = 0)
         [axis.set_linewidth(0) for axis in self.ax.spines.values()]
-    
-    
+
+
     def make_dendrogram_top(self):
-        
+
         self._make_dendrogram(0, 0)
-    
-    
+
+
     def make_dendrogram_right(self):
-        
+
         self._make_dendrogram(1, 1, orientation = 'right')
-    
-    
+
+
     def _make_dendrogram(self, i, j, orientation = 'top'):
-        
+
         dendro_param = {}
         dendro_param.update(self.dendro_param)
-        
+
         self.get_subplot(i, j)
-        
+
         with mpl.rc_context({'lines.linewidth': self.dendrogram_lwd}):
-            
+
             setattr(
                 self,
                 '%s_dendro' % orientation,
@@ -471,35 +471,35 @@ class ClassSimilarities(plot.PlotBase):
                     **dendro_param
                 )
             )
-        
+
         if orientation == 'right':
-            
+
             self.ax.set_ylim(10 * self.sims.shape[0], 0)
-        
+
         self.ax.set_axis_off()
 
 
 class InterClassChordplot(plot.PlotBase):
-    
-    
+
+
     def __init__(
             self,
             network_dataset = 'omnipath',
             intercell_network_param = None,
             **kwargs
         ):
-        
+
         self.network_dataset = network_dataset
-        
+
         self.intercell_network_param = {
             'only_class_levels': 'main',
             'only_directed': False,
             'only_effect': None,
         }
         self.intercell_network_param.update(intercell_network_param or {})
-        
+
         icnparam = self.intercell_network_param
-        
+
         param = {
             'fname': 'inter_class_chordplot_pdf',
             'fname_param': (
@@ -523,12 +523,12 @@ class InterClassChordplot(plot.PlotBase):
             'height': 8,
         }
         param.update(kwargs)
-        
+
         plot.PlotBase.__init__(self, **param)
-    
-    
+
+
     def load_data(self):
-        
+
         self.data = omnipath2.data
         self.intercell = self.data.get_db('intercell')
         network = self.data.network_df(self.network_dataset)
@@ -549,12 +549,12 @@ class InterClassChordplot(plot.PlotBase):
             ],
             inplace = True,
         )
-        
+
         self.edges.rename('connections')
         self.edges = (
             self.edges.reset_index().rename(columns = {0: 'connections'})
         )
-        
+
         self.adjacency = self.edges.pivot(
             index = 'category_a',
             columns = 'category_b',
@@ -563,15 +563,15 @@ class InterClassChordplot(plot.PlotBase):
         self.segments = self.intercell.counts_by_class()
         self.segments.name = 'size'
         self.labels = self.segments.index
-    
-    
+
+
     def make_plots(self):
-        
+
         colors = colors = [
             self.palette(i)
             for i in np.linspace(0, 1, len(self.segments))
         ]
-        
+
         self.fig = data_tools.plots.chordplot(
             edges = self.edges,
             nodes = self.segments,
@@ -579,13 +579,13 @@ class InterClassChordplot(plot.PlotBase):
             labels = False,
             alpha = .5,
         )
-        
+
         self.ax = self.fig.gca()
         self.ax.set_position([0, 0, 0.75, 1]) # [left, bottom, width, height]
                                               # chordplot
-        
+
         ax2 = self.fig.add_axes([0.70, 0.75, 0.25, 0.25]) # legend
-        
+
         ax2.legend(
             [
                 matplotlib.lines.Line2D(
@@ -601,9 +601,9 @@ class InterClassChordplot(plot.PlotBase):
             loc = 'center',
             ncol = 2,
         )
-        
+
         ax2.set_axis_off()
-        
+
         ax3 = self.fig.add_axes([0.72, 0.5, 0.25, 0.25]) # barplot
         ax4 = self.fig.add_axes([0.72, .05, 0.25, 0.5], sharex = ax3) # heatmap
 
@@ -620,14 +620,14 @@ class InterClassChordplot(plot.PlotBase):
         ax3.set_xticks([])
         #ax.axes.get_yaxis().set_visible(False)
         ax3.locator_params(axis = 'y', nbins = 4)
-        
+
         #ax.tick_params(axis='both', left='off', top='off', right='off', bottom='off', labelleft='off', labeltop='off', labelright='off', labelbottom='off')
-        
+
         #ax3.get_yaxis().set_visible(True)
-        
+
         adj = np.triu(self.adjacency.values).astype(float)
         adj[np.where(adj == 0)] = np.nan
-        
+
         self.heatmap = ax4.imshow(adj, cmap = 'plasma')
         # [left, bottom, width, height]
         ax5 = self.fig.add_axes([0.72, 0.05, 0.25, 0.03]) # colorbar
@@ -639,12 +639,12 @@ class InterClassChordplot(plot.PlotBase):
         )
         colorbar.outline.set_visible(False)
         ax4.set_axis_off()
-    
-    
+
+
     def post_subplot_hook(self):
-        
+
         pass
-    
+
     def finish(self):
-        
+
         self.save()

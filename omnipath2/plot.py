@@ -40,8 +40,8 @@ from matplotlib.backends.backend_pdf import PdfPages
 import matplotlib.backends.backend_cairo
 from matplotlib.backends.backend_cairo import FigureCanvasCairo
 
-from pypath import session_mod
-from pypath import common
+from pypath.share import session as session_mod
+from pypath.share import common
 
 import omnipath2
 from omnipath2 import settings as op2_settings
@@ -57,22 +57,22 @@ def is_opentype_cff_font(filename):
     Font embedded in an OpenType wrapper.  Used by the PostScript and
     PDF backends that can not subset these fonts.
     """
-    
+
     if os.path.splitext(filename)[1].lower() == '.otf':
-        
+
         result = _is_opentype_cff_font_cache.get(filename)
-        
+
         if result is None:
-            
+
             with open(filename, 'rb') as fd:
-                
+
                 tag = fd.read(4)
-            
+
             result = (tag == b'OTTO')
             _is_opentype_cff_font_cache[filename] = result
-        
+
         return result
-    
+
     return False
 
 
@@ -80,7 +80,7 @@ mpl.font_manager.is_opentype_cff_font = is_opentype_cff_font
 
 
 class PlotBase(omnipath2.path.PathBase):
-    
+
     text_elements = (
         'axis_label',
         'ticklabel',
@@ -91,8 +91,8 @@ class PlotBase(omnipath2.path.PathBase):
         'annotation',
     )
     timestamp = time.strftime('%Y%m%d')
-    
-    
+
+
     def __init__(
             self,
             fname = None,
@@ -162,7 +162,7 @@ class PlotBase(omnipath2.path.PathBase):
         the file.
         This class is designed to be very much typography aware. You have
         easy control over the typefaces of all text elements of the figure.
-        
+
         Parameters
         ----------
         fname : str
@@ -280,21 +280,21 @@ class PlotBase(omnipath2.path.PathBase):
             beneficial to first create the object and call individual methods
             afterwards.
         """
-        
+
         if not hasattr(self, '_logger'):
-            
+
             session_mod.Logger.__init__(self, name = log_label or 'op2.plot')
-        
+
         figures_dir = figures_dir or omnipath2.data.figures_dir
-        
+
         for k, v in itertools.chain(iteritems(locals()), iteritems(kwargs)):
-            
+
             # we check this because derived classes might have set
             # already attributes
             if not hasattr(self, k) or getattr(self, k) is None:
-                
+
                 setattr(self, k, v)
-        
+
         omnipath2.path.PathBase.__init__(
             self,
             fname = self.fname,
@@ -304,97 +304,97 @@ class PlotBase(omnipath2.path.PathBase):
             filetype = self.filetype,
             target_dir = self.figures_dir,
         )
-        
+
         if self.do_plot:
-            
+
             self.main()
-    
-    
+
+
     def reload(self):
         """
         Reloads the module and updates the class instance.
         """
-        
+
         modname = self.__class__.__module__
         mod = __import__(modname, fromlist = [modname.split('.')[0]])
         imp.reload(mod)
         new = getattr(mod, self.__class__.__name__)
         setattr(self, '__class__', new)
-    
-    
+
+
     def plot(self):
         """
         The total workflow of this class.
         Calls all methods in the correct order.
         """
-        
+
         self.load_data()
         self.pre_plot()
-        
+
         if self.make_plot_first:
-            
+
             self.make_plot()
             self.set_figure()
-            
+
             for ax in self.fig.axes:
-                
+
                 self.ax = ax
                 self.post_subplot_hook()
-            
+
         else:
-            
+
             self.set_figure()
             self.make_plot()
-        
+
         self.post_plot()
-    
+
     # a synonym
     main = plot
-    
-    
+
+
     def load_data(self):
-        
+
         pass
-    
-    
+
+
     def pre_plot(self):
         """
         Executes all necessary tasks before plotting in the correct order.
         Derived classes should override this if necessary.
         """
-        
+
         omnipath2.path.PathBase.main(self)
-        
+
         self._log('Plotting to `%s`.' % self.path)
-        
+
         self.set_fonts()
         self.set_palette()
         self.set_rc()
         self.set_bar_args()
         self.set_plot_args()
         self.set_figsize()
-    
-    
+
+
     def set_figure(self):
-        
+
         self.init_figure()
         self.set_grid()
-    
-    
+
+
     def make_plot(self):
         """
         Calls the plotting methods in the correct order.
         """
-        
+
         self.make_plots() # this should call post_subplot_hook
                           # after each subplot
-    
-    
+
+
     def post_subplot_hook(self):
         """
         A method executed each time after creating a subplot.
         """
-        
+
         self.set_labels()
         self.set_limits()
         self.set_ylims()
@@ -402,37 +402,37 @@ class PlotBase(omnipath2.path.PathBase):
         self.set_ticklabels()
         self.make_legend()
         self.set_legend_font()
-    
-    
+
+
     def post_plot(self):
         """
         Saves the plot into file, and closes the figure.
         """
-        
+
         self.finish()
-    
-    
+
+
     def set_bar_args(self):
-        
+
         self.bar_args = self.bar_args or {}
-    
-    
+
+
     def set_plot_args(self):
-        
+
         args = {
             'cmap': self.palette,
         }
-        
+
         args.update(self.plot_args or {})
-        
+
         self.plot_args = args
-    
-    
+
+
     def set_fonts(self):
         """
         Sets up everything related to fonts.
         """
-        
+
         # if no font parameters provided by arguments or derived classes
         # we get the defaults from settings
         self.fonts_defaults_from_settings()
@@ -444,41 +444,41 @@ class PlotBase(omnipath2.path.PathBase):
         self.fonts_set_rc()
         # create font properties objects from all parameters dicts
         self.fonts_create_fontproperties()
-    
-    
+
+
     def fonts_init_dicts(self):
         """
         Initializes specific font argument dicts unless they are explicitely
         provided.
         """
-        
+
         font_sizes = copy.deepcopy(op2_settings.get('font_sizes'))
         font_sizes.update(self.font_sizes or {})
-        
+
         for text in self.text_elements:
-            
+
             attr = '%s_font' % text
             this_font = copy.deepcopy(self.font_default)
             specific  = getattr(self, attr) or {}
-            
+
             if 'size' not in specific:
-                
+
                 specific['size'] = self.font_size * (
                     font_sizes[text] if text in font_sizes else 1.0
                 )
-            
+
             this_font.update(specific)
-            
+
             setattr(self, attr, this_font)
-    
-    
+
+
     def fonts_set_rc(self):
         """
         Sets up font related settings in matplotlib rc dict.
         """
-        
+
         self.rc = self.rc or {}
-        
+
         if type(self.lab_size) is not tuple:
             self.lab_size = (self.lab_size, ) * 2
         if 'axes.labelsize' not in self.rc:
@@ -487,21 +487,21 @@ class PlotBase(omnipath2.path.PathBase):
             self.rc['ytick.labelsize'] = self.lab_size[0]
         if 'ytick.labelsize' not in self.rc:
             self.rc['ytick.labelsize'] = self.lab_size[1]
-        
+
         self.rc['font.family'] = self.font_family
         self.rc['font.style'] = self.font_style
         self.rc['font.variant'] = self.font_variant
         self.rc['font.weight'] = self.font_weight
         self.rc['font.stretch'] = self.font_stretch
         self.rc['text.usetex'] = self.usetex
-    
-    
+
+
     def fonts_defaults_from_settings(self):
         """
         Sets default font options from ``settings`` unless they are
         explicitely set already.
         """
-        
+
         self.font_family = self.font_family or op2_settings.get('font_family')
         self.font_style = self.font_style or op2_settings.get('font_style')
         self.font_variant = (
@@ -512,14 +512,14 @@ class PlotBase(omnipath2.path.PathBase):
         )
         self.font_size = self.font_size or op2_settings.get('font_size')
         self.font_weight = self.font_weight or op2_settings.get('font_weight')
-    
-    
+
+
     def fonts_default_dict(self):
         """
         Creates a dict from default font parameters which can be passed later
         as arguments for ``matplotlib.font_manager.FontProperties``.
         """
-        
+
         # dict for default font parameters
         self.font_default = {
             'family': self.font_family,
@@ -529,18 +529,18 @@ class PlotBase(omnipath2.path.PathBase):
             'size': self.font_size,
             'weight': self.font_weight,
         }
-    
-    
+
+
     def fonts_create_fontproperties(self):
         """
         Creates ``matplotlib.font_manager.FontProperties`` objects from
         each font parameter dict.
         """
-        
+
         self.fp = mpl.font_manager.FontProperties(
             **copy.deepcopy(self.font_default)
         )
-        
+
         self.fp_default = (
             mpl.font_manager.FontProperties(
                 family = self.font_family,
@@ -551,19 +551,19 @@ class PlotBase(omnipath2.path.PathBase):
                 size = self.font_size,
             )
         )
-        
-        
+
+
         for elem in self.text_elements:
-            
+
             dictattr = '%s_font' % elem
             fpattr   = 'fp_%s' % elem
-            
+
             fp = mpl.font_manager.FontProperties(
                 **copy.deepcopy(getattr(self, dictattr))
             )
-            
+
             setattr(self, fpattr, fp)
-            
+
             self._log(
                 'Font properties for `%s`: %s' % (
                     elem,
@@ -576,9 +576,9 @@ class PlotBase(omnipath2.path.PathBase):
                     mpl.font_manager.fontManager.findfont(fp),
                 )
             )
-    
+
     def set_palette(self):
-        
+
         self.palette = (
             self.palette
                 if isinstance(self.palette, mpl.colors.Colormap) else
@@ -593,173 +593,173 @@ class PlotBase(omnipath2.path.PathBase):
                 ) else
             colors.get_palette(op2_settings.get('palette'))
         )
-        
+
         mpl.cm.register_cmap(name = 'op2_current', cmap = self.palette)
         rcParams['image.cmap'] = 'op2_current'
-    
-    
+
+
     def set_rc(self):
-        
+
         rcParams.update(self.rc or {})
-    
-    
+
+
     def set_figsize(self):
         """
         Converts width and height to a tuple so can be used for figsize.
         """
-        
+
         if hasattr(self, 'figsize') and self.figsize is not None:
-            
+
             return
-            
+
         self.width = self.width or op2_settings.get('fig_width')
         self.height = self.height or op2_settings.get('fig_height')
         self.figsize = (self.width, self.height)
-    
-    
+
+
     def init_figure(self):
         """
         Creates a figure using the object oriented matplotlib interface.
         """
-        
+
         self._create_figure()
-        
+
         if self.filetype == 'pdf':
-            
+
             self.pdf = mpl.backends.backend_pdf.PdfPages(self.path)
             self.cvs = mpl.backends.backend_pdf.FigureCanvasPdf(self.fig)
-        
+
         elif self.filetype in {'png', 'svg'}:
-            
+
             self.cvs = (
                 mpl.backends.backend_cairo.FigureCanvasCairo(self.fig)
             )
-    
-    
+
+
     def _create_figure(self):
-        
+
         if not (
             hasattr(self, 'fig') and
             isinstance(self.fig, mpl.figure.Figure)
         ):
-            
+
             self.fig = mpl.figure.Figure()
-        
+
         self.fig.set_size_inches(self.figsize)
-    
-    
+
+
     def set_grid(self):
         """
         Sets up a grid according to the number of subplots,
         with proportions according to the number of elements
         in each subplot.
         """
-        
+
         self.grid_hratios = self.grid_hratios or [1.] * self.grid_rows
         self.grid_wratios = self.grid_wratios or [1.] * self.grid_cols
-        
+
         self.gs = mpl.gridspec.GridSpec(
             self.grid_rows,
             self.grid_cols,
             height_ratios = self.grid_hratios,
             width_ratios = self.grid_wratios,
         )
-        
+
         self.axes = [[None] * self.grid_cols for _ in range(self.grid_rows)]
-    
-    
+
+
     def get_subplot(self, i = 0, j = 0, subplot_args = None):
-        
+
         if self.axes[i][j] is None:
-            
+
             subplot_args = subplot_args or {}
-            
+
             self.axes[i][j] = self.fig.add_subplot(
                 self.gs[i, j],
                 **subplot_args
             )
-        
+
         self.ax = self.axes[i][j]
-    
-    
+
+
     def add_subplot(self, ax, i = 0, j = 0):
-        
+
         self.axes[i][j] = ax
-    
-    
+
+
     def iter_subplots(self):
-        
+
         for j in xrange(self.grid_rows):
-            
+
             for i in xrange(self.grid_cols):
-                
+
                 self.get_subplot(i, j)
-                
+
                 yield self.ax
-    
-    
+
+
     def make_plots(self):
         """
         By default this plots nothing here in the base class.
         Derived classes should override.
         """
-        
+
         self.ax = get_subplot(0, 0)
-        
+
         self.ax.plot(x = [], y = [])
-        
+
         self.post_subplot_hook()
-    
-    
+
+
     def set_limits(self):
-        
+
         if self.xlim:
-            
+
             self.ax.set_xlim(self.xlim)
-        
+
         if self.ylim:
-            
+
             self.ax.set_ylim(self.ylim)
-    
-    
+
+
     def set_ylims(self):
-        
+
         if self.uniform_ylim:
-            
+
             maxy = max(
                 ax.get_ylim()[1]
                 for ax in self.axes[0][0:]
             )
-            
+
             _ = [None for _ in ax.set_ylim([0, maxy]) for ax in self.axes[0]]
-    
-    
+
+
     def set_title(self):
         """
         Sets the main title.
         """
-        
+
         if self.maketitle:
-            
+
             self.title_text = self.fig.suptitle(self.title)
             self.title_text.set_fontproperties(self.fp_title)
-            
+
             if self.title_halign:
-                
+
                 self.title_text.set_horizontalalignment(self.title_halign)
-    
-    
+
+
     def set_labels(self):
         """
         Sets properties of axis labels and ticklabels.
         """
-        
+
         if self.xlab is not None:
             self._xlab = self.ax.set_xlabel(self.xlab)
-        
+
         if self.ylab is not None:
             self._ylab = self.ax.set_ylabel(self.ylab)
-        
+
         _ = [
             tick.label.set_fontproperties(self.fp_xticklabel) or (
                 self.xticklab_angle == 0 or self.xticklab_angle == 90
@@ -769,66 +769,66 @@ class PlotBase(omnipath2.path.PathBase):
             )
             for tick in self.ax.xaxis.get_major_ticks()
         ]
-        
+
         _ = [
             tick.label.set_fontproperties(self.fp_ticklabel)
             for tick in self.ax.yaxis.get_major_ticks()
         ]
-        
+
         self.ax.set_ylabel(self.ylab, fontproperties = self.fp_axis_label)
         self.ax.set_xlabel(self.xlab, fontproperties = self.fp_axis_label)
         # self.ax.yaxis.label.set_fontproperties(self)
-    
-    
+
+
     def set_ticklabels(self):
-        
+
         if self.xticklabels is not None:
-            
+
             self.ax.set_xticklabels(
                 ('{0}'.format(x) for x in self.xticklabels),
             )
-        
+
         _ = [
             tl.set_fontproperties(self.fp_ticklabel)
             for tl in self.ax.get_xticklabels()
         ]
-        
+
         if self.xticks is not None:
-            
+
             self.ax.set_xticks(self.xticks)
-    
-    
+
+
     def make_legend(self):
-        
+
         if self.legend:
-            
+
             self.leg = self.ax.legend(
                 loc = self.legend_loc,
                 title = self.legend_title,
             )
-    
-    
+
+
     def set_legend_font(self):
-        
+
         if self.legend:
-            
+
             _ = [
                 t.set_fontproperties(self.fp_legend_label)
                 for t in self.leg.get_texts()
             ]
-            
+
             self.leg.get_title().set_fontproperties(self.fp_legend_title)
-    
-    
+
+
     def finish(self):
         """
         Applies tight layout, draws the figure, writes the file and closes.
         """
-        
+
         if self.tight_layout:
-            
+
             self.fig.tight_layout()
-        
+
         self.fig.subplots_adjust(
             top = (
                 (.86 if '\n' in self.title else .9)
@@ -837,30 +837,30 @@ class PlotBase(omnipath2.path.PathBase):
             )
         )
         self.cvs.draw()
-        
+
         self.save()
-    
-    
+
+
     def save(self):
-        
+
         if self.filetype == 'pdf':
-            
+
             self.cvs.print_figure(self.pdf)
             self.pdf.close()
             self._log('Plot saved to `%s`.' % self.path)
-            
+
         elif self.filetype in {'png', 'svg'}:
-            
+
             if self.path:
-                
+
                 with open(self.path, 'wb') as fp:
-                    
+
                     getattr(self.cvs, 'print_%s' % self.filetype)(fp)
-        
+
         self.ready()
-        
+
         self._log('Plot saved to `%s`.' % self.path)
-        
+
         #self.fig.clf()
 
 
@@ -870,22 +870,22 @@ class _TestPlot(PlotBase):
     a sinus function. Also serves as an example how to build plot classes
     on top of PlotBase.
     """
-    
-    
+
+
     def __init__(self, **kwargs):
-        
+
         defaults = {
             'fname': 'test_figure',
         }
         kwargs.update(defaults)
-        
+
         PlotBase.__init__(self, **kwargs)
-    
-    
+
+
     def make_plots(self):
-        
+
         self.get_subplot(0, 0)
-        
+
         x = np.linspace(0, 10, 1000)
         self.ax.plot(x, np.sin(x))
         self.post_subplot_hook()
