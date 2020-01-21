@@ -32,12 +32,12 @@ import collections
 import itertools
 
 import pypath.resources.network as netres
-from pypath import annot
-from pypath import intercell
-from pypath import complex
-from pypath import ptm
-from pypath import session_mod
-from pypath import network
+from pypath.core import annot
+from pypath.core import intercell
+from pypath.core import complex
+from pypath.core import ptm
+from pypath.share import session as session_mod
+from pypath.core import network
 
 import omnipath2.settings as op2_settings
 
@@ -189,7 +189,7 @@ class Database(session_mod.Logger):
     def ensure_module(self, dataset, reset = True):
 
         mod_str = self.get_param('%s_mod' % dataset)
-        mod = sys.modules['pypath.%s' % mod_str]
+        mod = sys.modules['pypath.core.%s' % mod_str]
 
         if reset and hasattr(mod, 'db'):
 
@@ -246,15 +246,15 @@ class Database(session_mod.Logger):
 
         transcription = copy.deepcopy(netres.transcription)
         dorothea = {}
-        
+
         for level in self.get_param('tfregulons_levels'):
-            
+
             dorothea['dorothea_%s' % level] = copy.deepcopy(
                 transcription['dorothea']
             )
             dorothea['dorothea_%s' % level].name = 'DoRothEA_%s' % level
             dorothea['dorothea_%s' % level].input_args = {'levels': {level}}
-        
+
         del transcription['dorothea']
         transcription.update(dorothea)
 
@@ -348,13 +348,13 @@ class Database(session_mod.Logger):
 
 
     def _network_df(self, obj, **kwargs):
-        
+
         if not isinstance(obj, network.Network):
-            
+
             obj = network.Network.from_igraph(obj)
-        
+
         obj.make_df(**kwargs)
-        
+
         return obj.df
 
 

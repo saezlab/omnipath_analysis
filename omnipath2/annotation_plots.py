@@ -26,9 +26,9 @@ import itertools
 
 import pattern.en
 
-import pypath.common as common
-import pypath.session_mod as session_mod
-import pypath.annot as annot
+from pypath.share import common
+from pypath.share import session as session_mod
+from pypath.core import annot
 
 import omnipath2
 import omnipath2.settings as op2_settings
@@ -37,16 +37,16 @@ import omnipath2.intercell_plots
 
 
 class EntitiesByResource(omnipath2.intercell_plots.CountsScatterBase):
-    
-    
+
+
     def __init__(
             self,
             entity_types = 'protein',
             **kwargs
         ):
-        
+
         self.entity_types = common.to_set(entity_types)
-        
+
         param = {
             'fname': 'annot_entities_by_resource_pdf',
             'fname_param': (
@@ -70,12 +70,12 @@ class EntitiesByResource(omnipath2.intercell_plots.CountsScatterBase):
             'xlim': (1, 1e5),
         }
         param.update(kwargs)
-        
+
         omnipath2.intercell_plots.CountsScatterBase.__init__(self, **param)
-    
-    
+
+
     def load_data(self):
-        
+
         self.annot = omnipath2.data.get_db('annotations')
         self.counts = dict(
             (
@@ -84,21 +84,21 @@ class EntitiesByResource(omnipath2.intercell_plots.CountsScatterBase):
             )
             for resource, annot in self.annot.annots.items()
         )
-        
+
         omnipath2.intercell_plots.CountsScatterBase.load_data(self)
 
 
 class RecordsByResource(omnipath2.intercell_plots.CountsScatterBase):
-    
-    
+
+
     def __init__(
             self,
             entity_types = 'protein',
             **kwargs
         ):
-        
+
         self.entity_types = common.to_set(entity_types)
-        
+
         param = {
             'fname': 'annot_records_by_resource_pdf',
             'fname_param': (
@@ -122,12 +122,12 @@ class RecordsByResource(omnipath2.intercell_plots.CountsScatterBase):
             'xlim': (1, 1e7),
         }
         param.update(kwargs)
-        
+
         omnipath2.intercell_plots.CountsScatterBase.__init__(self, **param)
-    
-    
+
+
     def load_data(self):
-        
+
         self.annot = omnipath2.data.get_db('annotations')
         self.counts = dict(
             (
@@ -136,23 +136,23 @@ class RecordsByResource(omnipath2.intercell_plots.CountsScatterBase):
             )
             for resource, _annot in self.annot.annots.items()
         )
-        
+
         omnipath2.intercell_plots.CountsScatterBase.load_data(self)
 
 
 class AnnotationNetworkOverlap(omnipath2.intercell_plots.CountsScatterBase):
-    
-    
+
+
     def __init__(
             self,
             entity_types = 'protein',
             network_dataset = 'omnipath',
             **kwargs
         ):
-        
+
         self.entity_types = common.to_set(entity_types)
         self.network_dataset = network_dataset
-        
+
         param = {
             'fname': 'annot_entities_in_network_pdf',
             'fname_param': (
@@ -178,12 +178,12 @@ class AnnotationNetworkOverlap(omnipath2.intercell_plots.CountsScatterBase):
             'xlim': (1, 1e5),
         }
         param.update(kwargs)
-        
+
         omnipath2.intercell_plots.CountsScatterBase.__init__(self, **param)
-    
-    
+
+
     def load_data(self):
-        
+
         self.network = omnipath2.data.get_db(self.network_dataset)
         self.annot = omnipath2.data.get_db('annotations')
         self.in_network = {
@@ -202,5 +202,5 @@ class AnnotationNetworkOverlap(omnipath2.intercell_plots.CountsScatterBase):
             )
             for resource, annot in self.annot.annots.items()
         )
-        
+
         omnipath2.intercell_plots.CountsScatterBase.load_data(self)
