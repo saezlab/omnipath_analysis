@@ -118,8 +118,10 @@ get_default_param <- function(){
         fig_cplex_by_comp = 'complexes-by-components',
         fig_network_coverage = 'network-coverage_%s',
         fig_network_size = 'network-size_%s',
-        fig_network_dir = 'network-dir_%s'
-        
+        fig_network_dir = 'network-dir_%s',
+        fig_intercell_deg = 'intercell-degrees_%s_%s_%s_%s',
+        fig_intercell_cov = 'intercell-cov_%s_%s_%s_%s',
+        fig_intercell_size = 'intercell-size_%s_%s_%s_%s'
     )
     
 }

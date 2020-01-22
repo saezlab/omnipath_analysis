@@ -88,7 +88,12 @@ NetworkCoverageDot <- R6::R6Class(
                 ) +
                 ylab('Coverage [%]') +
                 xlab('Resources') +
-                coord_flip()
+                coord_flip() +
+                facet_grid(
+                    category~.,
+                    scales = 'free_y',
+                    space = 'free_y'
+                )
             
             invisible(self)
             
@@ -100,6 +105,13 @@ NetworkCoverageDot <- R6::R6Class(
         
         setup = function(){
             
+            categories <- NetworkSize$new(
+                input_param = self$input_param
+            )$data %>%
+            group_by(resource, category) %>%
+            summarize_all(first) %>%
+            select(resource, category)
+            
             self$data <- NetworkCoverage$new(
                 input_param = self$input_param
             )$data %>%
@@ -110,6 +122,7 @@ NetworkCoverageDot <- R6::R6Class(
                     ordered = TRUE
                 )
             ) %>%
+            left_join(categories, by = c('resource')) %>%
             arrange(resource_type, desc(n_network)) %>%
             mutate(coverage_pct = coverage / n_group * 100) %>%
             mutate(
@@ -118,7 +131,14 @@ NetworkCoverageDot <- R6::R6Class(
                     levels = unique(resource),
                     ordered = TRUE
                 )
-            )
+            ) %>%
+            mutate(category = ifelse(
+                is.na(category),
+                as.character(resource),
+                category
+            ))
+            
+            self$height <- 1 + .2 * length(unique(self$data$resource))
             
             invisible(self)
             

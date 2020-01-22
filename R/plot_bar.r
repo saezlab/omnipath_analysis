@@ -39,7 +39,9 @@ SimpleBar <- R6::R6Class(
             name,
             ylab,
             title,
+            input_param,
             order_from_heatmap = TRUE,
+            only_main_classes = TRUE,
             vertical = TRUE
         ){
             
@@ -48,12 +50,26 @@ SimpleBar <- R6::R6Class(
             self$ylab <- ylab
             self$title <- title
             self$vertical <- vertical
+            self$input_param <- input_param
+            self$only_main_classes <- only_main_classes
+            
+            size <- `if`(only_main_classes, 2.7, 4)
             
             super$initialize(
                 data = NULL,
-                name = name,
-                width = `if`(vertical, 2.4, 4),
-                height = `if`(vertical, 4, 2.7),
+                name = UQ(enquo(name)),
+                fname_param = c(
+                    self$input_param,
+                    list(
+                        `if`(
+                            self$only_main_classes,
+                            'all-categories',
+                            'main-categories'
+                        )
+                    )
+                ),
+                width = `if`(vertical, 2.4, size),
+                height = `if`(vertical, size, 2.7),
                 theme_args = `if`(vertical, NULL, x_vertical_labels())
             )
             
@@ -89,8 +105,14 @@ SimpleBar <- R6::R6Class(
             
             self$data <- `if`(
                 self$order_from_heatmap,
-                ConnectionEnrichment$new(ordering_only = TRUE)$data,
-                IntercellCategoriesPairwise$new()$data
+                ConnectionEnrichment$new(
+                    ordering_only = TRUE,
+                    input_param = self$input_param,
+                    only_main_classes = self$only_main_classes
+                )$data,
+                IntercellCategoriesPairwise$new(
+                    input_param = self$input_param
+                )$data
             ) %>%
             group_by(cls_label0) %>%
             summarize_all(first) %>%
@@ -224,9 +246,9 @@ StackedGroupedBarDot <- R6::R6Class(
 )
 
 
-SizesBar <- R6::R6Class(
+IntercellSizesBar <- R6::R6Class(
     
-    'SizesBar',
+    'IntercellSizesBar',
     
     inherit = SimpleBar,
     
@@ -234,18 +256,24 @@ SizesBar <- R6::R6Class(
     
     public = list(
         
-        initialize = function(){
+        initialize = function(
+            input_param,
+            only_main_classes = TRUE,
+            ...
+        ){
             
             super$initialize(
                 yvar = size_log10,
-                name = 'intercell-sizes',
+                name = fig_intercell_size,
                 ylab = 'Number of proteins',
                 title = paste0(
                     'Number of proteins\n',
                     'in inter-cellular communication roles'
                 ),
                 order_from_heatmap = TRUE,
-                vertical = TRUE
+                vertical = TRUE,
+                input_param = input_param,
+                only_main_classes = only_main_classes
             )
             
             invisible(self)
@@ -273,9 +301,9 @@ SizesBar <- R6::R6Class(
 )
 
 
-CoverageBar <- R6::R6Class(
+IntercellCoverageBar <- R6::R6Class(
     
-    'CoverageBar',
+    'IntercellCoverageBar',
     
     inherit = SimpleBar,
     
@@ -283,18 +311,24 @@ CoverageBar <- R6::R6Class(
     
     public = list(
         
-        initialize = function(){
+        initialize = function(
+            input_param,
+            only_main_classes = TRUE,
+            ...
+        ){
             
             super$initialize(
                 yvar = omnipath_coverage,
-                name = 'intercell-cov',
+                name = fig_intercell_cov,
                 ylab = 'Coverage',
                 title = paste0(
                     'Coverage by OmniPath:\n',
                     'inter-cellular communication roles'
                 ),
                 order_from_heatmap = TRUE,
-                vertical = FALSE
+                vertical = FALSE,
+                input_param = input_param,
+                only_main_classes = only_main_classes
             )
             
             invisible(self)
@@ -311,7 +345,7 @@ CoverageBar <- R6::R6Class(
             super$setup()
             
             self$data <- self$data %>%
-                mutate(omnipath_coverage = in_omnipath_cls0 / size_cls0 * 100)
+                mutate(omnipath_coverage = in_network_cls0 / size_cls0 * 100)
             
             invisible(self)
             
@@ -322,9 +356,9 @@ CoverageBar <- R6::R6Class(
 )
 
 
-DegreeBar <- R6::R6Class(
+IntercellDegreeBar <- R6::R6Class(
     
-    'DegreeBar',
+    'IntercellDegreeBar',
     
     inherit = SimpleBar,
     
@@ -332,18 +366,24 @@ DegreeBar <- R6::R6Class(
     
     public = list(
         
-        initialize = function(){
+        initialize = function(
+            input_param,
+            only_main_classes = TRUE,
+            ...
+        ){
             
             super$initialize(
                 yvar = mean_degree,
-                name = 'intercell-deg',
+                name = fig_intercell_deg,
                 ylab = 'Degree',
                 title = paste0(
                     'Mean degree in OmniPath:\n',
                     'inter-cellular communication roles'
                 ),
                 order_from_heatmap = TRUE,
-                vertical = TRUE
+                vertical = TRUE,
+                input_param = input_param,
+                only_main_classes = only_main_classes
             )
             
             invisible(self)

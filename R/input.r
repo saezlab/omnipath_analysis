@@ -95,9 +95,15 @@ IntercellCategoriesPairwise <- R6::R6Class(
     
     public = list(
         
-        initialize = function(input_param, entity_type = NULL, ...){
+        initialize = function(
+            input_param,
+            entity_type = NULL,
+            only_main_classes = FALSE,
+            ...
+        ){
             
             self$entity_type <- entity_type
+            self$only_main_classes <- only_main_classes
             
             do.call(
                 super$initialize,
@@ -119,6 +125,8 @@ IntercellCategoriesPairwise <- R6::R6Class(
         #' the size of the first category.
         preprocess = function(...){
             
+            main_classes <- omnipath2_settings$get(intercell_main_classes)
+            
             self$data <- self$data %>%
                 {`if`(
                     is.null(self$entity_type) || !('entity' %in% names(.)),
@@ -138,7 +146,16 @@ IntercellCategoriesPairwise <- R6::R6Class(
                         levels = unique(name_cls0),
                         ordered = TRUE
                     )
-                )
+                ) %>%
+                {`if`(
+                    self$only_main_classes,
+                    filter(
+                        .,
+                        name_cls0 %in% main_classes &
+                        name_cls1 %in% main_classes
+                    ),
+                    .
+                )}
             
         }
         

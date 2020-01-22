@@ -23,11 +23,20 @@ con_enrich_input_param <- ProductParam$new(
     list('proteins'),
     list(
         'all-class-levels',
-        'above_main-main-misc-small_main'
+        'above_main-main-misc-small_main',
+        'main-classes'
     )
 )
 
 res_by_entity_input_param <- Param$new('omnipath', 'curated')
+
+network_param <- Param$new(
+    'omnipath',
+    'curated',
+    'tf_target',
+    'mirna_mrna',
+    'tf_mirna'
+)
 
 
 omnipath2_workflow <<- list(
@@ -168,25 +177,24 @@ omnipath2_workflow <<- list(
     network_sizes = Task$new(
         method = NetworkSizeDot,
         name = 'Network sizes',
-        input_param = Param$new(
-            'omnipath',
-            'curated',
-            'tf_target',
-            'mirna_mrna',
-            'tf_mirna'
-        )
+        input_param = network_param
     ),
     
     network_directions = Task$new(
         method = NetworkDirectionsDot,
         name = 'Network directions',
-        input_param = Param$new(
-            'omnipath',
-            'curated',
-            'tf_target',
-            'mirna_mrna',
-            'tf_mirna'
-        )
+        input_param = network_param
+    ),
+    
+    network_coverage = Task$new(
+        method = NetworkCoverageDot,
+        name = 'Network coverages',
+        input_param = network_param
+    ),
+    
+    network_coverage = Task$new(
+        method = IntercellClassSizesDots,
+        name = 'Intercell category sizes'
     )
     
 )

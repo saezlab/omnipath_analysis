@@ -124,8 +124,8 @@ IntercellClassSizesDots <- R6::R6Class(
             super$initialize(
                 data = self$data,
                 name = fig_cat_sizes_dots,
-                width = 4,
-                height = 5.5,
+                width = 3.5,
+                height = 4.5,
                 theme_args = x_vertical_labels()
             )
             
