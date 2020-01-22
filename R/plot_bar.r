@@ -21,6 +21,7 @@ require(ggplot2)
 require(ggnewscale)
 require(dplyr)
 require(R6)
+require(scales)
 
 
 SimpleBar <- R6::R6Class(
@@ -119,11 +120,14 @@ StackedGroupedBarDot <- R6::R6Class(
             fillvar,
             xlab,
             ylab,
+            alphavar = NULL,
             log_y = FALSE,
             bar = TRUE,
             color_values = NULL,
             color_labels = NULL,
-            legend_title = NULL
+            legend_title = NULL,
+            shape = 16,
+            scale_alpha_param = NULL
         ){
             
             self$obj <- obj
@@ -131,6 +135,7 @@ StackedGroupedBarDot <- R6::R6Class(
             self$xvar <- enquo(xvar)
             self$yvar <- enquo(yvar)
             self$fillvar <- enquo(fillvar)
+            self$alphavar <- enquo(alphavar)
             self$xlab <- xlab
             self$ylab <- ylab
             self$log_y <- log_y
@@ -138,6 +143,8 @@ StackedGroupedBarDot <- R6::R6Class(
             self$color_values <- color_values
             self$color_labels <- color_labels
             self$legend_title <- legend_title
+            self$shape <- shape
+            self$scale_alpha_param <- scale_alpha_param
             
             self$main()
             
@@ -161,7 +168,14 @@ StackedGroupedBarDot <- R6::R6Class(
                             aes(fill = !!self$fillvar),
                             position = `if`(self$log_y, 'dodge', 'stack')
                         ),
-                        geom_point(aes(color = !!self$fillvar), size = 5)
+                        geom_point(
+                            aes(
+                                color = !!self$fillvar,
+                                alpha = !!self$alphavar
+                            ),
+                            size = 5,
+                            shape = self$shape
+                        )
                     )}
                 ) %>%
                 `+`(
@@ -177,8 +191,18 @@ StackedGroupedBarDot <- R6::R6Class(
                 ) %>%
                 `+`(
                     {`if`(
+                        quo_text(self$alphavar) == 'NULL',
+                        NULL,
+                        do.call(
+                            scale_alpha_manual,
+                            self$scale_alpha_param
+                        )
+                    )}
+                ) %>%
+                `+`(
+                    {`if`(
                         self$log_y,
-                        scale_y_log10(),
+                        scale_y_log10(labels = comma),
                         NULL
                     )}
                 ) %>%
