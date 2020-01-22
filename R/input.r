@@ -388,3 +388,105 @@ NetworkCoverage <- R6::R6Class(
     )
     
 )
+
+
+NetworkSize <- R6::R6Class(
+    
+    'NetworkSize',
+    
+    inherit = Reader,
+    
+    lock_objects = FALSE,
+    
+    public = list(
+        
+        initialize = function(input_param, ...){
+            
+            vars <- c(
+                'entities',
+                'interactions_0',
+                'interactions_non_directed_0',
+                'interactions_directed',
+                'interactions_positive',
+                'interactions_negative'
+            )
+            
+            do.call(
+                super$initialize,
+                c(
+                    list(
+                        name = quote(input_network_size_tsv)
+                    ),
+                    input_param
+                )
+            )
+            
+            resources <- rev(self$data %>% pull(resource))
+            
+            categories <- NULL
+            category <- NA
+            
+            for(res in resources){
+                
+                if(endsWith(res, 'total')){
+                    category <- sub(' total', '', res)
+                }
+                
+                categories <- c(categories, category)
+                
+            }
+            
+            self$data <- self$data %>%
+                add_column(category = rev(categories))
+            
+            data <- NULL
+            
+            for(var in vars){
+                
+                this_data <- self$data %>%
+                    select(
+                        resource = resource,
+                        category = category,
+                        n_total = sprintf(
+                                '%s_n',
+                                var
+                        ),
+                        n_shared = sprintf(
+                                '%s_shared_within_database_category_n',
+                                var
+                        )
+                    ) %>%
+                    mutate(var = var)
+                
+                this_data <- bind_rows(
+                    this_data %>%
+                        select(
+                            resource,
+                            category,
+                            n = n_total,
+                            var
+                        ) %>%
+                        mutate(shared = FALSE),
+                    this_data %>%
+                        select(
+                            resource,
+                            category,
+                            n = n_shared,
+                            var
+                        ) %>%
+                        mutate(shared = TRUE)
+                )
+                
+                data <- bind_rows(data, this_data)
+                
+            }
+            
+            self$data <- data
+            
+            invisible(self)
+            
+        }
+        
+    )
+    
+)
