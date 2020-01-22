@@ -257,6 +257,16 @@ workflow = collections.OrderedDict(
             method = r_preprocess.EnzymeSubstrate,
             name = 'Enzyme-substrate interactions table',
         ),
+        Task(
+            method = r_preprocess.NetworkCoverage,
+            name = 'Network coverage on groups of proteins',
+            param = ProductParam(
+                network_dataset = (
+                    'omnipath',
+                    'curated',
+                ),
+            ),
+        ),
     ),
 
     complexes_plots = (

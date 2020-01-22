@@ -83,6 +83,7 @@ _defaults = {
     'complexes_by_resource_tsv': 'complexes_by_resource_tsv', #
     'connections_tsv': 'connections_%s_%s', #
     'category_overlaps_tsv': 'category_overlaps', #
+    'network_coverage_tsv': 'network_coverage_%s', #
 
     # tfregulons levels
     'tfregulons_levels': {'A', 'B', 'C', 'D'},

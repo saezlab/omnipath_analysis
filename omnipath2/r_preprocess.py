@@ -898,3 +898,92 @@ class InterClassOverlaps(omnipath2.table.TableBase):
                 len(self.intercell.classes[c0] | self.intercell.classes[c1]),
                 len(self.intercell.classes[c0] & self.intercell.classes[c1]),
             ])
+
+
+class NetworkCoverage(omnipath2.table.TableBase):
+    
+    
+    groups = (
+        ('kinase.com', 'Kinases'),
+        ('TFcensus', 'TFs'),
+        ('CancerGeneCensus', 'Cancer Drivers (COSMIC)'),
+        ('IntOGen', 'Cancer Drivers (IntOGen)'),
+        ('Phosphatome', 'Phosphatases'),
+        ('HPMR', 'Receptors'),
+    )
+    
+    
+    def __init__(self, network_dataset = 'omnipath', **kwargs):
+        
+        param = {
+            'fname': 'network_coverage_tsv',
+            'fname_param': (network_dataset,),
+            'header': [
+                'resource',
+                'resource_type',
+                'group',
+                'n_network',
+                'n_group',
+                'coverage',
+            ],
+        }
+        param.update(kwargs)
+        
+        self.network_dataset = network_dataset
+        
+        omnipath2.table.TableBase.__init__(self, **param)
+    
+    
+    def load(self):
+        
+        self.annot = omnipath2.data.get_db('annotations')
+        self.network = omnipath2.data.get_db(self.network_dataset)
+        
+        data = []
+        
+        resources = self.network.get_resource_names()
+        
+        proteins = dict(
+            (
+                (resource, 'resource'),
+                self.network.get_protein_identifiers(resources = resource)
+            )
+            for resource in resources
+        )
+        proteins[('OmniPath', 'total')] = (
+            self.network.get_protein_identifiers()
+        )
+        proteins.update(
+            dict(
+                (
+                    (data_model, 'data_model'),
+                    self.network.get_protein_identifiers(
+                        data_model = data_model
+                    )
+                )
+                for data_model in self.network.get_data_models()
+            )
+        )
+        
+        for annot, label in self.groups:
+            
+            this_group = set(
+                e
+                for e in self.annot.annots[annot].annot.keys()
+                if entity.Entity._is_protein(e)
+            )
+            
+            for res, in_network in proteins.items():
+                
+                data.append([
+                    (
+                        res[0].capitalize().replace('_', ' ')
+                            if res[1] == 'data_model' else
+                        res[0]
+                    ),
+                    res[1],
+                    label,
+                    len(in_network),
+                    len(this_group),
+                    len(in_network & this_group),
+                ])
