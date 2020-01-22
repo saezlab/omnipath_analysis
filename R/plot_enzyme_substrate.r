@@ -221,31 +221,37 @@ EnzymeSubstrateShared <- R6::R6Class(
         
         initialize = function(){
             
-            super$initialize(name = fig_enzyme_substrate_shared)
+            super$initialize(
+                name = fig_enzyme_substrate_shared,
+                width = 5,
+                height = 6
+            )
             
         },
         
         
         plot = function(){
             
-            self$plt <- ggplot(
-                    self$enz_sub_by_resource,
-                    aes(x = sources, y = n_shared)
-                ) +
-                geom_col(aes(fill = shared)) +
-                scale_fill_manual(
-                    values = c(
-                        `TRUE` = '#4268B3',
-                        `FALSE` = '#B3C5E9'
-                    ),
-                    labels = c(
-                        `TRUE` = 'Shared',
-                        `FALSE` = 'Unique'
-                    ),
-                    name = 'Enzyme-substrate\ninteractions'
-                ) +
-                xlab('Resources') +
-                ylab('Enzyme-substrate\ninteractions')
+            StackedGroupedBarDot$new(
+                obj = self,
+                data = self$enz_sub_by_resource,
+                xvar = sources,
+                yvar = n,
+                fillvar = !shared,
+                xlab = 'Resources',
+                ylab = 'Enzyme-substrate\ninteractions',
+                log_y = TRUE,
+                bar = FALSE,
+                color_values = `names<-`(
+                    omnipath2_settings$get(two_shades_1),
+                    c(TRUE, FALSE)
+                ),
+                color_labels = c(
+                    `FALSE` = 'Shared',
+                    `TRUE` = 'Total'
+                ),
+                legend_title = 'Enzyme-substrate\ninteractions'
+            )
             
         }
         
@@ -261,7 +267,9 @@ EnzymeSubstrateShared <- R6::R6Class(
             self$enz_sub_by_resource <- self$enz_sub_by_resource %>%
                 group_by(sources, shared) %>%
                 summarize_all(first) %>%
-                ungroup()
+                ungroup() %>%
+                mutate(n = ifelse(shared, n_shared, n_total)) %>%
+                arrange(desc(shared))
             
         }
         
