@@ -133,8 +133,8 @@ ComplexesByResource <- R6::R6Class(
                 obj = self,
                 data = self$complexes,
                 xvar = resource,
-                yvar = n_complexes,
-                fillvar = shared,
+                yvar = `if`(self$bar, n_complexes, n_shared_total),
+                fillvar = `if`(self$bar, shared, !shared),
                 xlab = 'Resource',
                 ylab = sprintf(
                     'Complexes%s',
@@ -147,8 +147,8 @@ ComplexesByResource <- R6::R6Class(
                     c(TRUE, FALSE)
                 ),
                 color_labels = c(
-                    `TRUE` = 'Shared',
-                    `FALSE` = 'Unique'
+                    `TRUE` = `if`(self$bar, 'Shared', 'Total'),
+                    `FALSE` = `if`(self$bar, 'Unique', 'Shared')
                 ),
                 legend_title = 'Number of\ncomplexes'
             )
@@ -177,7 +177,7 @@ ComplexesByResource <- R6::R6Class(
                 mutate(resource = as.character(resource)) %>%
                 full_join(
                     expand.grid(
-                        resource =unique(self$complexes$resource),
+                        resource = unique(self$complexes$resource),
                         shared = c(TRUE, FALSE)
                     ) %>%
                     mutate(resource = as.character(resource)),
@@ -215,7 +215,16 @@ ComplexesByResource <- R6::R6Class(
                     levels = unique(resource),
                     ordered = TRUE
                 )
-            )
+            ) %>%
+            group_by(resource) %>%
+            mutate(
+                n_total = sum(n_complexes)
+            ) %>%
+            ungroup() %>%
+            mutate(
+                n_shared_total = ifelse(shared, n_complexes, n_total)
+            ) %>%
+            arrange(desc(shared))
             
             invisible(self)
             
