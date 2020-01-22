@@ -296,7 +296,7 @@ EnzymeSubstrateSelf <- R6::R6Class(
             super$initialize(
                 name = fig_enzyme_substrate_self,
                 fname_param = list(
-                    `if`(self$log_y, 'dodge', 'stack'),
+                    `if`(self$log_y, 'log', 'stack'),
                     `if`(self$bar, 'bar', 'dot')
                 ),
                 complexes = TRUE,
@@ -314,6 +314,9 @@ EnzymeSubstrateSelf <- R6::R6Class(
         
         plot = function(){
             
+            pal <- omnipath2_settings$get(three_shades_1)
+            pal <- `if`(self$log_y, rev(pal), pal)
+            
             StackedGroupedBarDot$new(
                 obj = self,
                 data = self$enz_sub_by_resource,
@@ -328,7 +331,7 @@ EnzymeSubstrateSelf <- R6::R6Class(
                 log_y = self$log_y,
                 bar = self$bar,
                 color_values = `names<-`(
-                    omnipath2_settings$get(three_shades_1),
+                    pal,
                     c('self', 'in_complex', 'between_entities')
                 ),
                 color_labels = c(
@@ -355,7 +358,15 @@ EnzymeSubstrateSelf <- R6::R6Class(
             self$enz_sub_by_resource <- self$enz_sub_by_resource %>%
                 group_by(sources, category) %>%
                 summarize_all(first) %>%
-                ungroup()
+                ungroup() %>%
+                mutate(
+                    category = factor(
+                        category,
+                        levels = c('self', 'in_complex', 'between_entities'),
+                        ordered = TRUE
+                    )
+                ) %>%
+                arrange(category)
             
         }
         
