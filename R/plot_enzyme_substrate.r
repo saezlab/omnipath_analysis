@@ -414,10 +414,11 @@ EnzymeSubstrateModtype <- R6::R6Class(
                     aes(x = sources, y = n_modtype)
                 ) +
                 geom_col(aes(fill = modification)) +
-                scale_fill_discrete(
+                scale_fill_manual(
                     guide = guide_legend(
                         title = 'Modification type'
-                    )
+                    ),
+                    values = omnipath2_settings$get(palette2)
                 ) +
                 xlab('Resources') +
                 ylab('Enzyme-substrate\ninteractions')
@@ -486,10 +487,11 @@ EnzymeSubstrateModtypeDot <- R6::R6Class(
                     aes(y = sources, x = n_modtype, color = modification)
                 ) +
                 geom_point(size = 5, alpha = .7) +
-                scale_color_discrete(
+                scale_color_manual(
                     guide = guide_legend(
                         title = 'Modification type'
-                    )
+                    ),
+                    values = omnipath2_settings$get(palette2)
                 ) +
                 scale_x_log10() +
                 ylab('Resources') +

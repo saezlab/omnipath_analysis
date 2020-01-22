@@ -46,7 +46,7 @@ get_default_param <- function(){
         input_enzyme_substrate_tsv = 'enzyme_substrate',
         input_resource_by_entity_tsv = 'resources_by_entity_%s',
         input_complexes_by_resource_tsv = 'complexes_by_resource_tsv',
-        input_network_coverages_tsv = 'network_coverages_%s',
+        input_network_coverages_tsv = 'network_coverage_%s',
         graph_plot_defaults = list(
             vertex.frame.color = NA,
             vertex.color = '#FDC70F',
@@ -58,6 +58,18 @@ get_default_param <- function(){
         two_shades_1 = c('#4268B3', '#B3C5E9'),
         three_shades_1 = c('#4268B3', '#6F8DCF', '#B3C5E9'),
         palette = c('#176FC1', '#00AAB0'),
+        palette2 = c(
+            '#176FC1',
+            '#A6D81C',
+            '#F89D0E',
+            '#ED0772',
+            '#0A6167',
+            '#00AAB0',
+            '#D22027',
+            '#9E1639',
+            '#7264B9',
+            '#5B205F'
+        ),
         
         console_settings = list(
             width = 270,

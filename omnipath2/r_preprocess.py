@@ -939,7 +939,7 @@ class NetworkCoverage(omnipath2.table.TableBase):
         self.annot = omnipath2.data.get_db('annotations')
         self.network = omnipath2.data.get_db(self.network_dataset)
         
-        data = []
+        self.data = []
         
         resources = self.network.get_resource_names()
         
@@ -975,7 +975,7 @@ class NetworkCoverage(omnipath2.table.TableBase):
             
             for res, in_network in proteins.items():
                 
-                data.append([
+                self.data.append([
                     (
                         res[0].capitalize().replace('_', ' ')
                             if res[1] == 'data_model' else
