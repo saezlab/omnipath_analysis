@@ -357,3 +357,34 @@ Annotations <- R6::R6Class(
     )
     
 )
+
+
+NetworkCoverage <- R6::R6Class(
+    
+    'NetworkCoverage',
+    
+    inherit = Reader,
+    
+    lock_objects = FALSE,
+    
+    public = list(
+        
+        initialize = function(input_param, ...){
+            
+            do.call(
+                super$initialize,
+                c(
+                    list(
+                        name = quote(input_network_coverages_tsv)
+                    ),
+                    input_param
+                )
+            )
+            
+            invisible(self)
+            
+        }
+        
+    )
+    
+)

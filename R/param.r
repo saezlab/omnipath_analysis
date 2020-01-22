@@ -46,6 +46,7 @@ get_default_param <- function(){
         input_enzyme_substrate_tsv = 'enzyme_substrate',
         input_resource_by_entity_tsv = 'resources_by_entity_%s',
         input_complexes_by_resource_tsv = 'complexes_by_resource_tsv',
+        input_network_coverages_tsv = 'network_coverages_%s',
         graph_plot_defaults = list(
             vertex.frame.color = NA,
             vertex.color = '#FDC70F',
@@ -100,7 +101,8 @@ get_default_param <- function(){
         fig_cplex_n_comp = 'complexes-numof-components',
         fig_refs_by_cplex = 'references-by-complex',
         fig_complexes_by_ref = 'complexes-by-ref',
-        fig_cplex_by_comp = 'complexes-by-components'
+        fig_cplex_by_comp = 'complexes-by-components',
+        fig_network_coverage = 'network-coverage_%s'
         
     )
     
