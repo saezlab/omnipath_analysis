@@ -163,6 +163,30 @@ omnipath2_workflow <<- list(
     complexes_by_components = Task$new(
         method = ComplexesByComponents,
         name = NULL
+    ),
+    
+    network_sizes = Task$new(
+        method = NetworkSizeDot,
+        name = 'Network sizes',
+        input_param = Param$new(
+            'omnipath',
+            'curated',
+            'tf_target',
+            'mirna_mrna',
+            'tf_mirna'
+        )
+    ),
+    
+    network_directions = Task$new(
+        method = NetworkDirectionsDot,
+        name = 'Network directions',
+        input_param = Param$new(
+            'omnipath',
+            'curated',
+            'tf_target',
+            'mirna_mrna',
+            'tf_mirna'
+        )
     )
     
 )

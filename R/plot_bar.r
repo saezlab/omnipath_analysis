@@ -127,7 +127,9 @@ StackedGroupedBarDot <- R6::R6Class(
             color_labels = NULL,
             legend_title = NULL,
             shape = 16,
-            scale_alpha_param = NULL
+            size = 5,
+            scale_alpha_param = NULL,
+            position = 'identity'
         ){
             
             self$obj <- obj
@@ -144,7 +146,9 @@ StackedGroupedBarDot <- R6::R6Class(
             self$color_labels <- color_labels
             self$legend_title <- legend_title
             self$shape <- shape
+            self$size <- size
             self$scale_alpha_param <- scale_alpha_param
+            self$position <- position
             
             self$main()
             
@@ -173,8 +177,9 @@ StackedGroupedBarDot <- R6::R6Class(
                                 color = !!self$fillvar,
                                 alpha = !!self$alphavar
                             ),
-                            size = 5,
-                            shape = self$shape
+                            size = self$size,
+                            shape = self$shape,
+                            position = self$position
                         )
                     )}
                 ) %>%
