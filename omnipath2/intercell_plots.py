@@ -515,7 +515,7 @@ class InterClassChordplot(plot.PlotBase):
                     'any_effect'
                 ),
             ),
-            'palette': mpl.cm.get_cmap('gist_rainbow'),
+            'palette': omnipath2.colors.get_palette('rwth_selected.gpl'),
             'make_plot_first': True,
             'legend': False,
             'legend_font_size': 8,
@@ -567,7 +567,7 @@ class InterClassChordplot(plot.PlotBase):
 
     def make_plots(self):
 
-        colors = colors = [
+        colors = [
             self.palette(i)
             for i in np.linspace(0, 1, len(self.segments))
         ]
