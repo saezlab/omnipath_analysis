@@ -23,17 +23,35 @@
 #
 
 import os
+import importlib as imp
 import copy
 
 from pypath.share import settings as pp_settings
 from pypath.share import session as session_mod
 from omnipath2 import settings as settings_mod
 from omnipath2 import database as _database_mod
-from omnipath2 import colors as _colors_mod
-from omnipath2 import files as _files_mod
+
+if '_colors_mod' not in globals():
+
+    from omnipath2 import colors as _colors_mod
+
+else:
+
+    imp.reload(_colors_mod)
+
+if '_files_mod' not in globals():
+
+    from omnipath2 import files as _files_mod
+
+else:
+
+    imp.reload(_files_mod)
 
 
-_logger = session_mod.Logger(name = 'op2.init')
+if '_logger' not in globals():
+
+    _logger = session_mod.Logger(name = 'op2.init')
+
 _log = _logger._log
 
 

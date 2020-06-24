@@ -35,7 +35,7 @@ import pypath.resources.network as netres
 from pypath.core import annot
 from pypath.core import intercell
 from pypath.core import complex
-from pypath.core import ptm
+from pypath.core import enz_sub
 from pypath.share import session as session_mod
 from pypath.core import network
 
@@ -122,13 +122,11 @@ class Database(session_mod.Logger):
 
         if self.get_param('timestamp_dirs'):
 
-            self.tables_dir = os.path.join(
-                self.get_param('tables_dir'),
-                self.timestamp
+            self.tables_dir = self._timestamp_dir(
+                self.get_param('tables_dir')
             )
-            self.figures_dir = os.path.join(
-                self.get_param('figures_dir'),
-                self.timestamp,
+            self.figures_dir = self._timestamp_dir(
+                self.get_param('figures_dir')
             )
             op2_settings.setup(
                 tables_dir = self.tables_dir,
@@ -140,6 +138,15 @@ class Database(session_mod.Logger):
             path = self.get_param('%s_dir' % _dir)
             os.makedirs(path, exist_ok = True)
             self._log('%s directory: `%s`.' % (_dir.capitalize(), path))
+
+
+    def _timestamp_dir(self, path):
+
+        if os.path.split(path)[-1] != self.timestamp:
+
+            path = os.path.join(path, self.timestamp)
+
+        return path
 
 
     def pickle_path(self, dataset):

@@ -66,9 +66,9 @@ class InterClassConnections(omnipath2.table.TableBase):
                 self.network_dataset,
                 self.mode,
             ),
-            'class_levels': {
-                'main',
-                'small_main',
+            'class_args': {
+                'scope': 'generic',
+                'source': 'composite',
             },
             'header': [
                 'cat0',
@@ -107,39 +107,33 @@ class InterClassConnections(omnipath2.table.TableBase):
 
         iterator = (
             itertools.combinations_with_replacement(
-                self.intercell.class_names,
+                self.intercell.iter_classes(**self.class_args),
                 2,
             )
                 if self.mode == 'undirected' else
             itertools.product(
-                self.intercell.class_names,
-                self.intercell.class_names,
+                self.intercell.iter_classes(**self.class_args),
+                self.intercell.iter_classes(**self.class_args),
             )
         )
 
         for c0, c1 in iterator:
 
-            if (
-                self.intercell.class_types[c0] not in self.class_levels or
-                self.intercell.class_types[c1] not in self.class_levels
-            ):
-                continue
-
             numof_connections = getattr(
                 self.intercell,
                 method,
             )(
-                source_classes = c0,
-                target_classes = c1,
+                annot_args_source = c0.args,
+                annot_args_target = c1.args,
             )
 
             self.data.append([
-                c0,
-                c1,
-                self.intercell.class_labels[c0],
-                self.intercell.class_labels[c1],
-                len(self.intercell.classes[c0]),
-                len(self.intercell.classes[c1]),
+                c0.name,
+                c1.name,
+                c0.name_label,
+                c0.name_label,
+                c0.n_proteins,
+                c1.n_proteins,
                 numof_connections,
             ])
 
@@ -187,9 +181,14 @@ class IntercellCoverages(omnipath2.table.TableBase):
                 self.network_dataset,
             ),
             'header': [
-                'typ',
-                'cls',
-                'cls_label',
+                'cat_label',
+                'category',
+                'parent',
+                'aspect',
+                'scope',
+                'source',
+                'transmitter',
+                'receiver',
                 'resource',
                 'entity_type',
                 'total',
@@ -214,35 +213,27 @@ class IntercellCoverages(omnipath2.table.TableBase):
 
         self.data = []
 
-        for cls in self.intercell.classes.keys():
+        for cls in self.intercell.classes.values():
 
             for entity_type in ('protein', 'complex'):
 
-                members = self.intercell.get_class(
-                    cls,
-                    entity_type = entity_type,
-                )
+                members = cls.filter_entity_type(entity_type = entity_type)
                 total = len(members)
                 in_network = len(
                     members &
                     network_entities[entity_type]
                 )
-                typ = (
-                    self.intercell.class_types[cls]
-                        if cls in self.intercell.class_types else
-                    'sub'
-                )
-                res = (
-                    self.intercell.resource_labels[cls]
-                        if cls in self.intercell.resource_labels else
-                    ''
-                )
 
                 self.data.append([
-                    typ,
-                    cls,
-                    self.intercell.class_labels[cls],
-                    res,
+                    cls.name_label,
+                    cls.name,
+                    cls.parent,
+                    cls.aspect,
+                    cls.scope,
+                    cls.source,
+                    cls.transmitter,
+                    cls.receiver,
+                    cls.resource,
                     entity_type,
                     total,
                     in_network,
@@ -256,13 +247,13 @@ class IntercellNetworkCounts(omnipath2.table.TableBase):
             self,
             network_dataset = 'omnipath',
             only_proteins = True,
-            class_levels = None,
+            annot_args = None,
             **kwargs
         ):
 
         self.network_dataset = network_dataset
         self.only_proteins = only_proteins
-        self.class_levels = common.to_set(class_levels)
+        self.annot_args = annot_args or {}
         self.entity_type = 'protein'
 
         param = {
@@ -296,86 +287,57 @@ class IntercellNetworkCounts(omnipath2.table.TableBase):
 
             entity_type = 'protein' if self.only_proteins else None
 
-            cls0_elements = self.intercell.get_class(
-                cls0,
+            a_cls0 = self.intercell.select(cls0, entity_type = entity_type)
+            a_cls1 = self.intercell.select(cls1, entity_type = entity_type)
+
+            a_parent0 = self.intercell.select(
+                a_cls0.parent,
                 entity_type = entity_type,
             )
-            cls1_elements = self.intercell.get_class(
-                cls1,
+            a_parent1 = self.intercell.select(
+                a_cls1.parent,
                 entity_type = entity_type,
             )
 
-            parent0 = self.intercell.parents[cls0]
-            parent1 = self.intercell.parents[cls1]
+            overlap = a_cls0 & a_cls1
 
-            overlap = cls0_elements & cls1_elements
+            in_network0 = in_network & a_cls0
+            in_network1 = in_network & a_cls1
 
-            parent0_elements = (
-                self.intercell.get_class(
-                    parent0,
-                    entity_type = entity_type,
-                )
-                if parent0 else
-                set()
-            )
-            parent1_elements = (
-                self.intercell.get_class(
-                    parent1,
-                    entity_type = entity_type,
-                )
-                if parent1 else
-                set()
-            )
-
-            in_network0 = in_network & cls0_elements
-            in_network1 = in_network & cls1_elements
-
-            cls01 = (cls0, cls1)
-            cls10 = (cls1, cls0)
-
-            class_labels = self.intercell.class_labels
-            resource_labels = self.intercell.resource_labels
-            class_types = self.intercell.class_types
+            cls01 = (a_cls0.name, a_cls1.name)
+            cls10 = (a_cls1.name, a_cls0.name)
 
             self.data.append(
                 ClassesPairwiseRecord(
-                    name_cls0 = cls0,
-                    name_cls1 = cls1,
-                    cls_label0 = (
-                        class_labels[cls0] if cls0 in class_labels else ''
-                    ),
-                    cls_label1 = (
-                        class_labels[cls1] if cls1 in class_labels else ''
-                    ),
-                    src_label0 = (
-                        resource_labels[cls0]
-                            if cls0 in resource_labels else
-                        ''
-                    ),
-                    src_label1 = (
-                        resource_labels[cls1]
-                            if cls1 in resource_labels else
-                        ''
-                    ),
-                    typ_cls0 = (
-                        class_types[cls0] if cls0 in class_types else 'sub'
-                    ),
-                    typ_cls1 = (
-                        class_types[cls1] if cls1 in class_types else 'sub'
-                    ),
+                    name0 = a_cls0.name,
+                    name1 = a_cls1.name,
+                    label0 = a_cls0.name_label,
+                    label1 = a_cls1.name_label,
+                    resource0 = a_cls0.resource,
+                    resource1 = a_cls1.resource,
+                    aspect0 = a_cls0.aspect,
+                    aspect1 = a_cls1.aspect,
+                    source0 = a_cls0.source,
+                    source1 = a_cls1.source,
+                    scope0 = a_cls0.scope,
+                    scope1 = a_cls1.scope,
+                    transmitter0 = a_cls0.transmitter,
+                    transmitter1 = a_cls1.transmitter,
+                    receiver0 = a_cls0.receiver,
+                    receiver1 = a_cls1.receiver,
                     total = len(reference_set), # total number of all proteins
                                                 # or all complexes
                     network = len(in_network),
-                    parent0 = parent0,
-                    parent1 = parent1,
+                    parent0 = a_parent0.name,
+                    parent1 = a_parent1.name,
                     # sizes
-                    size_cls0 = len(cls0_elements),
-                    size_cls1 = len(cls1_elements),
+                    size_cls0 = len(a_cls0),
+                    size_cls1 = len(a_cls1),
                     overlap_cls01 = len(overlap),
                     in_network_cls0 = len(in_network0),
                     in_network_cls1 = len(in_network1),
-                    size_parent0 = len(parent0_elements),
-                    size_parent1 = len(parent1_elements),
+                    size_parent0 = len(a_parent0),
+                    size_parent1 = len(a_parent1),
                     # connections
                     con_all = self.con_all[cls01],
                     con_0to1 = self.con_directed[cls01],
@@ -413,14 +375,22 @@ class IntercellNetworkCounts(omnipath2.table.TableBase):
         ClassesPairwiseRecord = collections.namedtuple(
             'ClassesPairwiseRecord',
             [
-                'name_cls0',
-                'name_cls1',
-                'cls_label0',
-                'cls_label1',
-                'src_label0',
-                'src_label1',
-                'typ_cls0',
-                'typ_cls1',
+                'name0',
+                'name1',
+                'label0',
+                'label1',
+                'resource0',
+                'resource1',
+                'aspect0',
+                'aspect1',
+                'source0',
+                'source1',
+                'scope0',
+                'scope1',
+                'transmitter0',
+                'transmitter1',
+                'receiver0',
+                'receiver1',
                 'total',
                 'network',
                 'parent0',
@@ -468,7 +438,6 @@ class IntercellNetworkCounts(omnipath2.table.TableBase):
         self.count_connections_pairwise()
         self.count_connections_groupwise()
         self.count_connections()
-        self.intercell.unset_interclass_network_df()
         gc.collect()
 
         self.data = []
@@ -478,10 +447,6 @@ class IntercellNetworkCounts(omnipath2.table.TableBase):
                 if self.only_proteins else
             self.annot.reference_set
         )
-        classes = self.intercell.classes
-        class_labels = self.intercell.class_labels
-        resource_labels = self.intercell.resource_labels
-        class_types = self.intercell.class_types
 
         self._log('Building the intercell network by resource table.')
 
@@ -499,7 +464,10 @@ class IntercellNetworkCounts(omnipath2.table.TableBase):
 
         for cls0, cls1 in (
             itertools.combinations_with_replacement(
-                classes.keys(),
+                self.intercell.filter_classes(
+                    scope = 'generic',
+                    aspect = 'functional',
+                ),
                 2
             )
         ):
@@ -507,8 +475,8 @@ class IntercellNetworkCounts(omnipath2.table.TableBase):
             prg.step()
 
             add_stats_record(
-                cls0,
-                cls1,
+                cls0.key,
+                cls1.key,
                 annot_entities,
             )
 
@@ -535,11 +503,6 @@ class IntercellNetworkCounts(omnipath2.table.TableBase):
         self.network = omnipath2.data.get_db(self.network_dataset)
         self.network_df = omnipath2.data.network_df(self.network_dataset)
         self.intercell.register_network(self.network_df)
-
-        self.intercell.set_interclass_network_df(
-            only_class_levels = self.class_levels,
-            only_proteins = self.only_proteins
-        )
 
 
     def count_connections_pairwise(self):

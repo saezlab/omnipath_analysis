@@ -107,7 +107,7 @@ _defaults = {
     'complex_mod': 'complex',
     'annotations_mod': 'annot',
     'intercell_mod': 'intercell',
-    'enz_sub_mod': 'ptm',
+    'enz_sub_mod': 'enz_sub',
     'tf_target_mod': 'network',
     'tf_mirna_mod': 'network',
     'mirna_mrna_mod': 'network',
