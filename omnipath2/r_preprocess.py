@@ -632,31 +632,37 @@ class IntercellAnnotationsByEntity(omnipath2.table.TableBase):
             [
                 'entity_id',
                 'is_complex',
-                'cls',
+                'name',
+                'label',
                 'parent',
-                'resource_label',
-                'class_label',
-                'class_type',
+                'aspect',
+                'source',
+                'scope',
+                'transmitter',
+                'receiver',
+                'resource',
             ],
         )
 
         self.data = []
 
-        for cls, elements in iteritems(self.intercell.classes):
+        for key, cls in iteritems(self.intercell.classes):
 
-            for elem in elements:
+            for elem in cls:
 
                 self.data.append(
                     AnnotationRecord(
                         entity_id = elem.__str__(),
                         is_complex = entity.Entity._is_complex(elem),
-                        cls = cls,
-                        parent = self.intercell.parents[cls],
-                        resource_label = (
-                            self.intercell.get_resource_label(cls)
-                        ),
-                        class_label = self.intercell.get_class_label(cls),
-                        class_type = self.intercell.get_class_type(cls),
+                        name = cls.name,
+                        labem = cls.name_label,
+                        parent = cls.parent,
+                        aspect = cls.aspect,
+                        source = cls.source,
+                        scope = cls.scope,
+                        transmitter = cls.transmitter,
+                        receiver = cls.receiver,
+                        resource = cls.resource,
                     )
                 )
 
