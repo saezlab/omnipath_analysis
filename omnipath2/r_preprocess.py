@@ -820,7 +820,10 @@ class ComplexesByResource(omnipath2.table.TableBase):
                     )
                 )
 
-        self.data = pd.DataFrame(self.data, columns = ComplexRecord._fields)
+        self.data = pd.DataFrame(
+            self.data,
+            columns = ComplexRecord._fields,
+        )
         self.header = self.data.columns
 
 
@@ -848,24 +851,24 @@ class InterClassOverlaps(omnipath2.table.TableBase):
 
         for c0, c1 in (
             itertools.product(
-                self.intercell.class_names,
-                self.intercell.class_names,
+                self.intercell.filter_classes(
+                    scope = 'generic',
+                    source = 'composite'
+                ),
+                self.intercell.filter_classes(
+                    scope = 'generic',
+                    source = 'composite'
+                ),
             )
         ):
 
-            if (
-                self.intercell.class_types[c0] == 'above_main' or
-                self.intercell.class_types[c1] == 'above_main'
-            ):
-                continue
-
             self.data.append([
-                c0,
-                c1,
-                len(self.intercell.classes[c0]),
-                len(self.intercell.classes[c1]),
-                len(self.intercell.classes[c0] | self.intercell.classes[c1]),
-                len(self.intercell.classes[c0] & self.intercell.classes[c1]),
+                c0.name,
+                c1.name,
+                len(c0.n_proteins),
+                len(c1.n_proteins),
+                len(c0.proteins | c1.proteins),
+                len(c0.proteins & c1.proteins),
             ])
 
 
