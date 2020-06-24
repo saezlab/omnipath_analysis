@@ -870,8 +870,8 @@ class InterClassOverlaps(omnipath2.table.TableBase):
 
 
 class NetworkCoverage(omnipath2.table.TableBase):
-    
-    
+
+
     groups = (
         ('kinase.com', 'Kinases'),
         ('TFcensus', 'TFs'),
@@ -880,10 +880,10 @@ class NetworkCoverage(omnipath2.table.TableBase):
         ('Phosphatome', 'Phosphatases'),
         ('HPMR', 'Receptors'),
     )
-    
-    
+
+
     def __init__(self, network_dataset = 'omnipath', **kwargs):
-        
+
         param = {
             'fname': 'network_coverage_tsv',
             'fname_param': (network_dataset,),
@@ -897,21 +897,21 @@ class NetworkCoverage(omnipath2.table.TableBase):
             ],
         }
         param.update(kwargs)
-        
+
         self.network_dataset = network_dataset
-        
+
         omnipath2.table.TableBase.__init__(self, **param)
-    
-    
+
+
     def load(self):
-        
+
         self.annot = omnipath2.data.get_db('annotations')
         self.network = omnipath2.data.get_db(self.network_dataset)
-        
+
         self.data = []
-        
+
         resources = self.network.get_resource_names()
-        
+
         proteins = dict(
             (
                 (resource, 'resource'),
@@ -933,17 +933,17 @@ class NetworkCoverage(omnipath2.table.TableBase):
                 for data_model in self.network.get_data_models()
             )
         )
-        
+
         for annot, label in self.groups:
-            
+
             this_group = set(
                 e
                 for e in self.annot.annots[annot].annot.keys()
                 if entity.Entity._is_protein(e)
             )
-            
+
             for res, in_network in proteins.items():
-                
+
                 self.data.append([
                     (
                         res[0].capitalize().replace('_', ' ')
