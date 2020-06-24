@@ -116,8 +116,14 @@ class InterClassDegreeHisto(plot.PlotBase):
             )
         )
         self.degrees = self.intercell.degree_inter_class_network(
-            self.class0,
-            self.class1,
+            annot_args_source = {
+                'name': self.class0,
+                'source': 'composite',
+            },
+            annot_args_target = {
+                'name': self.class1,
+                'source': 'composite',
+            },
             only_directed = self.only_directed,
             only_effect = self.only_effect,
             degrees_of = self.degrees_of,
@@ -142,14 +148,16 @@ class CountsScatterBase(plot.PlotBase):
 
     def __init__(
             self,
-            entity_types = 'protein',
-            class_types = 'main',
+            entity_type = 'protein',
+            annot_args = None,
             xscale_log = False,
             **kwargs,
         ):
 
-        self.entity_types = common.to_set(entity_types)
-        self.class_types = common.to_set(class_types)
+        self.annot_args = annot_args or {
+            source = 'composite',
+        }
+        self.entity_type = common.to_set(entity_type)
         self.xscale_log = xscale_log
 
         param = {
@@ -205,13 +213,12 @@ class CountsByClass(CountsScatterBase):
 
     def __init__(
         self,
-        entity_types = 'protein',
-        class_types = 'main',
+        entity_type = 'protein',
+        annot_args = None,
         **kwargs,
     ):
 
-        self.entity_types = common.to_set(entity_types)
-        self.class_types = common.to_set(class_types)
+        self.entity_type = common.to_set(entity_type)
 
         param = {
             'title': 'Entities by inter-cellular communication role',
@@ -219,15 +226,14 @@ class CountsByClass(CountsScatterBase):
             'ylab': 'Inter-cellular communication roles',
             'fname_param': (
                 '-'.join(sorted(self.entity_types)),
-                '-'.join(sorted(self.class_types)),
             ),
         }
         param.update(kwargs)
 
         CountsScatterBase.__init__(
             self,
-            entity_types = entity_types,
-            class_types = class_types,
+            entity_type = entity_type,
+            annot_args = annot_args,
             **param
         )
 
@@ -237,8 +243,8 @@ class CountsByClass(CountsScatterBase):
         self.data = omnipath2.data
         self.intercell = self.data.get_db('intercell')
         countsdf = self.intercell.counts_by_class(
-            entity_types = self.entity_types,
-            class_types = self.class_types,
+            entity_type = self.entity_type,
+            annot_args = self.annot_args,
         )
         self.counts = dict(zip(countsdf.index, countsdf))
         CountsScatterBase.load_data(self)
@@ -298,7 +304,7 @@ class ClassSimilarities(plot.PlotBase):
 
     def __init__(
             self,
-            class_types = 'main',
+            annot_args = None,
             entity_types = 'protein',
             link_param = None,
             dendro_param = None,
@@ -307,7 +313,9 @@ class ClassSimilarities(plot.PlotBase):
         ):
 
         self.entity_types = common.to_set(entity_types)
-        self.class_types = common.to_set(class_types)
+        self.annot_args = annot_args or {
+            'source': 'composite',
+        }
         self.link_param = link_param or {}
         self.dendro_param = dendro_param or {}
         self.dendrogram_lwd = dendrogram_lwd
@@ -342,21 +350,22 @@ class ClassSimilarities(plot.PlotBase):
 
         self.sims = []
 
-        main_classes = sorted([
-            cls
-            for cls in self.data.intercell.classes.keys()
-            if (
-                cls in self.data.intercell.class_types and
-                self.data.intercell.class_types[cls] == 'main'
-            )
-        ])
+        main_classes = sorted(
+            (
+                cls
+                for cls in self.data.intercell.iter_classes(
+                    **self.annot_args
+                )
+            ),
+            key = lambda c: c.name_label,
+        )
 
         for class0, class1 in itertools.product(main_classes, repeat = 2):
 
             self.sims.append(
                 similarity(
-                    self.data.intercell.classes[class0],
-                    self.data.intercell.classes[class1],
+                    class0,
+                    class1,
                     mode = 'ss'
                 )
             )
@@ -492,7 +501,10 @@ class InterClassChordplot(plot.PlotBase):
         self.network_dataset = network_dataset
 
         self.intercell_network_param = {
-            'only_class_levels': 'main',
+            'annot_args': {
+                'source': 'composite',
+                'aspect': 'functional',
+            },
             'only_directed': False,
             'only_effect': None,
         }
@@ -532,7 +544,6 @@ class InterClassChordplot(plot.PlotBase):
         self.data = omnipath2.data
         self.intercell = self.data.get_db('intercell')
         network = self.data.network_df(self.network_dataset)
-        self.intercell.register_network(network)
         self.edges = self.intercell.class_to_class_connections(
             **self.intercell_network_param,
         )
@@ -604,8 +615,10 @@ class InterClassChordplot(plot.PlotBase):
 
         ax2.set_axis_off()
 
-        ax3 = self.fig.add_axes([0.72, 0.5, 0.25, 0.25]) # barplot
-        ax4 = self.fig.add_axes([0.72, .05, 0.25, 0.5], sharex = ax3) # heatmap
+        # barplot
+        ax3 = self.fig.add_axes([0.72, 0.5, 0.25, 0.25])
+        # heatmap
+        ax4 = self.fig.add_axes([0.72, .05, 0.25, 0.5], sharex = ax3)
 
         ax3.bar(
             range(len(self.segments)),
@@ -621,7 +634,9 @@ class InterClassChordplot(plot.PlotBase):
         #ax.axes.get_yaxis().set_visible(False)
         ax3.locator_params(axis = 'y', nbins = 4)
 
-        #ax.tick_params(axis='both', left='off', top='off', right='off', bottom='off', labelleft='off', labeltop='off', labelright='off', labelbottom='off')
+        #ax.tick_params(axis='both', left='off', top='off', right='off',
+        # bottom='off', labelleft='off', labeltop='off', labelright='off',
+        # labelbottom='off')
 
         #ax3.get_yaxis().set_visible(True)
 
