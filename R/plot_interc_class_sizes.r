@@ -333,7 +333,7 @@ IntercellClassSizesSeries <- R6::R6Class(
                 filter(
                     name0 == name1 &
                     aspect0 == 'functional' &
-                    source0 == 'composite'
+                    source0 == 'composite' &
                     !is.na(name0)
                 ) %>%
                 {`if`(

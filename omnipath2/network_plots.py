@@ -93,6 +93,13 @@ class CountsBase(plot.PlotBase):
 
     def load_data(self):
 
+        def get_value(var1, var2, key):
+
+            collection = getattr(getattr(self, var1), var2)
+
+            return collection[key] if key in collection else 0
+
+
         self.data = omnipath2.data
         self.network = self.data.get_db(self.network_dataset)
 
@@ -191,10 +198,7 @@ class CountsBase(plot.PlotBase):
         self.values = [
             [
                 np.array([
-                    getattr(
-                        getattr(self, var1),
-                        var2,
-                    )[key]
+                    get_value(var1, var2, key)
                     for key in self.keys
                 ])
                 for var2 in self.variables2[ivar]

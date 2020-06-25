@@ -163,8 +163,8 @@ class CountsScatterBase(plot.PlotBase):
         param = {
             'maketitle': True,
             'xlab': 'Number of %s' % (
-                pattern.en.pluralize(entity_types)
-                    if isinstance(entity_types, common.basestring) else
+                pattern.en.pluralize(entity_type)
+                    if isinstance(entity_type, common.basestring) else
                 'entities'
             ),
             'legend': False,
