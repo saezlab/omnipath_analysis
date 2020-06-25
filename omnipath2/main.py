@@ -181,7 +181,6 @@ workflow = collections.OrderedDict(
                 network_dataset = (
                     'omnipath',
                     'curated',
-                    'tf_target',
                 ),
                 mode = (
                     'all',
@@ -214,15 +213,6 @@ workflow = collections.OrderedDict(
                 network_dataset = (
                     'omnipath',
                     'curated',
-                ),
-                class_levels = (
-                    None,
-                    {
-                        'main',
-                        'above_main',
-                        'small_main',
-                        'misc',
-                    },
                 ),
             ),
             name = 'Intercell network counts table',

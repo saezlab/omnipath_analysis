@@ -69,6 +69,7 @@ class InterClassConnections(omnipath2.table.TableBase):
             'class_args': {
                 'scope': 'generic',
                 'source': 'composite',
+                'aspect': {'functional', 'locational'},
             },
             'header': [
                 'cat0',
@@ -253,7 +254,13 @@ class IntercellNetworkCounts(omnipath2.table.TableBase):
 
         self.network_dataset = network_dataset
         self.only_proteins = only_proteins
-        self.annot_args = annot_args or {}
+        self.annot_args = (
+            annot_args or
+            {
+                'scope': 'generic',
+                'aspect': 'functional',
+            }
+        )
         self.entity_type = 'protein'
 
         param = {
@@ -261,11 +268,6 @@ class IntercellNetworkCounts(omnipath2.table.TableBase):
             'fname_param': (
                 self.network_dataset,
                 'proteins' if self.only_proteins else 'all-entities',
-                (
-                    '-'.join(sorted(self.class_levels))
-                        if self.class_levels else
-                    'all-class-levels'
-                ),
             ),
         }
         param.update(kwargs)
@@ -299,6 +301,10 @@ class IntercellNetworkCounts(omnipath2.table.TableBase):
                 entity_type = entity_type,
             )
 
+            if a_parent1 is None or a_parent0 is None:
+
+                print(a_cls0, a_cls1)
+
             overlap = a_cls0 & a_cls1
 
             in_network0 = in_network & a_cls0
@@ -331,8 +337,8 @@ class IntercellNetworkCounts(omnipath2.table.TableBase):
                     parent0 = a_parent0.name,
                     parent1 = a_parent1.name,
                     # sizes
-                    size_cls0 = len(a_cls0),
-                    size_cls1 = len(a_cls1),
+                    size0 = len(a_cls0),
+                    size1 = len(a_cls1),
                     overlap_cls01 = len(overlap),
                     in_network_cls0 = len(in_network0),
                     in_network_cls1 = len(in_network1),
@@ -395,8 +401,8 @@ class IntercellNetworkCounts(omnipath2.table.TableBase):
                 'network',
                 'parent0',
                 'parent1',
-                'size_cls0',
-                'size_cls1',
+                'size0',
+                'size1',
                 'overlap_cls01',
                 'in_network_cls0',
                 'in_network_cls1',
@@ -451,7 +457,8 @@ class IntercellNetworkCounts(omnipath2.table.TableBase):
         self._log('Building the intercell network by resource table.')
 
         prg = progress.Progress(
-            len(classes.items()) ** 2 / 2,
+            len(list(self.intercell.iter_classes(**self.annot_args)))
+            ** 2 / 2,
             'Collecting intercell categories stats',
             1,
             off = False,
@@ -464,11 +471,8 @@ class IntercellNetworkCounts(omnipath2.table.TableBase):
 
         for cls0, cls1 in (
             itertools.combinations_with_replacement(
-                self.intercell.filter_classes(
-                    scope = 'generic',
-                    aspect = 'functional',
-                ),
-                2
+                self.intercell.iter_classes(**self.annot_args),
+                2,
             )
         ):
 
@@ -655,7 +659,7 @@ class IntercellAnnotationsByEntity(omnipath2.table.TableBase):
                         entity_id = elem.__str__(),
                         is_complex = entity.Entity._is_complex(elem),
                         name = cls.name,
-                        labem = cls.name_label,
+                        label = cls.name_label,
                         parent = cls.parent,
                         aspect = cls.aspect,
                         source = cls.source,
@@ -851,11 +855,11 @@ class InterClassOverlaps(omnipath2.table.TableBase):
 
         for c0, c1 in (
             itertools.product(
-                self.intercell.filter_classes(
+                self.intercell.iter_classes(
                     scope = 'generic',
                     source = 'composite'
                 ),
-                self.intercell.filter_classes(
+                self.intercell.iter_classes(
                     scope = 'generic',
                     source = 'composite'
                 ),
@@ -865,8 +869,8 @@ class InterClassOverlaps(omnipath2.table.TableBase):
             self.data.append([
                 c0.name,
                 c1.name,
-                len(c0.n_proteins),
-                len(c1.n_proteins),
+                c0.n_proteins,
+                c1.n_proteins,
                 len(c0.proteins | c1.proteins),
                 len(c0.proteins & c1.proteins),
             ])

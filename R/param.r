@@ -89,8 +89,8 @@ get_default_param <- function(){
             'adhesion',
             'ligand',
             'receptor',
-            'surface_enzyme',
-            'extracellular_enzyme',
+            'cell_surface_enzyme',
+            'secreted_enzyme',
             'transporter'
         ),
         

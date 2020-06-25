@@ -64,10 +64,10 @@ IntercellClassSizes <- R6::R6Class(
         preprocess = function(...){
             
             self$data <- self$data %>%
-                group_by(name_cls0) %>%
+                group_by(name0) %>%
                 summarize_all(first) %>%
                 mutate(
-                    label0 = ifelse(is.na(src_label0), 'OmniPath', src_label0)
+                    label0 = ifelse(is.na(label0), 'OmniPath', label0)
                 ) %>%
                 arrange(desc(label0 == 'OmniPath'), desc(size_cls0)) %>%
                 mutate(
@@ -316,7 +316,7 @@ IntercellClassSizesSeries <- R6::R6Class(
                 plotter = IntercellClassSizes,
                 name = quote(fig_cat_sizes),
                 input_param = input_param,
-                width_by = src_label0,
+                width_by = label0,
                 width_min = .7,
                 width_step = .23,
                 ...
@@ -331,10 +331,10 @@ IntercellClassSizesSeries <- R6::R6Class(
             
             self$data <- self$data %>%
                 filter(
-                    typ_cls0 == typ_cls1 &
-                    typ_cls0 != 'misc' &
-                    typ_cls0 != 'small_main' &
-                    !is.na(name_cls0)
+                    name0 == name1 &
+                    aspect0 == 'functional' &
+                    source0 == 'composite'
+                    !is.na(name0)
                 ) %>%
                 {`if`(
                     'entity' %in% names(.),

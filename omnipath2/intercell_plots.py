@@ -155,7 +155,7 @@ class CountsScatterBase(plot.PlotBase):
         ):
 
         self.annot_args = annot_args or {
-            source = 'composite',
+            'source': 'composite',
         }
         self.entity_type = common.to_set(entity_type)
         self.xscale_log = xscale_log

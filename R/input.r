@@ -134,16 +134,16 @@ IntercellCategoriesPairwise <- R6::R6Class(
                     filter(., entity == self$entity_type)
                 )} %>%
                 mutate(
-                    network_covers_cls0 = size_cls0 / in_network_cls0 * 100,
-                    network_covers_cls1 = size_cls1 / in_network_cls1 * 100,
-                    pct_of_parent_cls0 = size_cls0 / size_parent0 * 100,
-                    pct_of_parent_cls1 = size_cls1 / size_parent1 * 100
+                    network_covers_cls0 = size0 / in_network0 * 100,
+                    network_covers_cls1 = size1 / in_network1 * 100,
+                    pct_of_parent_cls0 = size0 / size_parent0 * 100,
+                    pct_of_parent_cls1 = size1 / size_parent1 * 100
                 ) %>%
-                arrange(desc(size_cls0)) %>%
+                arrange(desc(size0)) %>%
                 mutate(
                     name_cls0 = factor(
                         name_cls0,
-                        levels = unique(name_cls0),
+                        levels = unique(name0),
                         ordered = TRUE
                     )
                 ) %>%
@@ -151,8 +151,8 @@ IntercellCategoriesPairwise <- R6::R6Class(
                     self$only_main_classes,
                     filter(
                         .,
-                        name_cls0 %in% main_classes &
-                        name_cls1 %in% main_classes
+                        name0 %in% main_classes &
+                        name1 %in% main_classes
                     ),
                     .
                 )}
