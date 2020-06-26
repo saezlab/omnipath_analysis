@@ -150,7 +150,7 @@ _defaults = {
 
     # figure filenames
     'inter_class_degree_pdf': 'inter_class_degree_%s_%s_%s_%s',
-    'counts_by_class_pdf': 'counts_by_class_%s_%s',
+    'counts_by_class_pdf': 'counts_by_class_%s',
     'counts_by_resource_pdf': 'counts_by_resource_%s',
     'inter_class_sim_pdf': 'inter_class_sim',
     'inter_class_chordplot_pdf': 'inter_class_chordplot_%s_%s_%s',
@@ -163,7 +163,17 @@ _defaults = {
     # default palette
     'palette': 'Nico_3',
 
-    'r_workflow_command': 'Rscript omnipath2_workflow.r'
+    'r_workflow_command': 'Rscript omnipath2_workflow.r',
+
+    'intercell_main_classes': {
+        'ecm',
+        'adhesion',
+        'ligand',
+        'receptor',
+        'cell_surface_enzyme',
+        'secreted_enzyme',
+        'transporter'
+    },
 
 }
 

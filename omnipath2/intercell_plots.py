@@ -43,6 +43,7 @@ from data_tools.plots import chordplot
 
 import omnipath2
 from omnipath2 import plot
+from omnipath2 import settings
 
 
 class InterClassDegreeHisto(plot.PlotBase):
@@ -225,7 +226,7 @@ class CountsByClass(CountsScatterBase):
             'fname': 'counts_by_class_pdf',
             'ylab': 'Inter-cellular communication roles',
             'fname_param': (
-                '-'.join(sorted(self.entity_types)),
+                '-'.join(sorted(self.entity_type)),
             ),
         }
         param.update(kwargs)
@@ -242,11 +243,14 @@ class CountsByClass(CountsScatterBase):
 
         self.data = omnipath2.data
         self.intercell = self.data.get_db('intercell')
-        countsdf = self.intercell.counts_by_class(
+        countsdf = self.intercell.counts_df(
             entity_type = self.entity_type,
-            annot_args = self.annot_args,
+            **self.annot_args
         )
-        self.counts = dict(zip(countsdf.index, countsdf))
+        self.counts = dict(zip(
+            (cat.capitalize() for cat in countsdf.category),
+            countsdf.n_uniprot
+        ))
         CountsScatterBase.load_data(self)
 
 
@@ -255,13 +259,12 @@ class CountsByResource(CountsScatterBase):
 
     def __init__(
         self,
-        entity_types = 'protein',
-        class_types = 'main',
+        entity_type = 'protein',
+        annot_args = None,
         **kwargs,
     ):
 
-        self.entity_types = common.to_set(entity_types)
-        self.class_types = common.to_set(class_types)
+        self.entity_type = common.to_set(entity_type)
 
         param = {
             'title': (
@@ -271,7 +274,7 @@ class CountsByResource(CountsScatterBase):
             'fname': 'counts_by_resource_pdf',
             'ylab': 'Inter-cellular annotation resources',
             'fname_param': (
-                '-'.join(sorted(self.entity_types)),
+                '-'.join(sorted(self.entity_type)),
             ),
             'height': 5,
         }
@@ -279,8 +282,8 @@ class CountsByResource(CountsScatterBase):
 
         CountsScatterBase.__init__(
             self,
-            entity_types = entity_types,
-            class_types = class_types,
+            entity_type = entity_type,
+            annot_args = annot_args,
             **param
         )
 
@@ -291,7 +294,7 @@ class CountsByResource(CountsScatterBase):
         self.intercell = self.data.get_db('intercell')
 
         self.counts = self.intercell.counts_by_resource(
-            entity_types = self.entity_types
+            entity_types = self.entity_type
         )
         CountsScatterBase.load_data(self)
 
@@ -383,9 +386,7 @@ class ClassSimilarities(plot.PlotBase):
             **self.link_param
         )
 
-        self.labels = np.array([
-            self.data.intercell.class_labels[cls] for cls in main_classes
-        ])
+        self.labels = np.array([cls.name_label for cls in main_classes])
 
 
     def make_plots(self):
@@ -495,16 +496,21 @@ class InterClassChordplot(plot.PlotBase):
             self,
             network_dataset = 'omnipath',
             intercell_network_param = None,
+            annot_args = None,
             **kwargs
         ):
 
         self.network_dataset = network_dataset
 
+        self.annot_args = {
+            'source': 'composite',
+            'aspect': 'functional',
+            'category': settings.get('intercell_main_classes')
+        }
+        self.annot_args.update(annot_args or {})
+
         self.intercell_network_param = {
-            'annot_args': {
-                'source': 'composite',
-                'aspect': 'functional',
-            },
+            'annot_args': self.annot_args,
             'only_directed': False,
             'only_effect': None,
         }
@@ -544,17 +550,18 @@ class InterClassChordplot(plot.PlotBase):
         self.data = omnipath2.data
         self.intercell = self.data.get_db('intercell')
         network = self.data.network_df(self.network_dataset)
+        self.intercell.register_network(network)
         self.edges = self.intercell.class_to_class_connections(
             **self.intercell_network_param,
         )
         self.edges.index.set_levels(
             [
                 [
-                    self.intercell.get_class_label(cls)
+                    cls.capitalize().replace('_', ' ')
                     for cls in self.edges.index.levels[0]
                 ],
                 [
-                    self.intercell.get_class_label(cls)
+                    cls.capitalize().replace('_', ' ')
                     for cls in self.edges.index.levels[1]
                 ],
             ],
@@ -571,7 +578,13 @@ class InterClassChordplot(plot.PlotBase):
             columns = 'category_b',
             values = 'connections',
         )
-        self.segments = self.intercell.counts_by_class()
+        counts = self.intercell.counts_df(**self.annot_args)
+        counts['label'] = [
+            c.capitalize().replace('_', ' ')
+            for c in counts.category
+        ]
+        counts.set_index('label', inplace = True)
+        self.segments = counts.n_uniprot
         self.segments.name = 'size'
         self.labels = self.segments.index
 
