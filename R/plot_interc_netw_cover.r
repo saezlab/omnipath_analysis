@@ -33,13 +33,11 @@ ResourceCoverage <- R6::R6Class(
         
         initialize = function(
             con_enrich_input_param,
-            res_by_entity_input_param,
             ann_by_entity_input_param = list(),
             only_main_classes = FALSE
         ){
             
             self$con_enrich_input_param <- con_enrich_input_param
-            self$res_by_entity_input_param <- res_by_entity_input_param
             self$ann_by_entity_input_param <- ann_by_entity_input_param
             self$only_main_classes <- only_main_classes
             
@@ -48,7 +46,6 @@ ResourceCoverage <- R6::R6Class(
                 name = fig_res_cov,
                 fname_param = c(
                     self$con_enrich_input_param,
-                    self$res_by_entity_input_param,
                     self$ann_by_entity_input_param,
                     list(
                         `if`(
@@ -77,7 +74,7 @@ ResourceCoverage <- R6::R6Class(
             
             self$plt <- ggplot(
                 self$data,
-                aes(x = class_label, y = resource, fill = log10(coverage))
+                aes(x = label, y = resource, fill = log10(coverage))
             ) +
             geom_tile() +
             scale_fill_viridis_c(
@@ -112,7 +109,7 @@ ResourceCoverage <- R6::R6Class(
             )
             
             res <- ResourceByEntity$new(
-                    input_param = self$res_by_entity_input_param
+                    input_param = self$con_enrich_input_param[1]
                 )$data %>%
                 filter(!is_complex) %>%
                 select(entity_id, resource)
@@ -124,28 +121,28 @@ ResourceCoverage <- R6::R6Class(
                     self$only_main_classes,
                     filter(
                         .,
-                        cls %in% omnipath2_settings$get(
+                        name %in% omnipath2_settings$get(
                             intercell_main_classes
                         )
                     ),
                     .
                 )} %>%
                 filter(!is_complex) %>%
-                select(entity_id, class_label) %>%
-                group_by(class_label) %>%
+                select(entity_id, label) %>%
+                group_by(label) %>%
                 mutate(class_size = n()) %>%
                 ungroup() %>%
                 inner_join(res, by = c('entity_id')) %>%
-                group_by(resource, class_label) %>%
+                group_by(resource, label) %>%
                 mutate(in_resource = n()) %>%
                 summarize_all(first) %>%
                 select(-entity_id) %>%
                 mutate(coverage = in_resource / class_size * 100) %>%
                 ungroup() %>%
-                filter(class_label %in% self$order) %>%
+                filter(label %in% self$order) %>%
                 mutate(
-                    class_label = factor(
-                        class_label,
+                    label = factor(
+                        label,
                         levels = self$order,
                         ordered = TRUE
                     )
@@ -154,7 +151,7 @@ ResourceCoverage <- R6::R6Class(
             self$data <- icc
             
             self$height <- length(unique(icc$resource)) / 5
-            self$width <- length(unique(icc$class_label)) / 6.6 + 2.6
+            self$width <- length(unique(icc$label)) / 6.6 + 2.6
             
             invisible(self)
             

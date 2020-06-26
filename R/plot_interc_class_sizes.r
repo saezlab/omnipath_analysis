@@ -181,35 +181,26 @@ IntercellClassSizesDots <- R6::R6Class(
             classes <- unique(
                 (
                     self$data %>%
-                    filter(typ_cls0 == 'main')
-                )$cls_label0
-            )
-            
-            huge_classes <- unique(
-                (
-                    self$data %>%
-                    filter(typ_cls0 == 'above_main')
-                )$cls_label0
+                    filter(source0 == 'composite' & aspect0 == 'functional')
+                )$label0
             )
             
             self$by_entity <- self$by_entity %>%
                 filter(
                     !is_complex &
-                    class_type == 'sub' &
-                    !(class_label %in% huge_classes) &
-                    !is.na(resource_label)
+                    !is.na(label)
                 ) %>%
-                group_by(entity_id, class_label) %>%
+                group_by(entity_id, label) %>%
                 mutate(is_unique = n() == 1) %>%
                 ungroup() %>%
                 filter(is_unique) %>%
-                group_by(class_label, resource_label) %>%
+                group_by(label, resource) %>%
                 mutate(n_unique = n()) %>%
                 summarize_all(first) %>%
                 ungroup() %>%
                 select(
                     database = resource_label,
-                    cls = class_label,
+                    cls = label,
                     size = n_unique
                 ) %>%
                 bind_rows(
@@ -234,13 +225,13 @@ IntercellClassSizesDots <- R6::R6Class(
                 ) %>%
                 left_join(
                     self$data %>%
-                    select(cls_label0, src_label0, size_cls0) %>%
-                    group_by(cls_label0, src_label0) %>%
+                    select(label0, src_label0, size_cls0) %>%
+                    group_by(label0, src_label0) %>%
                     summarize_all(first) %>%
                     ungroup(),
                     by = c(
                         'database' = 'src_label0',
-                        'cls' = 'cls_label0'
+                        'cls' = 'label0'
                     )
                 ) %>%
                 rename(size = size_cls0) %>%

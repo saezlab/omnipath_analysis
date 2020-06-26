@@ -118,7 +118,7 @@ ConnectionEnrichment <- R6::R6Class(
                         self$data %>% filter(!enrich_dir),
                         swap_labels = TRUE
                     ) %>%
-                    filter(cls_label0 != cls_label1)
+                    filter(label0 != label1)
                 ) %>%
                 mutate(
                     sym1 = ifelse(enrich_dir, "\u25E4", "\u25E2"),
@@ -131,7 +131,7 @@ ConnectionEnrichment <- R6::R6Class(
                     private$lower_triangle(
                         self$data %>% filter(!enrich_dir)
                     ) %>%
-                    filter(cls_label0 != cls_label1)
+                    filter(label0 != label1)
                 )
             )}
             
@@ -171,20 +171,20 @@ ConnectionEnrichment <- R6::R6Class(
             mapping_param <- `if`(
                 self$heatmap_variables == 'enrich-count',
                 list(
-                    x = quo(cls_label0),
-                    y = quo(cls_label1),
+                    x = quo(label0),
+                    y = quo(label1),
                     label = quo(sym1)
                 ),
                 list(
-                    x = quo(cls_label0),
-                    y = quo(cls_label1)
+                    x = quo(label0),
+                    y = quo(label1)
                 )
             )
             
             data <- `if`(
                 self$directed,
                 data,
-                data %>% filter(cls_label0 >= cls_label1)
+                data %>% filter(label0 >= label1)
             )
             
             self$plt <- ggplot(
@@ -205,8 +205,8 @@ ConnectionEnrichment <- R6::R6Class(
                     geom_text(
                         data = data,
                         mapping = aes(
-                            x = cls_label1,
-                            y = cls_label0,
+                            x = label1,
+                            y = label0,
                             color = numof_con_log10,
                             label = sym2
                         )
@@ -232,8 +232,8 @@ ConnectionEnrichment <- R6::R6Class(
                     geom_tile(
                         data = data,
                         mapping = aes(
-                            x = cls_label1,
-                            y = cls_label0,
+                            x = label1,
+                            y = label0,
                             fill = numof_con_log10
                         )
                     ),
@@ -351,10 +351,10 @@ ConnectionEnrichment <- R6::R6Class(
                 data,
                 data %>%
                     rename(
-                        cls_label0 = cls_label1,
-                        cls_label1 = cls_label0
+                        label0 = label1,
+                        label1 = label0
                     ) %>%
-                    filter(cls_label0 != cls_label1)
+                    filter(label0 != label1)
             )
             
         },
@@ -429,8 +429,8 @@ ConnectionEnrichment <- R6::R6Class(
                 #return(enrich)
                 self$clustering <- ClusteringBase$new(
                     enrich$data,
-                    cls_label0,
-                    cls_label1,
+                    label0,
+                    label1,
                     enrichment_log2
                 )
                 self$data <- self$clustering$get_ordered(data = self$data)
@@ -489,8 +489,8 @@ ConnectionEnrichment <- R6::R6Class(
                     self$only_main_classes,
                     filter(
                         .,
-                        name_cls0 %in% main_classes &
-                        name_cls1 %in% main_classes
+                        name0 %in% main_classes &
+                        name1 %in% main_classes
                     ),
                     .
                 )}
@@ -516,8 +516,8 @@ ConnectionEnrichment <- R6::R6Class(
         
         triangle = function(data, swap_labels = FALSE, op = `<=`){
             
-            order_x <- levels(data$cls_label0)
-            order_y <- levels(data$cls_label1)
+            order_x <- levels(data$label0)
+            order_y <- levels(data$label1)
             
             (
                 data %>%
@@ -525,25 +525,25 @@ ConnectionEnrichment <- R6::R6Class(
                     swap_labels,
                     rename(
                         .,
-                        cls_label0 = cls_label1,
-                        cls_label1 = cls_label0
+                        label0 = label1,
+                        label1 = label0
                     ),
                     .
                 )} %>%
                 filter(
                     op(
-                        match(cls_label0, order_x),
-                        match(cls_label1, order_y)
+                        match(label0, order_x),
+                        match(label1, order_y)
                     )
                 ) %>%
                 mutate(
-                    cls_label0 = factor(
-                        cls_label0,
+                    label0 = factor(
+                        label0,
                         levels = order_x,
                         ordered = TRUE
                     ),
-                    cls_label1 = factor(
-                        cls_label1,
+                    label1 = factor(
+                        label1,
                         levels = order_y,
                         ordered = TRUE
                     )

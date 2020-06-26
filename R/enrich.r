@@ -38,6 +38,7 @@ Enrichment <- R6::R6Class(
             universe,
             directed = TRUE,
             exclude = NULL,
+            include = NULL,
             enrich_var = NULL,
             expected_var = NULL
         ){
@@ -49,6 +50,7 @@ Enrichment <- R6::R6Class(
             self$universe <- enquo(universe)
             self$directed <- directed
             self$exclude <- exclude
+            self$include <- include
             self$enrich_var <- `if`(
                 is.null(enrich_var),
                 sym('enrichment'),
@@ -87,10 +89,16 @@ Enrichment <- R6::R6Class(
         filter = function(){
             
             self$data <- self$data %>%
-                filter(
-                    !(typ_cls0 %in% self$exclude) &
-                    !(typ_cls1 %in% self$exclude)
-                )
+                {`if`(
+                    is.null(self$include),
+                    .,
+                    filter(
+                        .,
+                        name0 %in% self$include &
+                        name1 %in% self$include
+                    )
+                )}
+
             
             invisible(self)
             
@@ -143,10 +151,10 @@ Enrichment <- R6::R6Class(
                     self$data,
                     self$data %>%
                         rename(
-                            cls_label0 = cls_label1,
-                            cls_label1 = cls_label0
+                            label0 = label1,
+                            label1 = label0
                         ) %>%
-                        filter(cls_label0 != cls_label1)
+                        filter(label0 != label1)
                 )
                 
             }

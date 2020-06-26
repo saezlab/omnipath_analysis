@@ -38,7 +38,7 @@ get_default_param <- function(){
             axis.text.y = element_text(color = '#000000')
             #panel.grid.minor.x = element_blank()
         ),
-        input_intercell_cat_pairwise_tsv = 'stats_by_resource_%s_%s_%s',
+        input_intercell_cat_pairwise_tsv = 'stats_by_resource_%s_%s',
         input_intercell_annotation_by_entity_tsv = {
             'intercell_annotations_by_entity'
         },
@@ -94,8 +94,8 @@ get_default_param <- function(){
             'transporter'
         ),
         
-        fig_res_cov = 'res-cov_%s_%s_%s_%s_%s',
-        fig_con_enrich = 'connection-enrichment_%s_%s_%s_%s_%s_%s',
+        fig_res_cov = 'res-cov_%s_%s_%s',
+        fig_con_enrich = 'connection-enrichment_%s_%s_%s_%s_%s',
         fig_subcls_intersect = 'subclass-intersection_%s_%s_%s',
         fig_cplex_overlap = 'complex-overlap',
         fig_intercell_cls_graph = 'intercell-classes-graph_%s_%s_%s',

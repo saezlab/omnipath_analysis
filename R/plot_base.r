@@ -51,7 +51,7 @@ SinglePlot <- R6::R6Class(
             plot_args = list(),
             theme_args = list()
         ){
-            
+
             super$initialize(
                 name = enquo(name),
                 fname_param = fname_param

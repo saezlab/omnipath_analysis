@@ -126,7 +126,7 @@ IntercellCategoriesPairwise <- R6::R6Class(
         preprocess = function(...){
             
             main_classes <- omnipath2_settings$get(intercell_main_classes)
-            
+
             self$data <- self$data %>%
                 {`if`(
                     is.null(self$entity_type) || !('entity' %in% names(.)),
@@ -134,15 +134,15 @@ IntercellCategoriesPairwise <- R6::R6Class(
                     filter(., entity == self$entity_type)
                 )} %>%
                 mutate(
-                    network_covers_cls0 = size0 / in_network0 * 100,
-                    network_covers_cls1 = size1 / in_network1 * 100,
+                    network_covers_cls0 = size0 / in_network_cls0 * 100,
+                    network_covers_cls1 = size1 / in_network_cls1 * 100,
                     pct_of_parent_cls0 = size0 / size_parent0 * 100,
                     pct_of_parent_cls1 = size1 / size_parent1 * 100
                 ) %>%
                 arrange(desc(size0)) %>%
                 mutate(
-                    name_cls0 = factor(
-                        name_cls0,
+                    name0 = factor(
+                        name0,
                         levels = unique(name0),
                         ordered = TRUE
                     )

@@ -286,22 +286,24 @@ ConnectionGraph <- R6::R6Class(
         
         build_graph = function(){
             
+            main_classes <- omnipath2_settings$get('intercell_main_classes')
+
             edges <- self$data %>%
-                filter(typ_cls0 == 'main' & typ_cls1 == 'main') %>%
+                filter(name0 == main_classes & name1 == main_classes) %>%
                 select(
-                    cls_label0, cls_label1, con_all, size_cls0, size_cls1
+                    label0, label1, con_all, size_cls0, size_cls1
                 ) %>%
                 filter(size_cls0 > 0 & size_cls1 > 0) %>%
-                mutate(cls_label0 = as.character(cls_label0))
+                mutate(label0 = as.character(label0))
             
             vertices <- bind_rows(
-                    edges %>% select(name = cls_label0, size = size_cls0),
-                    edges %>% select(name = cls_label1, size = size_cls1)
+                    edges %>% select(name = label0, size = size_cls0),
+                    edges %>% select(name = label1, size = size_cls1)
                 ) %>%
                 group_by(name) %>%
                 summarize_all(first)
             
-            edges <- edges %>% select(cls_label0, cls_label1, con_all)
+            edges <- edges %>% select(label0, label1, con_all)
             
             g <- graph_from_data_frame(
                 edges,

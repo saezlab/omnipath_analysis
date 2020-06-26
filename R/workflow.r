@@ -20,12 +20,7 @@
 
 con_enrich_input_param <- ProductParam$new(
     list('curated', 'omnipath'),
-    list('proteins'),
-    list(
-        'all-class-levels',
-        'above_main-main-misc-small_main',
-        'main-classes'
-    )
+    list('proteins')
 )
 
 res_by_entity_input_param <- Param$new('omnipath', 'curated')
@@ -64,7 +59,6 @@ omnipath2_workflow <<- list(
         method = ResourceCoverage,
         name = NULL,
         con_enrich_input_param,
-        res_by_entity_input_param,
         only_main_classes = Param$new(TRUE, FALSE)
     ),
     

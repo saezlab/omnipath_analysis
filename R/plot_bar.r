@@ -82,7 +82,7 @@ SimpleBar <- R6::R6Class(
             
             self$plt <- ggplot(
                 self$data,
-                aes(x = cls_label0, y = !!self$yvar)
+                aes(x = label0, y = !!self$yvar)
             ) %>%
             `+`(geom_col(fill = '#333333')) %>%
             {`if`(
@@ -114,7 +114,7 @@ SimpleBar <- R6::R6Class(
                     input_param = self$input_param
                 )$data
             ) %>%
-            group_by(cls_label0) %>%
+            group_by(label0) %>%
             summarize_all(first) %>%
             ungroup()
             
