@@ -69,22 +69,7 @@ EnzymeSubstrateBase <- R6::R6Class(
         
         setup = function(){
             
-            self$enz_sub <- EnzymeSubstrate$new()$data
-            
-            if(self$complexes){
-                
-                complexes <- {
-                    Complexes$new(
-                        expand_members = TRUE,
-                        keep_references = FALSE
-                    )$data
-                } %>%
-                mutate(complex_id = as.integer(as.factor(complex_id))) %>%
-                select(-resource, -n_members)
-                
-            }
-            
-            self$enz_sub <- self$enz_sub %>%
+            self$enz_sub <- EnzymeSubstrate$new()$data %>%
                 select(
                     -enzyme_genesymbol,
                     -substrate_genesymbol,
@@ -97,51 +82,9 @@ EnzymeSubstrateBase <- R6::R6Class(
                 )} %>%
                 {`if`(
                     self$complexes,
-                    left_join(., complexes, by = c('enzyme' = 'members')) %>%
-                    left_join(
-                        complexes,
-                        by = c('substrate' = 'members'),
-                        suffix = c('.enz', '.sub')
-                    ) %>%
-                    mutate(
-                        complex_id.enz = replace_na(complex_id.enz, 0),
-                        complex_id.sub = replace_na(complex_id.sub, 0),
-                        in_complex = (
-                            complex_id.enz != 0 &
-                            complex_id.enz == complex_id.sub
-                        )
-                    ) %>%
-                    group_by(
-                        enzyme,
-                        substrate,
-                        residue_type,
-                        residue_offset,
-                        modification
-                    ) %>%
-                    mutate(in_complex = any(in_complex)) %>%
-                    summarize_all(first) %>%
-                    ungroup() %>%
-                    select(
-                        -complex_id.enz,
-                        -complex_id.sub,
-                    ) %>%
-                    mutate(self_modification = enzyme == substrate) %>%
-                    mutate(
-                        category = ifelse(
-                            self_modification,
-                            'self',
-                            ifelse(
-                                in_complex,
-                                'in_complex',
-                                'between_entities'
-                            )
-                        )
-                    ),
+                    enz_sub_add_complexes(.),
                     .
-                )}
-            
-            
-            self$enz_sub <- self$enz_sub %>%
+                )} %>%
                 mutate(
                     shared = sapply(
                         str_split(sources, ';'),
@@ -207,6 +150,78 @@ EnzymeSubstrateBase <- R6::R6Class(
     )
     
 )
+
+
+enz_sub_add_complexes <- function(es){
+
+    complexes <- {
+            Complexes$new(
+                expand_members = TRUE,
+                keep_references = FALSE
+            )$data
+        } %>%
+        mutate(complex_id = as.integer(as.factor(complex_id))) %>%
+        select(-resource, -n_members)
+
+    result <- NULL
+
+    eschunks <- ceiling(seq_len(nrow(es)) / 5000)
+
+    for(esi in unique(eschunks)){
+
+        eschunk <- es %>% filter(eschunks == esi)
+
+        eschunk <- eschunk %>%
+            left_join(., complexes, by = c('enzyme' = 'members')) %>%
+            left_join(
+                complexes,
+                by = c('substrate' = 'members'),
+                suffix = c('.enz', '.sub')
+            ) %>%
+            mutate(
+                complex_id.enz = replace_na(complex_id.enz, 0),
+                complex_id.sub = replace_na(complex_id.sub, 0),
+                in_complex = (
+                    complex_id.enz != 0 &
+                    complex_id.enz == complex_id.sub
+                )
+            ) %>%
+            group_by(
+                enzyme,
+                substrate,
+                residue_type,
+                residue_offset,
+                modification
+            ) %>%
+            mutate(in_complex = any(in_complex)) %>%
+            summarize_all(first) %>%
+            ungroup() %>%
+            select(
+                -complex_id.enz,
+                -complex_id.sub,
+            )
+
+        result <- bind_rows(result, eschunk)
+
+    }
+
+    result <- result %>%
+        mutate(self_modification = enzyme == substrate) %>%
+        mutate(
+            category = ifelse(
+                self_modification,
+                'self',
+                ifelse(
+                    in_complex,
+                    'in_complex',
+                    'between_entities'
+                )
+            )
+        )
+
+    return(result)
+
+}
 
 
 EnzymeSubstrateShared <- R6::R6Class(
