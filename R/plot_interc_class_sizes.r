@@ -199,7 +199,7 @@ IntercellClassSizesDots <- R6::R6Class(
                 summarize_all(first) %>%
                 ungroup() %>%
                 select(
-                    database = resource_label,
+                    database = resource,
                     cls = label,
                     size = n_unique
                 ) %>%

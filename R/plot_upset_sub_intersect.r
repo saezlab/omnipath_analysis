@@ -57,7 +57,7 @@ SubclassesIntersection <- R6::R6Class(
                 data = data,
                 fname_param = fname_param,
                 ent_col = entity_id,
-                cat_col = resource_label,
+                cat_col = resource,
                 name = enquo(name),
                 plot_args = plot_args,
                 width = width,
@@ -101,7 +101,7 @@ SubclassesIntersectionSeries <- R6::R6Class(
                 fname_param = list(
                     `if`(self$complexes, 'complex', 'protein')
                 ),
-                width_by = resource_label,
+                width_by = resource,
                 width_min = 4,
                 width_step = .5
             )
@@ -114,8 +114,8 @@ SubclassesIntersectionSeries <- R6::R6Class(
             
             self$data <- self$data %>%
                 filter(
-                    resource_label != '' &
-                    class_type == 'sub'
+                    resource != '' &
+                    source == 'resource_specific'
                 ) %>%
                 {`if`(
                     self$complexes,
@@ -146,7 +146,7 @@ SubclassesIntersectionSeries <- R6::R6Class(
             return(
                 length(
                     self$slice %>%
-                    pull(resource_label) %>%
+                    pull(resource) %>%
                     unique()
                 ) > 1
             )
