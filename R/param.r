@@ -93,6 +93,58 @@ get_default_param <- function(){
             'secreted_enzyme',
             'transporter'
         ),
+
+        intercell_classes_exclude = list(
+            'Small molecule ligand synthase',
+            'Ligand dgidb',
+            'Receptor regulator',
+            'Matrix adhesion regulator',
+            'Intracellular intercellular related',
+            'Ligand regulator',
+            'Ecm regulator',
+            'Desmosome',
+            'Matrix adhesion regulator',
+            'Ion channel regulator',
+            'Secreted peptidase inhibitor',
+            'Cell surface peptidase',
+            'Secreted receptor'
+        ),
+
+        intercell_colors = list(
+            `Adhesion` = '#7264B9',
+            `Adherens junction` = '#7264B9',
+            `Tight junction` = '#7264B9',
+            `Matrix adhesion` = '#7264B9',
+            `Cell adhesion` = '#7264B9',
+            `Secreted enzyme` = '#9E1639',
+            `Secreted peptidase` = '#9E1639',
+            `Ecm` = '#591E5E',
+            `Ligand` = '#F89D0E',
+            `Receptor` = '#00AAB0',
+            `Cell surface enzyme` = '#ED0772',
+            `Cell surface ligand` = '#D22027',
+            `Transporter` = '#FFF200',
+            `Gap junction` = '#FFF200',
+            `Ion channel` = '#FFF200'
+        ),
+
+        intercell_colors_2 = list(
+            `Adhesion` = '#CDC4E7',
+            `Adherens junction` = '#CDC4E7',
+            `Tight junction` = '#CDC4E7',
+            `Matrix adhesion` = '#CDC4E7',
+            `Cell adhesion` = '#CDC4E7',
+            `Secreted enzyme` = '#8B456E',
+            `Secreted peptidase` = '#8B456E',
+            `Ecm` = '#BEA2BE',
+            `Ligand` = '#FDDCA6',
+            `Receptor` = '#ABE3DF',
+            `Cell surface enzyme` = '#F9ABCA',
+            `Cell surface ligand` = '#E16C70',
+            `Transporter` = '#FFFBAB',
+            `Gap junction` = '#FFFBAB',
+            `Ion channel` = '#FFFBAB'
+        ),
         
         fig_res_cov = 'res-cov_%s_%s_%s',
         fig_con_enrich = 'connection-enrichment_%s_%s_%s_%s_%s',

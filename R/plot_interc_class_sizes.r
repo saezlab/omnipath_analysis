@@ -124,8 +124,8 @@ IntercellClassSizesDots <- R6::R6Class(
             super$initialize(
                 data = self$data,
                 name = fig_cat_sizes_dots,
-                width = 3.5,
-                height = 4.5,
+                width = 4.5,
+                height = 5.5,
                 theme_args = x_vertical_labels()
             )
             
@@ -142,24 +142,19 @@ IntercellClassSizesDots <- R6::R6Class(
                         x = cls,
                         y = database,
                         size = size,
-                        color = database == 'OmniPath',
-                        alpha = total_unique
+                        color = color
                     )
                 ) +
                 geom_point(stroke = 0) +
-                scale_color_manual(
-                    values = omnipath2_settings$get(palette),
-                    guide = FALSE
-                ) +
-                scale_alpha_manual(
-                    values = c(
-                        'total' = .66,
-                        'unique' = 1.
-                    ),
-                    guide = FALSE
-                ) +
-                xlab('Inter-cellular\ncommunication roles') +
+                xlab('Intercellular\ncommunication roles') +
                 ylab('Resources') +
+                scale_color_manual(
+                    values = setNames(
+                        unique(self$data$color),
+                        unique(self$data$color)
+                    ),
+                    guide = NULL
+                ) +
                 scale_size_area(
                     guide = guide_legend(
                         title = 'Number of\nproteins',
@@ -180,13 +175,31 @@ IntercellClassSizesDots <- R6::R6Class(
             
             classes <- unique(self$data$label0)
 
+            exclude <- omnipath2_settings$get(intercell_classes_exclude)
+
+            colors <- omnipath2_settings$get(intercell_colors_2) %>%
+                unlist() %>%
+                tibble(cls = names(.), color = .) %>%
+                mutate(total_unique = 'total') %>%
+                bind_rows(
+                    omnipath2_settings$get(intercell_colors) %>%
+                    unlist() %>%
+                    tibble(cls = names(.), color = .) %>%
+                    mutate(total_unique = 'unique')
+                )
+
+            colors_unique <- data.frame
+
             self$by_entity <- self$by_entity %>%
                 filter(
                     !is_complex &
-                    !is.na(label)
+                    !is.na(label) &
+                    aspect == 'functional' &
+                    scope == 'generic' &
+                    !label %in% exclude
                 ) %>%
                 group_by(entity_id, label) %>%
-                mutate(is_unique = n() == 1) %>%
+                mutate(is_unique = n() <= 2) %>%
                 ungroup() %>%
                 filter(is_unique) %>%
                 group_by(label, resource) %>%
@@ -209,17 +222,23 @@ IntercellClassSizesDots <- R6::R6Class(
                     summarize_all(first) %>%
                     ungroup()
                 )
-            
+
             data_full <- expand.grid(
                     database = databases,
                     cls = classes
                 ) %>%
+                filter(!cls %in% exclude) %>%
                 mutate(
                     database = as.character(database),
                     cls = as.character(cls)
                 ) %>%
                 left_join(
                     self$data %>%
+                    filter(
+                        scope0 == 'generic' &
+                        aspect0 == 'functional' &
+                        !label0 %in% exclude
+                    ) %>%
                     select(label0, resource0, size0) %>%
                     group_by(label0, resource0) %>%
                     summarize_all(first) %>%
@@ -246,6 +265,10 @@ IntercellClassSizesDots <- R6::R6Class(
                         levels = unique(database),
                         ordered = TRUE
                     )
+                ) %>%
+                left_join(
+                    colors,
+                    by = c('cls', 'total_unique')
                 )
             
             self$data <- data_full
