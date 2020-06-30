@@ -69,7 +69,7 @@ IntercellClassSizes <- R6::R6Class(
                 mutate(
                     label0 = ifelse(is.na(label0), 'OmniPath', label0)
                 ) %>%
-                arrange(desc(label0 == 'OmniPath'), desc(size_cls0)) %>%
+                arrange(desc(label0 == 'OmniPath'), desc(size0)) %>%
                 mutate(
                     label0 = factor(
                         label0, levels = unique(label0), ordered = TRUE
@@ -83,7 +83,7 @@ IntercellClassSizes <- R6::R6Class(
         
         plot = function(...){
             
-            self$plt <- ggplot(self$data, aes(x = label0, y = size_cls0)) +
+            self$plt <- ggplot(self$data, aes(x = label0, y = size0)) +
                 geom_col(fill = 'black') +
                 xlab('Resources') +
                 ylab('Number of proteins') +
@@ -176,15 +176,10 @@ IntercellClassSizesDots <- R6::R6Class(
         
         preprocess = function(...){
             
-            databases <- unique(self$data$src_label0)
+            databases <- unique(self$data$resource0)
             
-            classes <- unique(
-                (
-                    self$data %>%
-                    filter(source0 == 'composite' & aspect0 == 'functional')
-                )$label0
-            )
-            
+            classes <- unique(self$data$label0)
+
             self$by_entity <- self$by_entity %>%
                 filter(
                     !is_complex &
@@ -225,16 +220,16 @@ IntercellClassSizesDots <- R6::R6Class(
                 ) %>%
                 left_join(
                     self$data %>%
-                    select(label0, src_label0, size_cls0) %>%
-                    group_by(label0, src_label0) %>%
+                    select(label0, resource0, size0) %>%
+                    group_by(label0, resource0) %>%
                     summarize_all(first) %>%
                     ungroup(),
                     by = c(
-                        'database' = 'src_label0',
+                        'database' = 'resource0',
                         'cls' = 'label0'
                     )
                 ) %>%
-                rename(size = size_cls0) %>%
+                rename(size = size0) %>%
                 mutate(
                     database = replace_na(database, 'OmniPath'),
                     total_unique = 'total'

@@ -102,7 +102,7 @@ UpsetBase <- R6::R6Class(
             
             private$ensure_data()
             private$collect_categories()
-            
+
         },
         
         
@@ -120,19 +120,19 @@ UpsetBase <- R6::R6Class(
         collect_categories = function(){
             
             self$names <- self$data %>%
-                select(!!self$cat_col) %>%
-                unlist() %>%
+                pull(!!self$cat_col) %>%
                 unique()
-            
+
             self$categories <- setNames(
                 sapply(
                     self$names,
-                    function(name){
+                    function(value){
+
                         self$data %>%
-                            filter(!!self$cat_col == name) %>%
-                            select(!!self$ent_col) %>%
-                            unlist() %>%
+                            dplyr::filter(!!self$cat_col == value) %>%
+                            pull(!!self$ent_col) %>%
                             unique()
+
                     }
                 ),
                 self$names

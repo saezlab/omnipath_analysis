@@ -291,14 +291,14 @@ ConnectionGraph <- R6::R6Class(
             edges <- self$data %>%
                 filter(name0 == main_classes & name1 == main_classes) %>%
                 select(
-                    label0, label1, con_all, size_cls0, size_cls1
+                    label0, label1, con_all, size0, size1
                 ) %>%
-                filter(size_cls0 > 0 & size_cls1 > 0) %>%
+                filter(size0 > 0 & size1 > 0) %>%
                 mutate(label0 = as.character(label0))
             
             vertices <- bind_rows(
-                    edges %>% select(name = label0, size = size_cls0),
-                    edges %>% select(name = label1, size = size_cls1)
+                    edges %>% select(name = label0, size = size0),
+                    edges %>% select(name = label1, size = size1)
                 ) %>%
                 group_by(name) %>%
                 summarize_all(first)

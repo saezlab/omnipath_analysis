@@ -185,7 +185,7 @@ PlotSeries <- R6::R6Class(
     private = list(
         
         single_plot = function(){
-            
+
             do.call(
                 self$plotter$new,
                 c(

@@ -121,12 +121,27 @@ Path <- R6::R6Class(
         
         insert_param = function(){
             
-            self$fname_key <- do.call(
-                sprintf,
-                c(
-                    list(self$fname_key),
-                    self$fname_param
-                )
+            tryCatch(
+                {
+                    self$fname_key <- do.call(
+                        sprintf,
+                        c(
+                            list(self$fname_key),
+                            self$fname_param
+                        )
+                    )
+                },
+                error = function(e){
+                    msg <- paste0(
+                        'Number of file name parameters does not match. ',
+                        sprintf(
+                            'File name template: `%s`, parameters: %s',
+                            self$fname_key,
+                            paste(self$fname_param, collapse = ', ')
+                        )
+                    )
+                    stop(msg)
+                }
             )
             
             invisible(self)

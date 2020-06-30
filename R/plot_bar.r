@@ -290,7 +290,7 @@ IntercellSizesBar <- R6::R6Class(
             super$setup()
             
             self$data <- self$data %>%
-                mutate(size_log10 = log10(size_cls0))
+                mutate(size_log10 = log10(size0))
             
             invisible(self)
             
@@ -345,7 +345,7 @@ IntercellCoverageBar <- R6::R6Class(
             super$setup()
             
             self$data <- self$data %>%
-                mutate(omnipath_coverage = in_network_cls0 / size_cls0 * 100)
+                mutate(omnipath_coverage = in_network_cls0 / size0 * 100)
             
             invisible(self)
             
@@ -400,7 +400,7 @@ IntercellDegreeBar <- R6::R6Class(
             super$setup()
             
             self$data <- self$data %>%
-                mutate(mean_degree = deg_total0 / size_cls0)
+                mutate(mean_degree = deg_total0 / size0)
             
             invisible(self)
             

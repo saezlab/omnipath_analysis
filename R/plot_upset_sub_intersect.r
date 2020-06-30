@@ -52,7 +52,7 @@ SubclassesIntersection <- R6::R6Class(
                 ),
                 plot_args
             )
-            
+
             super$initialize(
                 data = data,
                 fname_param = fname_param,
@@ -89,10 +89,12 @@ SubclassesIntersectionSeries <- R6::R6Class(
             complexes = FALSE,
             ...
         ){
-            
+
             self$complexes <- complexes
             private$ensure_data(data)
             
+
+
             super$initialize(
                 data = self$data,
                 slice_var = parent,
@@ -115,7 +117,8 @@ SubclassesIntersectionSeries <- R6::R6Class(
             self$data <- self$data %>%
                 filter(
                     resource != '' &
-                    source == 'resource_specific'
+                    source == 'resource_specific' &
+                    scope == 'generic'
                 ) %>%
                 {`if`(
                     self$complexes,

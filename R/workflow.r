@@ -186,7 +186,7 @@ omnipath2_workflow <<- list(
         input_param = network_param
     ),
     
-    network_coverage = Task$new(
+    intercell_class_sizes_dot = Task$new(
         method = IntercellClassSizesDots,
         name = 'Intercell category sizes'
     )

@@ -77,7 +77,19 @@ SinglePlot <- R6::R6Class(
             
             private$setup()
             do.call(self$preprocess, self$preproc_args)
-            do.call(self$plot, self$plot_args)
+            png('.tmp.png')
+            tryCatch(
+                do.call(self$plot, self$plot_args),
+                error = function(e){
+                    stop(e)
+                },
+                finally = function(){
+                    dev.off()
+                    suppressWarnings(file.remove('.tmp.png'))
+                }
+            )
+            dev.off()
+            suppressWarnings(file.remove('.tmp.png'))
             self$post_plot()
             self$save()
             
