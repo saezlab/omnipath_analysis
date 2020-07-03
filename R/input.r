@@ -507,3 +507,67 @@ NetworkSize <- R6::R6Class(
     )
     
 )
+
+
+Networks <- R6::R6Class(
+
+    'Networks',
+
+    lock_objects = FALSE,
+
+    public = list(
+
+        initialize = function(
+                networks = NULL,
+                only_totals = TRUE,
+                coverage = FALSE,
+                ...
+            ){
+
+            self$networks <- `if`(
+                is.null(networks),
+                omnipath2_settings$get(network_datasets),
+                networks
+            )
+            self$only_totals <- only_totals
+            self$coverage <- coverage
+            self$loader <- `if`(
+                self$coverage,
+                NetworkCoverage,
+                NetworkSize
+            )
+
+            self$collect_networks()
+
+            invisible(self)
+
+        },
+
+
+        collect_networks = function(){
+
+            data <- NULL
+
+            for(dataset in self$networks){
+
+                reader <- self$loader$new(input_param = dataset)
+                this_data <- reader$data %>%
+                    mutate(dataset = dataset)
+                data <- data %>% bind_rows(this_data)
+
+            }
+
+            self$data <- data %>%
+                {`if`(
+                    self$only_totals & !self$coverage,
+                    filter(., grepl('total', resource)),
+                    .
+                )}
+
+            invisible(self)
+
+        }
+
+    )
+
+)

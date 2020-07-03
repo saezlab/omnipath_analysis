@@ -171,19 +171,43 @@ omnipath2_workflow <<- list(
     network_sizes = Task$new(
         method = NetworkSizeDot,
         name = 'Network sizes',
-        input_param = network_param
+        input_param = network_param,
+        only_totals = Param$new(FALSE)
+    ),
+
+    network_sizes_totals = Task$new(
+        method = NetworkSizeDot,
+        name = 'Network sizes totals',
+        input_param = Param$new('all'),
+        only_totals = Param$new(TRUE)
     ),
     
     network_directions = Task$new(
         method = NetworkDirectionsDot,
         name = 'Network directions',
-        input_param = network_param
+        input_param = network_param,
+        only_totals = Param$new(FALSE)
+    ),
+
+    network_directions_totals = Task$new(
+        method = NetworkDirectionsDot,
+        name = 'Network directions totals',
+        input_param = Param$new('all'),
+        only_totals = Param$new(TRUE)
     ),
     
     network_coverage = Task$new(
         method = NetworkCoverageDot,
         name = 'Network coverages',
-        input_param = network_param
+        input_param = network_param,
+        only_totals = Param$new(FALSE)
+    ),
+
+    network_coverage_totals = Task$new(
+        method = NetworkCoverageDot,
+        name = 'Network coverages totals',
+        input_param = Param$new('all'),
+        only_totals = Param$new(TRUE)
     ),
     
     intercell_class_sizes_dot = Task$new(

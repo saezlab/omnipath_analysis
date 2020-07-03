@@ -83,7 +83,7 @@ get_default_param <- function(){
         timestamp_dirs = TRUE,
         timestamp_files = TRUE,
         loglevel = 5,
-        
+
         intercell_main_classes = list(
             'ecm',
             'adhesion',
@@ -92,6 +92,13 @@ get_default_param <- function(){
             'cell_surface_enzyme',
             'secreted_enzyme',
             'transporter'
+        ),
+
+        network_datasets = list(
+            'omnipath',
+            'tf_target',
+            'mirna_mrna',
+            'tf_mirna'
         ),
 
         intercell_classes_exclude = list(
@@ -145,7 +152,7 @@ get_default_param <- function(){
             `Gap junction` = '#FFFBAB',
             `Ion channel` = '#FFFBAB'
         ),
-        
+
         fig_res_cov = 'res-cov_%s_%s_%s',
         fig_con_enrich = 'connection-enrichment_%s_%s_%s_%s_%s',
         fig_subcls_intersect = 'subclass-intersection_%s_%s_%s',
@@ -168,9 +175,9 @@ get_default_param <- function(){
         fig_refs_by_cplex = 'references-by-complex',
         fig_complexes_by_ref = 'complexes-by-ref',
         fig_cplex_by_comp = 'complexes-by-components',
-        fig_network_coverage = 'network-coverage_%s',
-        fig_network_size = 'network-size_%s',
-        fig_network_dir = 'network-dir_%s',
+        fig_network_coverage = 'network-coverage_%s_%s',
+        fig_network_size = 'network-size_%s_%s',
+        fig_network_dir = 'network-dir_%s_%s',
         fig_intercell_deg = 'intercell-degrees_%s_%s_%s_%s',
         fig_intercell_cov = 'intercell-cov_%s_%s_%s_%s',
         fig_intercell_size = 'intercell-size_%s_%s_%s_%s'

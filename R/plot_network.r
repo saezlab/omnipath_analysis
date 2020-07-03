@@ -33,14 +33,22 @@ NetworkCoverageDot <- R6::R6Class(
     
     public = list(
         
-        initialize = function(input_param, ...){
-            
+        initialize = function(input_param, only_totals = FALSE, ...){
+
             self$input_param <- input_param
-            
+            self$only_totals <- only_totals
+
             super$initialize(
                 data = self$data,
                 name = fig_network_coverage,
-                fname_param = list(input_param),
+                fname_param = list(
+                    input_param,
+                    `if`(
+                        self$only_totals,
+                        'totals',
+                        'by-resource'
+                    )
+                ),
                 height = 9,
                 width = 6
             )
@@ -60,8 +68,8 @@ NetworkCoverageDot <- R6::R6Class(
                 ) +
                 geom_col(
                     data = self$data %>%
-                    group_by(resource) %>%
-                    summarize_all(first),
+                        group_by(resource, category) %>%
+                        summarize_all(first),
                     mapping = aes(
                         y = n_network / sc,
                         x = resource,
@@ -88,12 +96,18 @@ NetworkCoverageDot <- R6::R6Class(
                 ) +
                 ylab('Coverage [%]') +
                 xlab('Resources') +
-                coord_flip() +
-                facet_grid(
-                    category~.,
-                    scales = 'free_y',
-                    space = 'free_y'
-                )
+                coord_flip()
+
+                if(!self$only_totals){
+
+                    self$plt <- self$plt +
+                        facet_grid(
+                            category~.,
+                            scales = 'free_y',
+                            space = 'free_y'
+                        )
+
+                }
             
             invisible(self)
             
@@ -103,18 +117,35 @@ NetworkCoverageDot <- R6::R6Class(
     
     private = list(
         
+        load_data = function(){
+
+            self$data <- `if`(
+                self$only_totals,
+                Networks$new(coverage = TRUE)$data,
+                NetworkCoverage$new(input_param = self$input_param)$data
+            )
+
+            self$categories <- `if`(
+                self$only_totals,
+                Networks$new()$data,
+                NetworkSize$new(input_param = self$input_param)$data
+            )
+
+            invisible(self)
+
+        },
+
+
         setup = function(){
             
-            categories <- NetworkSize$new(
-                input_param = self$input_param
-            )$data %>%
-            group_by(resource, category) %>%
-            summarize_all(first) %>%
-            select(resource, category)
+            private$load_data()
+
+            categories <- self$categories %>%
+                group_by(resource, category) %>%
+                summarize_all(first) %>%
+                select(resource, category)
             
-            self$data <- NetworkCoverage$new(
-                input_param = self$input_param
-            )$data %>%
+            self$data <- self$data %>%
             mutate(
                 resource_type = factor(
                     resource_type,
@@ -123,20 +154,27 @@ NetworkCoverageDot <- R6::R6Class(
                 )
             ) %>%
             left_join(categories, by = c('resource')) %>%
-            arrange(resource_type, desc(n_network)) %>%
             mutate(coverage_pct = coverage / n_group * 100) %>%
+            filter(!is.na(category) | resource_type != 'resource') %>%
+            mutate(category = ifelse(
+                is.na(category),
+                as.character(resource),
+                category
+            )) %>%
+            {`if`(
+                self$only_totals,
+                filter(., resource_type != 'resource'),
+                .
+            )} %>%
+            arrange(resource_type, desc(n_network)) %>%
             mutate(
                 resource = factor(
                     resource,
                     levels = unique(resource),
                     ordered = TRUE
                 )
-            ) %>%
-            mutate(category = ifelse(
-                is.na(category),
-                as.character(resource),
-                category
-            ))
+            )
+
             
             self$height <- 1 + .2 * length(unique(self$data$resource))
             
@@ -159,14 +197,22 @@ NetworkSizeDot <- R6::R6Class(
     
     public = list(
         
-        initialize = function(input_param, ...){
+        initialize = function(input_param, only_totals = FALSE, ...){
             
             self$input_param <- input_param
+            self$only_totals <- only_totals
             
             super$initialize(
                 data = self$data,
                 name = fig_network_size,
-                fname_param = list(input_param),
+                fname_param = list(
+                    input_param,
+                    `if`(
+                        self$only_totals,
+                        'totals',
+                        'by-resource'
+                    )
+                ),
                 height = 9,
                 width = 6
             )
@@ -214,12 +260,16 @@ NetworkSizeDot <- R6::R6Class(
                 shape = 19
             )
             
-            self$plt <- self$plt +
-                facet_grid(
-                    category~.,
-                    scales = 'free_y',
-                    space = 'free_y'
-                )
+            if(!self$only_totals){
+
+                self$plt <- self$plt +
+                    facet_grid(
+                        category~.,
+                        scales = 'free_y',
+                        space = 'free_y'
+                    )
+
+            }
             
             invisible(self)
             
@@ -230,11 +280,24 @@ NetworkSizeDot <- R6::R6Class(
     
     private = list(
         
+        load_data = function(){
+
+            self$data <- `if`(
+                self$only_totals,
+                Networks$new()$data,
+                NetworkSize$new(input_param = self$input_param)$data
+            )
+
+            invisible(self)
+
+        },
+
+
         setup = function(){
-            
-            self$data <- NetworkSize$new(
-                input_param = self$input_param
-            )$data %>%
+
+            private$load_data()
+
+            self$data <- self$data %>%
             filter(var %in% c('entities', 'interactions_0')) %>%
             arrange(desc(n)) %>%
             mutate(
@@ -266,10 +329,10 @@ NetworkDirectionsDot <- R6::R6Class(
     
     public = list(
         
-        initialize = function(
-                input_param, ...){
+        initialize = function(input_param, only_totals = FALSE, ...){
             
             self$input_param <- input_param
+            self$only_totals <- only_totals
             
             self$vars <- c(
                 'interactions_non_directed_0',
@@ -282,7 +345,14 @@ NetworkDirectionsDot <- R6::R6Class(
             super$initialize(
                 data = self$data,
                 name = fig_network_dir,
-                fname_param = list(input_param),
+                fname_param = list(
+                    input_param,
+                    `if`(
+                        self$only_totals,
+                        'totals',
+                        'by-resource'
+                    )
+                ),
                 height = 9,
                 width = 6
             )
@@ -326,12 +396,16 @@ NetworkDirectionsDot <- R6::R6Class(
                 position = position_dodge(width = .4)
             )
             
-            self$plt <- self$plt +
-                facet_grid(
-                    category~.,
-                    scales = 'free_y',
-                    space = 'free_y'
-                )
+            if(!self$only_totals){
+
+                self$plt <- self$plt +
+                    facet_grid(
+                        category~.,
+                        scales = 'free_y',
+                        space = 'free_y'
+                    )
+
+            }
             
             invisible(self)
             
@@ -342,11 +416,24 @@ NetworkDirectionsDot <- R6::R6Class(
     
     private = list(
         
+        load_data = function(){
+
+            self$data <- `if`(
+                self$only_totals,
+                Networks$new()$data,
+                NetworkSize$new(input_param = self$input_param)$data
+            )
+
+            invisible(self)
+
+        },
+
+
         setup = function(){
             
-            self$data <- NetworkSize$new(
-                input_param = self$input_param
-            )$data %>%
+            private$load_data()
+
+            self$data <- self$data %>%
             filter(var %in% self$vars & !shared) %>%
             arrange(desc(n)) %>%
             mutate(

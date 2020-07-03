@@ -225,7 +225,7 @@ InputPath <- R6::R6Class(
             
             private$set_fname_key()
             private$insert_param()
-            
+
             self$path <- omnipath2_files$get(self$fname_key)
             self$dir <- dirname(self$path)
             self$fname <- basename(self$path)
@@ -285,7 +285,7 @@ FigurePath <- R6::R6Class(
     public = list(
         
         initialize = function(name, fname_param = list()){
-            
+
             super$initialize(
                 name = name,
                 fname_param = fname_param,
