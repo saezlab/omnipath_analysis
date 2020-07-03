@@ -559,8 +559,12 @@ Networks <- R6::R6Class(
 
             self$data <- data %>%
                 {`if`(
-                    self$only_totals & !self$coverage,
-                    filter(., grepl('total', resource)) %>%
+                    self$only_totals,
+                    {`if`(
+                        self$coverage,
+                        filter(., resource_type != 'resource'),
+                        filter(., grepl('total', resource))
+                    )} %>%
                     mutate(
                         dataset = factor(
                             dataset,
@@ -572,24 +576,9 @@ Networks <- R6::R6Class(
                             ),
                             ordered = TRUE
                         ),
-                        resource_label = sub(' total', '', resource),
-                        resource_label = sub(
-                            'Post translational',
-                            'Post translational (total)',
-                            resource_label
-                        ),
-                        resource_label = sub(
-                            'Mirna',
-                            'miRNA',
-                            resource_label
-                        ),
-                        resource_label = sub(
-                            ' trans',
-                            '-trans',
-                            resource_label
-                        ),
+                        resource_label = self$get_resource_label(resource),
                         dataset_label = map_chr(
-                            dataset,
+                            as.character(dataset),
                             function(x){
                                 omnipath2_settings$get(
                                     network_dataset_labels
@@ -597,22 +586,57 @@ Networks <- R6::R6Class(
                             }
                         )
                     ) %>%
-                    filter(
-                        category != 'Activity flow' |
-                        dataset == 'omnipath'
-                    ) %>%
-                    arrange(dataset, desc(category)) %>%
-                    mutate(
-                        resource = factor(
-                            resource,
-                            levels = unique(resource),
-                            ordered = TRUE
+                    {`if`(
+                        self$coverage,
+                        mutate(
+                            .,
+                            resource_label = ifelse(
+                                resource_type == 'total',
+                                dataset_label,
+                                resource_label
+                            ),
+                            resource_label = ifelse(
+                                startsWith(resource_label, 'miRNA'),
+                                resource_label,
+                                str_to_sentence(resource_label)
+                            )
+                        ) %>%
+                        filter(
+                            resource != 'Activity flow' |
+                            dataset == 'omnipath'
+                        ),
+                        filter(
+                            .,
+                            category != 'Activity flow' |
+                            dataset == 'omnipath'
+                        ) %>%
+                        arrange(dataset, desc(category)) %>%
+                        mutate(
+                            resource = factor(
+                                resource,
+                                levels = unique(resource),
+                                ordered = TRUE
+                            )
                         )
-                    ),
+                    )},
                     .
                 )}
 
             invisible(self)
+
+        },
+
+
+        get_resource_label = function(label){
+
+            label %>%
+            str_replace(' total', '') %>%
+            str_replace(
+                'Post translational',
+                'Post translational (total)'
+            ) %>%
+            str_replace('Mirna', 'miRNA') %>%
+            str_replace(' trans', '-trans')
 
         }
 

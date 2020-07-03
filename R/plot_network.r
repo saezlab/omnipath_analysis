@@ -64,15 +64,15 @@ NetworkCoverageDot <- R6::R6Class(
             
             self$plt <- ggplot(
                     self$data,
-                    aes(y = coverage_pct, x = resource, color = group)
+                    aes(y = coverage_pct, x = resource_label, color = group)
                 ) +
                 geom_col(
                     data = self$data %>%
-                        group_by(resource, category) %>%
+                        group_by(resource_label, category) %>%
                         summarize_all(first),
                     mapping = aes(
                         y = n_network / sc,
-                        x = resource,
+                        x = resource_label,
                     ),
                     fill = '#CCCCCC',
                     color = NA
@@ -145,40 +145,46 @@ NetworkCoverageDot <- R6::R6Class(
             categories <- self$categories %>%
                 group_by(resource, category) %>%
                 summarize_all(first) %>%
-                select(resource, category)
+                select(resource, resource_label, category)
             
             self$data <- self$data %>%
-            mutate(
-                resource_type = factor(
-                    resource_type,
-                    levels = c('total', 'data_model', 'resource'),
-                    ordered = TRUE
+                mutate(
+                    resource_type = factor(
+                        resource_type,
+                        levels = c('total', 'data_model', 'resource'),
+                        ordered = TRUE
+                    )
+                ) %>%
+                {`if`(
+                    self$only_totals,
+                    left_join(., categories, by = c('resource_label')),
+                    left_join(., categories, by = c('resource'))
+                )} %>%
+                mutate(coverage_pct = coverage / n_group * 100) %>%
+                filter(!is.na(category) | resource_type != 'resource') %>%
+                mutate(
+                    category = ifelse(
+                        is.na(category),
+                        as.character(resource_label),
+                        category
+                    )
+                ) %>%
+                {`if`(
+                    self$only_totals,
+                    filter(., resource_type != 'resource') %>%
+                    arrange(dataset, desc(n_network)),
+                    arrange(., desc(n_network))
+                )} %>%
+                mutate(
+                    resource_label = factor(
+                        resource_label,
+                        levels = unique(resource_label),
+                        ordered = TRUE
+                    )
                 )
-            ) %>%
-            left_join(categories, by = c('resource')) %>%
-            mutate(coverage_pct = coverage / n_group * 100) %>%
-            filter(!is.na(category) | resource_type != 'resource') %>%
-            mutate(category = ifelse(
-                is.na(category),
-                as.character(resource),
-                category
-            )) %>%
-            {`if`(
-                self$only_totals,
-                filter(., resource_type != 'resource'),
-                .
-            )} %>%
-            arrange(resource_type, desc(n_network)) %>%
-            mutate(
-                resource = factor(
-                    resource,
-                    levels = unique(resource),
-                    ordered = TRUE
-                )
-            )
 
             
-            self$height <- 1 + .2 * length(unique(self$data$resource))
+            self$height <- 1 + .2 * length(unique(self$data$resource_label))
             
             invisible(self)
             
@@ -375,7 +381,7 @@ NetworkDirectionsDot <- R6::R6Class(
             StackedGroupedBarDot$new(
                 obj = self,
                 data = self$data,
-                xvar = resource,
+                xvar = resource_label,
                 yvar = n,
                 fillvar = var,
                 xlab = 'Resources',
@@ -441,11 +447,15 @@ NetworkDirectionsDot <- R6::R6Class(
 
             self$data <- self$data %>%
             filter(var %in% self$vars & !shared) %>%
-            arrange(desc(n)) %>%
+            {`if`(
+                self$only_totals,
+                    arrange(., dataset, desc(n)),
+                    arrange(., desc(n))
+            )} %>%
             mutate(
-                resource = factor(
-                    resource,
-                    levels = unique(resource),
+                resource_label = factor(
+                    resource_label,
+                    levels = unique(resource_label),
                     ordered = TRUE
                 ),
                 var = factor(
