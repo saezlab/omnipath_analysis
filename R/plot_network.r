@@ -81,7 +81,8 @@ NetworkCoverageDot <- R6::R6Class(
                     size = 2.3,
                     alpha = .8,
                     position = position_dodge(width = .4),
-                    shape = 16
+                    shape = 16,
+                    stroke = 0
                 ) +
                 scale_y_continuous(
                     sec.axis = sec_axis(
@@ -230,7 +231,7 @@ NetworkSizeDot <- R6::R6Class(
             StackedGroupedBarDot$new(
                 obj = self,
                 data = self$data,
-                xvar = resource,
+                xvar = resource_label,
                 yvar = n,
                 fillvar = var,
                 alphavar = shared,
@@ -258,7 +259,7 @@ NetworkSizeDot <- R6::R6Class(
                     ),
                     guide = guide_legend(title = '')
                 ),
-                shape = 19
+                shape = 16
             )
             
             if(!self$only_totals){
@@ -299,17 +300,21 @@ NetworkSizeDot <- R6::R6Class(
             private$load_data()
 
             self$data <- self$data %>%
-            filter(var %in% c('entities', 'interactions_0')) %>%
-            arrange(desc(n)) %>%
-            mutate(
-                resource = factor(
-                    resource,
-                    levels = unique(resource),
-                    ordered = TRUE
+                filter(var %in% c('entities', 'interactions_0')) %>%
+                {`if`(
+                    self$only_totals,
+                    arrange(., dataset, desc(n)),
+                    arrange(., desc(n))
+                )} %>%
+                mutate(
+                    resource_label = factor(
+                        resource_label,
+                        levels = unique(resource_label),
+                        ordered = TRUE
+                    )
                 )
-            )
             
-            self$height <- 1 + .2 * length(unique(self$data$resource))
+            self$height <- 1 + .2 * length(unique(self$data$resource_label))
             
             invisible(self)
             

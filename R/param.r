@@ -101,6 +101,13 @@ get_default_param <- function(){
             'tf_mirna'
         ),
 
+        network_dataset_labels = list(
+            omnipath = 'post-translational',
+            tf_target = 'transcriptional',
+            mirna_mrna = 'post-transcriptional',
+            tf_mirna = 'miRNA transcriptional'
+        ),
+
         intercell_classes_exclude = list(
             'Small molecule ligand synthase',
             'Ligand dgidb',

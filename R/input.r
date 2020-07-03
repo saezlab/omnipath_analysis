@@ -560,7 +560,55 @@ Networks <- R6::R6Class(
             self$data <- data %>%
                 {`if`(
                     self$only_totals & !self$coverage,
-                    filter(., grepl('total', resource)),
+                    filter(., grepl('total', resource)) %>%
+                    mutate(
+                        dataset = factor(
+                            dataset,
+                            levels = c(
+                                'tf_mirna',
+                                'mirna_mrna',
+                                'tf_target',
+                                'omnipath'
+                            ),
+                            ordered = TRUE
+                        ),
+                        resource_label = sub(' total', '', resource),
+                        resource_label = sub(
+                            'Post translational',
+                            'Post translational (total)',
+                            resource_label
+                        ),
+                        resource_label = sub(
+                            'Mirna',
+                            'miRNA',
+                            resource_label
+                        ),
+                        resource_label = sub(
+                            ' trans',
+                            '-trans',
+                            resource_label
+                        ),
+                        dataset_label = map_chr(
+                            dataset,
+                            function(x){
+                                omnipath2_settings$get(
+                                    network_dataset_labels
+                                )[[x]]
+                            }
+                        )
+                    ) %>%
+                    filter(
+                        category != 'Activity flow' |
+                        dataset == 'omnipath'
+                    ) %>%
+                    arrange(dataset, desc(category)) %>%
+                    mutate(
+                        resource = factor(
+                            resource,
+                            levels = unique(resource),
+                            ordered = TRUE
+                        )
+                    ),
                     .
                 )}
 
