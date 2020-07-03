@@ -145,7 +145,7 @@ IntercellClassSizesDots <- R6::R6Class(
                         color = color
                     )
                 ) +
-                geom_point(stroke = 0) +
+                geom_point(stroke = 0, shape = 16) +
                 xlab('Intercellular\ncommunication roles') +
                 ylab('Resources') +
                 scale_color_manual(

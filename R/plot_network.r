@@ -80,7 +80,8 @@ NetworkCoverageDot <- R6::R6Class(
                 geom_point(
                     size = 2.3,
                     alpha = .8,
-                    position = position_dodge(width = .4)
+                    position = position_dodge(width = .4),
+                    shape = 16
                 ) +
                 scale_y_continuous(
                     sec.axis = sec_axis(

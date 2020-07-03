@@ -501,7 +501,7 @@ EnzymeSubstrateModtypeDot <- R6::R6Class(
                     self$enz_sub_by_resource,
                     aes(y = sources, x = n_modtype, color = modification)
                 ) +
-                geom_point(size = 5, alpha = .7) +
+                geom_point(size = 5, alpha = .7, shape = 16) +
                 scale_color_manual(
                     guide = guide_legend(
                         title = 'Modification type'
