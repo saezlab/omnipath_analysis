@@ -1,0 +1,70 @@
+\documentclass{standalone}
+
+\usepackage[utf8]{inputenc}
+\usepackage[no-math]{fontspec}
+
+\usepackage{graphicx}
+\usepackage{tikz}
+\usetikzlibrary{shapes,decorations.pathreplacing,calligraphy,positioning,shadows,fit,calc,arrows.meta}
+\usepackage{color}
+\usepackage{xcolor}
+
+\definecolor{lgray}{RGB}{200,199,200}
+\definecolor{lblue}{RGB}{191,207,238}
+\definecolor{rwthblue}{RGB}{23,111,193}
+
+\setmainfont{HelveticaNeueLTStd-Cn.otf}[Path=/home/denes/fonts/from_csilla/, BoldFont=HelveticaNeueLTStd-MdCn.otf]
+
+%\pgfkeys{/cclwd/Dendritic cell/Goblet cell}
+
+\begin{document}
+
+    \begin{tikzpicture}[cell/.style={circle, fill=lgray, minimum width=5mm, inner sep=2pt}]
+
+        \foreach \lab [count=\c, evaluate=\c as \ang using {18+72*\c}]
+            in {Dendritic cell, Macrophage, Goblet cell, Treg, Myofibroblast} {
+                \node[cell] (\lab) at (\ang:20mm) {};
+
+        }
+
+        \begin{scope}[
+            every path/.style={->,>=stealth,draw=rwthblue},
+            every to/.style={bend right}
+        ]
+
+            \begin{scope}[opacity=.5, transparency group]\path[line width=1.265pt](Dendritic cell) to (Myofibroblast);\end{scope}
+            \begin{scope}[opacity=.5, transparency group]\path[line width=1.495pt](Dendritic cell) to (Macrophage);\end{scope}
+            \begin{scope}[opacity=.5, transparency group]\path[line width=1.86pt](Dendritic cell) to (Goblet cell);\end{scope}
+            \begin{scope}[opacity=.5, transparency group]\path[line width=1.775pt](Dendritic cell) to (Treg);\end{scope}
+
+            \begin{scope}[opacity=.5, transparency group]\path[line width=3.265pt](Myofibroblast) to (Dendritic cell);\end{scope}
+            \begin{scope}[opacity=.5, transparency group]\path[line width=2.14pt](Myofibroblast) to (Macrophage);\end{scope}
+            \begin{scope}[opacity=.5, transparency group]\path[line width=2.29pt](Myofibroblast) to (Goblet cell);\end{scope}
+            \begin{scope}[opacity=.5, transparency group]\path[line width=2.36pt](Myofibroblast) to (Treg);\end{scope}
+
+            \begin{scope}[opacity=.5, transparency group]\path[line width=3.05pt](Treg) to (Dendritic cell);\end{scope}
+            \begin{scope}[opacity=.5, transparency group]\path[line width=1.825pt](Treg) to (Macrophage);\end{scope}
+            \begin{scope}[opacity=.5, transparency group]\path[line width=2.135pt](Treg) to (Goblet cell);\end{scope}
+            \begin{scope}[opacity=.5, transparency group]\path[line width=1.52pt](Treg) to (Myofibroblast);\end{scope}
+
+            \begin{scope}[opacity=.5, transparency group]\path[line width=3.27pt](Goblet cell) to (Dendritic cell);\end{scope}
+            \begin{scope}[opacity=.5, transparency group]\path[line width=2.08pt](Goblet cell) to (Macrophage);\end{scope}
+            \begin{scope}[opacity=.5, transparency group]\path[line width=2.25pt](Goblet cell) to (Treg);\end{scope}
+            \begin{scope}[opacity=.5, transparency group]\path[line width=1.715pt](Goblet cell) to (Myofibroblast);\end{scope}
+
+            \begin{scope}[opacity=.5, transparency group]\path[line width=4.325pt](Macrophage) to (Dendritic cell);\end{scope}
+            \begin{scope}[opacity=.5, transparency group]\path[line width=3.11pt](Macrophage) to (Goblet cell);\end{scope}
+            \begin{scope}[opacity=.5, transparency group]\path[line width=3.025pt](Macrophage) to (Treg);\end{scope}
+            \begin{scope}[opacity=.5, transparency group]\path[line width=2.28pt](Macrophage) to (Myofibroblast);\end{scope}
+
+        \end{scope}
+
+        \foreach \lab [count=\c, evaluate=\c as \ang using {18+72*\c}]
+        in {Dendritic cell, Macrophage, Goblet cell, Treg, Myofibroblast} {
+            \node at (\ang:28mm){\lab};
+
+        }
+
+    \end{tikzpicture}
+
+\end{document}
