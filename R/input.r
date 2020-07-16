@@ -309,6 +309,9 @@ Complexes <- R6::R6Class(
         preprocess = function(){
             
             self$data <- self$data %>%
+                mutate(
+                    resource = gsub('Signor', 'SIGNOR', resource)
+                ) %>%
                 {`if`(
                     self$keep_references,
                     .,

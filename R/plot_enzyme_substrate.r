@@ -239,7 +239,7 @@ EnzymeSubstrateShared <- R6::R6Class(
             super$initialize(
                 name = fig_enzyme_substrate_shared,
                 width = 5,
-                height = 6
+                height = 3
             )
             
         },
@@ -316,7 +316,7 @@ EnzymeSubstrateSelf <- R6::R6Class(
                 ),
                 complexes = TRUE,
                 width = 6,
-                height = 6,
+                height = 3,
                 xlab_vertical = FALSE
             )
             
@@ -412,7 +412,7 @@ EnzymeSubstrateModtype <- R6::R6Class(
                 list(
                     name = name,
                     width = 9,
-                    height = 7
+                    height = 3
                 ),
                 list(...)
             )
@@ -488,7 +488,7 @@ EnzymeSubstrateModtypeDot <- R6::R6Class(
             
             super$initialize(
                 name = fig_enzyme_substrate_modtype_dot,
-                height = 5,
+                height = 3,
                 xlab_vertical = FALSE
             )
             

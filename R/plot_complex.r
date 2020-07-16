@@ -117,7 +117,7 @@ ComplexesByResource <- R6::R6Class(
                     `if`(log_y, 'log', 'stacked'),
                     `if`(bar, 'bar', 'dot')
                 ),
-                height = 4,
+                height = 3,
                 width = 4,
                 xlab_vertical = FALSE
             )
