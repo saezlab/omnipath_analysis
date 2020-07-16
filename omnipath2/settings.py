@@ -76,6 +76,7 @@ _defaults = {
     'intercell_classes_tsv': 'intercell_classes', #
     'main_coverage_tsv': 'main_coverage_%s', #
     'intercell_network_by_resource_tsv': 'stats_by_resource_%s_%s', #
+    'intercell_network_tsv': 'intercell_network_by_resource', #
     'resources_by_entity_tsv': 'resources_by_entity_%s', #
     'intercell_annots_by_entity_tsv': 'intercell_annotations_by_entity', #
     'annots_by_entity_tsv': 'annotations_by_entity', #

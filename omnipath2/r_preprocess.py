@@ -41,6 +41,7 @@ from pypath.inputs import main as dataio
 from pypath.share import progress
 from pypath.share import common
 from pypath.core import entity
+from pypath.resources import network as netres
 
 import omnipath2
 from omnipath2 import settings as op2_settings
@@ -677,6 +678,66 @@ class IntercellAnnotationsByEntity(omnipath2.table.TableBase):
         self.header = self.data.columns
 
 
+class IntercellNetworkByResource(omnipath2.table.TableBase):
+
+
+    def __init__(self, **kwargs):
+
+        param = {
+            'fname': 'intercell_network_tsv',
+            'log_label': 'op2.ic-net-by-res',
+        }
+        param.update(kwargs)
+
+        omnipath2.table.TableBase.__init__(self, **param)
+
+
+    def load(self):
+
+        intercell = omnipath2.data.get_db('intercell')
+        network = omnipath2.data.get_db('omnipath')
+
+        intercell.register_network(network)
+
+        lig_rec_resources = {r.name for r in netres.ligand_receptor.values()}
+        lig_rec_resources.add(None)
+
+        l_df = []
+
+        for res in lig_rec_resources:
+
+            annot_res = res or 'OmniPath'
+            only_composite = res is None
+            self._log('Creating intercell network from `%s`.' % annot_res)
+            network_args = {'resources': res}
+            annot_args_source = {'database': annot_res}
+            annot_args_target = {'database': annot_res}
+
+            df = intercell.network_df(
+                network_args = network_args,
+                annot_args_source = annot_args_source,
+                annot_args_target = annot_args_target,
+                only_proteins = True,
+                only_directed = True,
+                transmitter_receiver = True,
+                only_composite = only_composite,
+            )
+
+            self._log(
+                'Intercell network created for `%s`, %u interactions.' % (
+                    annot_res,
+                    df.shape[0],
+                )
+            )
+
+            l_df.append(df)
+
+        self._log('Concatenating %u data frames.' % len(l_df))
+        self.data = pd.concat(l_df)
+        self.header = self.data.columns
+
+
+
 class AnnotationsByEntity(omnipath2.table.TableBase):
 
 
@@ -701,12 +762,13 @@ class AnnotationsByEntity(omnipath2.table.TableBase):
 class EnzymeSubstrate(omnipath2.table.TableBase):
 
 
-    def __init__(self, **kwargs):
+    def __init__(self, resources_only_primary = True, **kwargs):
 
         param = {
             'fname': 'enz_sub_tsv',
         }
         param.update(kwargs)
+        self.resources_only_primary = resources_only_primary
 
         omnipath2.table.TableBase.__init__(self, **param)
 
@@ -714,7 +776,14 @@ class EnzymeSubstrate(omnipath2.table.TableBase):
     def load(self):
 
         self.enzsubdb = omnipath2.data.get_db('enz_sub')
-        self.enzsubdb.make_df()
+
+        if hasattr(self.enzsubdb, 'df'):
+
+            delattr(self.enzsubdb, 'df')
+
+        self.enzsubdb.make_df(
+            resources_only_primary = self.resources_only_primary,
+        )
 
         self.data = self.enzsubdb.df
 
