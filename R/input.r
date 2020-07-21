@@ -646,3 +646,110 @@ Networks <- R6::R6Class(
     )
 
 )
+
+
+IntercellNetworkByResource <- R6::R6Class(
+
+    'IntercellNetworkByResource',
+
+    inherit = Reader,
+
+    lock_objects = FALSE,
+
+    public = list(
+
+        initialize = function(...){
+
+            super$initialize(input_intercell_network_by_resource_tsv)
+
+            invisible(self)
+
+        },
+
+
+        preprocess = function(...){
+
+            self$data <- self$data %>%
+                select(id_a, id_b, database_a, sources) %>%
+                group_by(database_a, id_a, id_b) %>%
+                summarize_all(first) %>%
+                group_by(id_a, id_b) %>%
+                mutate(
+                    con_is_unique = n_distinct(database_a) <= 2
+                ) %>%
+                ungroup() %>%
+                group_by(id_a) %>%
+                mutate(
+                    a_is_unique = n_distinct(database_a) <= 2
+                ) %>%
+                ungroup() %>%
+                group_by(id_b) %>%
+                mutate(
+                    b_is_unique = n_distinct(database_a) <= 2
+                ) %>%
+                ungroup() %>%
+                group_by(database_a, a_is_unique) %>%
+                mutate(
+                    n_a_unique = n_distinct(id_a) * a_is_unique
+                ) %>%
+                ungroup() %>%
+                group_by(database_a, b_is_unique) %>%
+                mutate(
+                    n_b_unique = n_distinct(id_b) * b_is_unique
+                ) %>%
+                ungroup() %>%
+                group_by(database_a) %>%
+                mutate(
+                    n_con_unique = sum(con_is_unique),
+                    n_a_unique = max(n_a_unique),
+                    n_a = n_distinct(id_a),
+                    n_b_unique = max(n_a_unique),
+                    n_b = n_distinct(id_b),
+                    n_con = n_distinct(id_a, id_b)
+                ) %>%
+                summarize_all(first) %>%
+                select(
+                    resource = database_a,
+                    n_con,
+                    n_con_unique,
+                    n_a,
+                    n_a_unique,
+                    n_b,
+                    n_b_unique
+                ) %>%
+                arrange(desc(n_con)) %>%
+                mutate(
+                    resource = factor(
+                        resource,
+                        levels = unique(resource),
+                        ordered = TRUE
+                    )
+                ) %>%
+                gather(key = 'var', value = 'cnt', -resource) %>%
+                mutate(
+                    uni = grepl('unique', var, fixed = TRUE),
+                    obj = ifelse(
+                        grepl('con', var, fixed = TRUE),
+                        'con',
+                        ifelse(
+                            grepl('n_a', var, fixed = TRUE),
+                            'transmitter',
+                            'receiver'
+                        )
+                    )
+                ) %>%
+                mutate(
+                    obj = factor(
+                        obj,
+                        levels = c('con', 'transmitter', 'receiver'),
+                        ordered = TRUE
+                    )
+                )
+
+            invisible(self)
+
+        }
+
+    )
+
+)

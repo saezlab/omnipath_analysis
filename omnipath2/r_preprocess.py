@@ -709,7 +709,7 @@ class IntercellNetworkByResource(omnipath2.table.TableBase):
             annot_res = res or 'OmniPath'
             only_composite = res is None
             self._log('Creating intercell network from `%s`.' % annot_res)
-            network_args = {'resources': res}
+            network_args = {'resource': res}
             annot_args_source = {'database': annot_res}
             annot_args_target = {'database': annot_res}
 

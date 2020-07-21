@@ -48,6 +48,9 @@ get_default_param <- function(){
         input_complexes_by_resource_tsv = 'complexes_by_resource_tsv',
         input_network_coverages_tsv = 'network_coverage_%s',
         input_network_size_tsv = 'S2_network_%s_for-r',
+        input_intercell_network_by_resource_tsv = {
+            'intercell_network_by_resource'
+        },
         
         graph_plot_defaults = list(
             vertex.frame.color = NA,
@@ -187,7 +190,8 @@ get_default_param <- function(){
         fig_network_dir = 'network-dir_%s_%s',
         fig_intercell_deg = 'intercell-degrees_%s_%s_%s_%s',
         fig_intercell_cov = 'intercell-cov_%s_%s_%s_%s',
-        fig_intercell_size = 'intercell-size_%s_%s_%s_%s'
+        fig_intercell_size = 'intercell-size_%s_%s_%s_%s',
+        fig_intercell_by_res = 'intercell-by-resource'
     )
     
 }

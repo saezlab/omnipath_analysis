@@ -230,6 +230,10 @@ workflow = collections.OrderedDict(
             name = 'Intercell class overlaps table',
         ),
         Task(
+            method = r_preprocess.IntercellNetworkByResource,
+            name = 'Intercell network by resource',
+        ),
+        Task(
             method = r_preprocess.ResourcesByEntity,
             param = ProductParam(
                 network_dataset = (
