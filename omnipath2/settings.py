@@ -172,6 +172,7 @@ _defaults = {
         'ligand',
         'receptor',
         'cell_surface_enzyme',
+        'cell_surface_ligand',
         'secreted_enzyme',
         'transporter'
     },
