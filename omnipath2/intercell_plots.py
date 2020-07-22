@@ -600,8 +600,8 @@ class InterClassChordplot(plot.PlotBase):
     def make_plots(self):
 
         self.colors = [
-            self.palette(i)
-            for i in np.linspace(0, 1, len(self.segments))
+            self.palette.colors[i]
+            for i in range(len(self.segments))
         ]
 
         self.fig = data_tools.plots.chordplot(
