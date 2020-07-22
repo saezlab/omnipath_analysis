@@ -197,10 +197,17 @@ class Colors(session_mod.Logger):
         """
 
         pal = self.get_palette(name)
+        self.show_palette(pal)
+
+
+    @staticmethod
+    def show_palette(palette):
+
+        colors = palette.colors if hasattr(palette, 'colors') else palette
 
         fig, ax = plt.subplots(figsize = (1, 4), dpi = 100)
 
-        for x, color in zip(range(len(pal.colors)), pal.colors):
+        for x, color in enumerate(colors):
 
             ax.scatter(x, 0, c = [color], s = 1000)
 
