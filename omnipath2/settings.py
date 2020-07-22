@@ -166,16 +166,16 @@ _defaults = {
 
     'r_workflow_command': 'Rscript omnipath2_workflow.r',
 
-    'intercell_main_classes': {
-        'ecm',
+    'intercell_main_classes': [
         'adhesion',
+        'secreted_enzyme',
+        'ecm',
         'ligand',
         'receptor',
         'cell_surface_enzyme',
         'cell_surface_ligand',
-        'secreted_enzyme',
         'transporter'
-    },
+    ],
 
 }
 

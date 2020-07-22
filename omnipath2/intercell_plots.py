@@ -502,11 +502,12 @@ class InterClassChordplot(plot.PlotBase):
         ):
 
         self.network_dataset = network_dataset
+        self.intercell_main_classes = settings.get('intercell_main_classes')
 
         self.annot_args = {
             'source': 'composite',
             'aspect': 'functional',
-            'category': settings.get('intercell_main_classes')
+            'category': self.intercell_main_classes
         }
         self.annot_args.update(annot_args or {})
 
@@ -555,6 +556,9 @@ class InterClassChordplot(plot.PlotBase):
         self.edges = self.intercell.class_to_class_connections(
             **self.intercell_network_param,
         )
+        self.edges = self.edges.reindex(
+            index = itertools.product(*((self.intercell_main_classes,) * 2))
+        )
         self.edges.index.set_levels(
             [
                 [
@@ -587,12 +591,15 @@ class InterClassChordplot(plot.PlotBase):
         counts.set_index('label', inplace = True)
         self.segments = counts.n_uniprot
         self.segments.name = 'size'
+        self.segments = self.segments.reindex(
+            index = self.edges.category_a.unique()
+        )
         self.labels = self.segments.index
 
 
     def make_plots(self):
 
-        colors = [
+        self.colors = [
             self.palette(i)
             for i in np.linspace(0, 1, len(self.segments))
         ]
@@ -600,7 +607,7 @@ class InterClassChordplot(plot.PlotBase):
         self.fig = data_tools.plots.chordplot(
             edges = self.edges,
             nodes = self.segments,
-            colors = colors,
+            colors = self.colors,
             labels = False,
             alpha = .5,
         )
@@ -620,7 +627,7 @@ class InterClassChordplot(plot.PlotBase):
                     color = 'w',
                     markerfacecolor = c
                 )
-                for c in colors
+                for c in self.colors
             ],
             self.labels,
             loc = 'center',
@@ -637,7 +644,7 @@ class InterClassChordplot(plot.PlotBase):
         ax3.bar(
             range(len(self.segments)),
             self.segments.values,
-            color = colors,
+            color = self.colors,
         )
         #ax3.set_axis_off()
         ax3.spines['right'].set_visible(False)
