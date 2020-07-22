@@ -213,6 +213,11 @@ omnipath2_workflow <<- list(
     intercell_class_sizes_dot = Task$new(
         method = IntercellClassSizesDots,
         name = 'Intercell category sizes'
+    ),
+
+    intercell_network_sizes_by_resource = Task$new(
+        method = IntercellNetworkByResourcePlot,
+        name = 'Intercell network sizes by resource'
     )
     
 )
