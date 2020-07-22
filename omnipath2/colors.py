@@ -28,7 +28,8 @@ import importlib as imp
 import collections
 
 import matplotlib as mpl
-from matplotlib import colors
+import matplotlib.pyplot as plt
+import matplotlib.colors
 import colorsys
 
 from pypath.share import session as session_mod
@@ -178,3 +179,30 @@ class Colors(session_mod.Logger):
         )
 
         return colorsys.hls_to_rgb(*hls)
+
+
+    def __repr__(self):
+
+        return '<Colors: %u palettes loaded>' % len(self)
+
+
+    def __len__(self):
+
+        return len(self.palettes)
+
+
+    def show(self, name):
+        """
+        Shows a palette (in case you want to see its colors.
+        """
+
+        pal = self.get_palette(name)
+
+        fig, ax = plt.subplots(figsize = (1, 4), dpi = 100)
+
+        for x, color in zip(range(len(pal.colors)), pal.colors):
+
+            ax.scatter(x, 0, c = [color], s = 1000)
+
+        ax.axes.set_aspect(8.0)
+        fig.show()
