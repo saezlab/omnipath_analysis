@@ -497,6 +497,7 @@ class InterClassChordplot(plot.PlotBase):
             network_dataset = 'omnipath',
             intercell_network_param = None,
             annot_args = None,
+            only_directed = True,
             **kwargs
         ):
 
@@ -511,7 +512,7 @@ class InterClassChordplot(plot.PlotBase):
 
         self.intercell_network_param = {
             'annot_args': self.annot_args,
-            'only_directed': False,
+            'only_directed': only_directed,
             'only_effect': None,
         }
         self.intercell_network_param.update(intercell_network_param or {})
