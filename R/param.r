@@ -194,7 +194,8 @@ get_default_param <- function(){
         fig_intercell_deg = 'intercell-degrees_%s_%s_%s_%s',
         fig_intercell_cov = 'intercell-cov_%s_%s_%s_%s',
         fig_intercell_size = 'intercell-size_%s_%s_%s_%s',
-        fig_intercell_by_res = 'intercell-by-resource'
+        fig_intercell_by_res = 'intercell-by-resource',
+        fig_interc_chordplot = 'intercell-chordplot_%s_%s_%s'
     )
     
 }

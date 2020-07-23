@@ -517,6 +517,7 @@ class InterClassChordplotData(table.TableBase):
             'only_directed': only_directed,
             'only_effect': None,
             'undirected_orientation': None if only_directed else 'category',
+            'only_proteins': True,
         }
         self.intercell_network_param.update(intercell_network_param or {})
 
