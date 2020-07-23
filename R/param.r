@@ -51,6 +51,9 @@ get_default_param <- function(){
         input_intercell_network_by_resource_tsv = {
             'intercell_network_by_resource'
         },
+        input_intercell_network_summary_tsv = (
+            'inter_class_network_summary_%s_%s_%s'
+        ),
         
         graph_plot_defaults = list(
             vertex.frame.color = NA,

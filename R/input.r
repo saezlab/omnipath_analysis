@@ -49,7 +49,7 @@ Reader <- R6::R6Class(
             
         },
         
-        
+
         main = function(){
             
             self$read()
@@ -745,6 +745,43 @@ IntercellNetworkByResource <- R6::R6Class(
                         ordered = TRUE
                     )
                 )
+
+            invisible(self)
+
+        }
+
+    )
+
+)
+
+
+IntercellNetworkSummary <- R6::R6Class(
+
+    'IntercellNetworkSummary',
+
+    inherit = Reader,
+
+    lock_objects = FALSE,
+
+    public = list(
+
+        initialize = function(input_param = NULL, ...){
+
+            input_param <- `if`(
+                is.null(input_param),
+                c('omnipath', 'undirected', 'any_effect'),
+                input_param
+            )
+
+            do.call(
+                super$initialize,
+                c(
+                    list(
+                        name = quote(input_intercell_network_summary_tsv)
+                    ),
+                    input_param
+                )
+            )
 
             invisible(self)
 
