@@ -516,6 +516,7 @@ class InterClassChordplotData(table.TableBase):
             'annot_args': self.annot_args,
             'only_directed': only_directed,
             'only_effect': None,
+            'undirected_orientation': None if only_directed else 'category',
         }
         self.intercell_network_param.update(intercell_network_param or {})
 
@@ -556,6 +557,7 @@ class InterClassChordplotData(table.TableBase):
         self.edges = self.edges.reindex(
             index = itertools.product(*((self.intercell_main_classes,) * 2))
         )
+        self.edges.dropna(inplace = True)
         self.edges.index.set_levels(
             [
                 [
