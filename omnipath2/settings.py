@@ -85,6 +85,7 @@ _defaults = {
     'connections_tsv': 'connections_%s_%s', #
     'category_overlaps_tsv': 'category_overlaps', #
     'network_coverage_tsv': 'network_coverage_%s', #
+    'inter_class_summary_tsv': 'inter_class_network_summary_%s_%s_%s',
 
     # tfregulons levels
     'tfregulons_levels': {'A', 'B', 'C', 'D'},

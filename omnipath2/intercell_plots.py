@@ -44,6 +44,7 @@ from data_tools.plots import chordplot
 import omnipath2
 from omnipath2 import plot
 from omnipath2 import settings
+from omnipath2 import table
 
 
 class InterClassDegreeHisto(plot.PlotBase):
@@ -489,7 +490,7 @@ class ClassSimilarities(plot.PlotBase):
         self.ax.set_axis_off()
 
 
-class InterClassChordplot(plot.PlotBase):
+class InterClassChordplotData(table.TableBase):
 
 
     def __init__(
@@ -520,38 +521,34 @@ class InterClassChordplot(plot.PlotBase):
 
         icnparam = self.intercell_network_param
 
-        param = {
-            'fname': 'inter_class_chordplot_pdf',
-            'fname_param': (
-                self.network_dataset,
-                'directed'
-                    if icnparam['only_directed'] else
-                'undirected',
-                (
-                    'stimulation'
-                        if icnparam['only_effect'] == 1 else
-                    'inhibition'
-                        if icnparam['only_effect'] == -1 else
-                    'any_effect'
-                ),
+        self.fname_param = (
+            self.network_dataset,
+            'directed'
+                if icnparam['only_directed'] else
+            'undirected',
+            (
+                'stimulation'
+                    if icnparam['only_effect'] == 1 else
+                'inhibition'
+                    if icnparam['only_effect'] == -1 else
+                'any_effect'
             ),
-            'palette': omnipath2.colors.get_palette('rwth_selected.gpl'),
-            'make_plot_first': True,
+        )
+
+        param = {
+            'fname': 'inter_class_summary_tsv',
+            'fname_param': self.fname_param,
             'legend': False,
-            'legend_font_size': 8,
-            'width': 10,
-            'height': 8,
         }
         param.update(kwargs)
 
-        plot.PlotBase.__init__(self, **param)
+        table.TableBase.__init__(self, **param)
 
 
-    def load_data(self):
+    def load(self):
 
-        self.data = omnipath2.data
-        self.intercell = self.data.get_db('intercell')
-        network = self.data.network_df(self.network_dataset)
+        self.intercell = omnipath2.data.get_db('intercell')
+        network = omnipath2.data.network_df(self.network_dataset)
         self.intercell.register_network(network)
         self.edges = self.intercell.class_to_class_connections(
             **self.intercell_network_param,
@@ -596,17 +593,60 @@ class InterClassChordplot(plot.PlotBase):
         )
         self.labels = self.segments.index
 
+        self.data = self.edges
+        self.header = self.data.columns
+
+
+class InterClassChordplot(plot.PlotBase):
+
+
+    def __init__(
+            self,
+            network_dataset = 'omnipath',
+            intercell_network_param = None,
+            annot_args = None,
+            only_directed = True,
+            **kwargs
+        ):
+
+        self.data = InterClassChordplotData(
+            network_dataset = network_dataset,
+            intercell_network_param = intercell_network_param,
+            annot_args = annot_args,
+            only_directed = only_directed,
+            **kwargs
+        )
+
+        param = {
+            'fname': 'inter_class_chordplot_pdf',
+            'fname_param': self.data.fname_param,
+            'palette': omnipath2.colors.get_palette('rwth_selected.gpl'),
+            'make_plot_first': True,
+            'legend': False,
+            'legend_font_size': 8,
+            'width': 10,
+            'height': 8,
+        }
+        param.update(kwargs)
+
+        plot.PlotBase.__init__(self, **param)
+
+
+    def load_data(self):
+
+        pass
+
 
     def make_plots(self):
 
         self.colors = [
             self.palette.colors[i]
-            for i in range(len(self.segments))
+            for i in range(len(self.data.segments))
         ]
 
         self.fig = data_tools.plots.chordplot(
-            edges = self.edges,
-            nodes = self.segments,
+            edges = self.data.edges,
+            nodes = self.data.segments,
             colors = self.colors,
             labels = False,
             alpha = .5,
@@ -629,7 +669,7 @@ class InterClassChordplot(plot.PlotBase):
                 )
                 for c in self.colors
             ],
-            self.labels,
+            self.data.labels,
             loc = 'center',
             ncol = 2,
         )
@@ -642,8 +682,8 @@ class InterClassChordplot(plot.PlotBase):
         ax4 = self.fig.add_axes([0.72, .05, 0.25, 0.5], sharex = ax3)
 
         ax3.bar(
-            range(len(self.segments)),
-            self.segments.values,
+            range(len(self.data.segments)),
+            self.data.segments.values,
             color = self.colors,
         )
         #ax3.set_axis_off()
@@ -661,7 +701,7 @@ class InterClassChordplot(plot.PlotBase):
 
         #ax3.get_yaxis().set_visible(True)
 
-        adj = np.triu(self.adjacency.values).astype(float)
+        adj = np.triu(self.data.adjacency.values).astype(float)
         adj[np.where(adj == 0)] = np.nan
 
         self.heatmap = ax4.imshow(adj, cmap = 'plasma')
