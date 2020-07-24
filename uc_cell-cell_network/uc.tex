@@ -23,13 +23,13 @@
     \begin{tikzpicture}[cell/.style={circle, fill=lgray, minimum width=5mm, inner sep=2pt}]
 
         \foreach \lab [count=\c, evaluate=\c as \ang using {18+72*\c}]
-            in {Dendritic cell, Macrophage, Goblet cell, Treg, Myofibroblast} {
+            in {Dendritic cell, Macrophage, Myofibroblast, Treg, Goblet cell} {
                 \node[cell] (\lab) at (\ang:20mm) {};
 
         }
 
         \begin{scope}[
-            every path/.style={->,>=stealth,draw=rwthred,
+            every path/.style={->,>=stealth,draw=rwthred},
             every to/.style={bend right}
         ]
 
@@ -61,7 +61,7 @@
         \end{scope}
 
         \foreach \lab [count=\c, evaluate=\c as \ang using {18+72*\c}]
-        in {Dendritic cell, Macrophage, Goblet cell, Treg, Myofibroblast} {
+        in {Dendritic cell, Macrophage, Myofibroblast, Treg, Goblet cell} {
             \node at (\ang:28mm){\lab};
 
         }
