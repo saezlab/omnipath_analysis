@@ -21,6 +21,7 @@ require(ggplot2)
 require(dplyr)
 require(stringr)
 require(R6)
+require(scales)
 
 
 EnzymeSubstrateBase <- R6::R6Class(
@@ -238,8 +239,9 @@ EnzymeSubstrateShared <- R6::R6Class(
             
             super$initialize(
                 name = fig_enzyme_substrate_shared,
-                width = 5,
-                height = 3
+                width = 4,
+                height = 2.4,
+                xlab_vertical = FALSE
             )
             
         },
@@ -253,8 +255,9 @@ EnzymeSubstrateShared <- R6::R6Class(
                 xvar = sources,
                 yvar = n,
                 fillvar = !shared,
+                size = 4,
                 xlab = 'Resources',
-                ylab = 'Enzyme-substrate\ninteractions',
+                ylab = 'Enzyme-PTM\ninteractions',
                 log_y = TRUE,
                 bar = FALSE,
                 color_values = `names<-`(
@@ -265,7 +268,7 @@ EnzymeSubstrateShared <- R6::R6Class(
                     `FALSE` = 'Shared',
                     `TRUE` = 'Total'
                 ),
-                legend_title = 'Enzyme-substrate\ninteractions'
+                legend_title = 'Enzyme-PTM\ninteractions'
             )
             
         }
@@ -315,8 +318,8 @@ EnzymeSubstrateSelf <- R6::R6Class(
                     `if`(self$bar, 'bar', 'dot')
                 ),
                 complexes = TRUE,
-                width = 6,
-                height = 3,
+                width = 4.5,
+                height = 2.4,
                 xlab_vertical = FALSE
             )
             
@@ -340,11 +343,12 @@ EnzymeSubstrateSelf <- R6::R6Class(
                 fillvar = category,
                 xlab = 'Resources',
                 ylab = sprintf(
-                    'Enzyme-substrate\ninteractions%s',
+                    'Enzyme-PTM\ninteractions%s',
                     `if`(self$log_y, ' (log)', '')
                 ),
                 log_y = self$log_y,
                 bar = self$bar,
+                size = 4,
                 color_values = `names<-`(
                     pal,
                     c('self', 'in_complex', 'between_entities')
@@ -354,7 +358,7 @@ EnzymeSubstrateSelf <- R6::R6Class(
                         in_complex = 'Within complex',
                         between_entities = 'Other entity'
                     ),
-                legend_title = 'Target of the\nenzyme-substrate\ninteractions'
+                legend_title = 'Target of the\nenzyme-PTM\ninteractions'
             )
             
             invisible(self)
@@ -488,7 +492,8 @@ EnzymeSubstrateModtypeDot <- R6::R6Class(
             
             super$initialize(
                 name = fig_enzyme_substrate_modtype_dot,
-                height = 3,
+                height = 2.4,
+                width = 6,
                 xlab_vertical = FALSE
             )
             
@@ -501,16 +506,16 @@ EnzymeSubstrateModtypeDot <- R6::R6Class(
                     self$enz_sub_by_resource,
                     aes(y = sources, x = n_modtype, color = modification)
                 ) +
-                geom_point(size = 5, alpha = .7, shape = 16) +
+                geom_point(size = 4, alpha = .7, shape = 16) +
                 scale_color_manual(
                     guide = guide_legend(
                         title = 'Modification type'
                     ),
                     values = omnipath2_settings$get(palette2)
                 ) +
-                scale_x_log10() +
+                scale_x_log10(labels = comma) +
                 ylab('Resources') +
-                xlab('Enzyme-substrate interactions')
+                xlab('Enzyme-PTM interactions')
             
             invisible(self)
             
@@ -554,7 +559,7 @@ EnzymeSubstrateNumofResources <- R6::R6Class(
                 ) +
                 geom_bar(fill = 'black', stat = 'count') +
                 xlab('Number of resources') +
-                ylab('Enzyme-substrate interactions')
+                ylab('Enzyme-PTM interactions')
             
             invisible(self)
             
