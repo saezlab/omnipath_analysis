@@ -155,7 +155,8 @@ IntercellClassSizesDots <- R6::R6Class(
                     ),
                     guide = NULL
                 ) +
-                scale_size_area(
+                scale_size_binned_area(
+                    n.breaks = 10,
                     guide = guide_legend(
                         title = 'Number of\nproteins',
                         override.aes = list(
