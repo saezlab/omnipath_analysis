@@ -70,6 +70,7 @@ IntercellChordplot <- R6::R6Class(
                 unlist()
 
             self$open_device()
+            circos.par(cell.padding = c(30, 0, 0, 0))
             self$plt <- chordDiagram(
                 self$data,
                 grid.col = grid.col,
