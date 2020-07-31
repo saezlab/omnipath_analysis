@@ -239,7 +239,7 @@ EnzymeSubstrateShared <- R6::R6Class(
             
             super$initialize(
                 name = fig_enzyme_substrate_shared,
-                width = 4,
+                width = 3.5,
                 height = 2.4,
                 xlab_vertical = FALSE
             )
@@ -268,7 +268,9 @@ EnzymeSubstrateShared <- R6::R6Class(
                     `FALSE` = 'Shared',
                     `TRUE` = 'Total'
                 ),
-                legend_title = 'Enzyme-PTM\ninteractions'
+                legend_title = 'Enzyme-PTM\ninteractions',
+                expand_y = expansion(mult = c(.07, .07)),
+                tick_label_size = 8
             )
             
         }
@@ -318,7 +320,7 @@ EnzymeSubstrateSelf <- R6::R6Class(
                     `if`(self$bar, 'bar', 'dot')
                 ),
                 complexes = TRUE,
-                width = 4.5,
+                width = 3.95,
                 height = 2.4,
                 xlab_vertical = FALSE
             )
@@ -358,7 +360,8 @@ EnzymeSubstrateSelf <- R6::R6Class(
                         in_complex = 'Within complex',
                         between_entities = 'Other entity'
                     ),
-                legend_title = 'Target of the\nenzyme-PTM\ninteractions'
+                legend_title = 'Target of the\nenzyme-PTM\ninteractions',
+                expand_y = expansion(mult = c(.05, .07))
             )
             
             invisible(self)
@@ -493,7 +496,7 @@ EnzymeSubstrateModtypeDot <- R6::R6Class(
             super$initialize(
                 name = fig_enzyme_substrate_modtype_dot,
                 height = 2.4,
-                width = 6,
+                width = 4.2,
                 xlab_vertical = FALSE
             )
             
@@ -513,7 +516,7 @@ EnzymeSubstrateModtypeDot <- R6::R6Class(
                     ),
                     values = omnipath2_settings$get(palette2)
                 ) +
-                scale_x_log10(labels = comma) +
+                scale_x_log10(labels = comma, expand = expansion(mult = c(0.1, 0.05))) +
                 ylab('Resources') +
                 xlab('Enzyme-PTM interactions')
             

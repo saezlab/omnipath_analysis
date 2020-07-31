@@ -71,7 +71,7 @@ IntercellNetworkByResourcePlot <- R6::R6Class(
                     )
                 ) +
                 #scale_x_continuous(expand = expansion(mult = c(.1, .1))) +
-                scale_x_log10(limits=c(3, NA), expand = expansion(mult = c(.01, .07))) +
+                scale_x_log10(limits=c(1, NA), expand = expansion(mult = c(.02, .07))) +
                 geom_point(
                     size = 5,
                     shape = 16,

@@ -151,7 +151,9 @@ StackedGroupedBarDot <- R6::R6Class(
             shape = 16,
             size = 5,
             scale_alpha_param = NULL,
-            position = 'identity'
+            position = 'identity',
+            expand_y = waiver(),
+            tick_label_size = 8
         ){
             
             self$obj <- obj
@@ -171,6 +173,8 @@ StackedGroupedBarDot <- R6::R6Class(
             self$size <- size
             self$scale_alpha_param <- scale_alpha_param
             self$position <- position
+            self$expand_y <- expand_y
+            self$tick_label_size <- tick_label_size
             
             self$main()
             
@@ -229,13 +233,19 @@ StackedGroupedBarDot <- R6::R6Class(
                 `+`(
                     {`if`(
                         self$log_y,
-                        scale_y_log10(labels = comma),
+                        scale_y_log10(labels = comma, expand = self$expand_y),
                         NULL
                     )}
                 ) %>%
                 `+`(coord_flip()) %>%
                 `+`(xlab(self$xlab)) %>%
-                `+`(ylab(self$ylab))
+                `+`(ylab(self$ylab)) %>%
+                `+`(
+                    theme(
+                        axis.text.x = element_text(size = self$tick_label_size),
+                        axis.text.y = element_text(size = self$tick_label_size)
+                    )
+                )
             
             invisible(self)
             
