@@ -1,4 +1,4 @@
-# The OmniPath2 paper analysis suite
+# The OmniPath paper analysis suite
 
 This repository contains a Python module and an R package.
 The purpose of both is to process and analyse the database contents of
@@ -39,12 +39,6 @@ omnipath network:
 import omnipath2
 op = omnipath2.data.get_db('omnipath')
 ```
-
-The pickle dumps I use you can find here (to be extracted to the `pickles`
-directory):
-
-http://denes.omnipathdb.org/54b510889336eb2591d8beff/omnipath2_pickles.tar.gz
-(116M)
 
 ## Networks
 
