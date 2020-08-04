@@ -20,6 +20,7 @@
 require(rlang)
 require(readr)
 require(dplyr)
+require(purrr)
 require(R6)
 
 
@@ -400,6 +401,9 @@ NetworkCoverage <- R6::R6Class(
                     input_param
                 )
             )
+
+            self$data <- self$data %>%
+                add_resource_label()
             
             invisible(self)
             
@@ -501,6 +505,8 @@ NetworkSize <- R6::R6Class(
                 
             }
             
+            data <- data %>% add_resource_label()
+
             self$data <- data
             
             invisible(self)
@@ -510,6 +516,27 @@ NetworkSize <- R6::R6Class(
     )
     
 )
+
+
+get_resource_label <- function(label){
+
+    label %>%
+    str_replace(' total', '') %>%
+    str_replace(
+        'Post translational',
+        'Post translational (total)'
+    ) %>%
+    str_replace('Mirna', 'miRNA') %>%
+    str_replace(' trans', '-trans')
+
+}
+
+
+add_resource_label <- function(df){
+
+    df %>% mutate(resource_label = get_resource_label(resource))
+
+}
 
 
 Networks <- R6::R6Class(
@@ -568,6 +595,7 @@ Networks <- R6::R6Class(
                         filter(., resource_type != 'resource'),
                         filter(., grepl('total', resource))
                     )} %>%
+                    add_resource_label() %>%
                     mutate(
                         dataset = factor(
                             dataset,
@@ -579,7 +607,6 @@ Networks <- R6::R6Class(
                             ),
                             ordered = TRUE
                         ),
-                        resource_label = self$get_resource_label(resource),
                         dataset_label = map_chr(
                             as.character(dataset),
                             function(x){
@@ -626,20 +653,6 @@ Networks <- R6::R6Class(
                 )}
 
             invisible(self)
-
-        },
-
-
-        get_resource_label = function(label){
-
-            label %>%
-            str_replace(' total', '') %>%
-            str_replace(
-                'Post translational',
-                'Post translational (total)'
-            ) %>%
-            str_replace('Mirna', 'miRNA') %>%
-            str_replace(' trans', '-trans')
 
         }
 

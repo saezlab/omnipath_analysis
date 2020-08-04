@@ -218,6 +218,11 @@ omnipath2_workflow <<- list(
     intercell_network_sizes_by_resource = Task$new(
         method = IntercellNetworkByResourcePlot,
         name = 'Intercell network sizes by resource'
+    ),
+
+    intercell_network_chordplot = Task$new(
+        method = IntercellChordplot,
+        name = 'Intercell network chordplot'
     )
     
 )

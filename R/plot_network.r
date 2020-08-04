@@ -127,7 +127,7 @@ NetworkCoverageDot <- R6::R6Class(
                 NetworkCoverage$new(input_param = self$input_param)$data
             )
 
-            self$categories <- `if`(
+            self$sizes <- `if`(
                 self$only_totals,
                 Networks$new()$data,
                 NetworkSize$new(input_param = self$input_param)$data
@@ -142,24 +142,47 @@ NetworkCoverageDot <- R6::R6Class(
             
             private$load_data()
 
-            categories <- self$categories %>%
-                group_by(resource, category) %>%
-                summarize_all(first) %>%
-                select(resource, resource_label, category)
+            resource_order <- self$sizes %>%
+                {`if`(
+                    self$only_totals,
+                        arrange(., dataset, desc(n)),
+                        arrange(., category, desc(n))
+                )} %>%
+                pull(resource_label) %>%
+                unique()
             
+            if(!self$only_totals){
+
+                categories <- self$data %>%
+                    filter(resource_type != 'resource') %>%
+                    pull(resource_label) %>%
+                    unique()
+
+                resource_order <- c(
+                    categories,
+                    setdiff(resource_order, categories)
+                )
+
+            }
+
             self$data <- self$data %>%
+                rename(category = data_model) %>%
                 mutate(
                     resource_type = factor(
                         resource_type,
                         levels = c('total', 'data_model', 'resource'),
                         ordered = TRUE
-                    )
+                    ),
+                    resource_label = factor(
+                        resource_label,
+                        levels = resource_order,
+                        ordered = TRUE
+                    ),
+                    category = recode(category, All = 'OmniPath')
                 ) %>%
-                {`if`(
-                    self$only_totals,
-                    left_join(., categories, by = c('resource_label')),
-                    left_join(., categories, by = c('resource'))
-                )} %>%
+                arrange(
+                    category
+                ) %>%
                 mutate(coverage_pct = coverage / n_group * 100) %>%
                 filter(!is.na(category) | resource_type != 'resource') %>%
                 mutate(
@@ -167,22 +190,13 @@ NetworkCoverageDot <- R6::R6Class(
                         is.na(category),
                         as.character(resource_label),
                         category
-                    )
-                ) %>%
-                {`if`(
-                    self$only_totals,
-                    filter(., resource_type != 'resource') %>%
-                    arrange(dataset, desc(n_network)),
-                    arrange(., desc(n_network))
-                )} %>%
-                mutate(
-                    resource_label = factor(
-                        resource_label,
-                        levels = unique(resource_label),
+                    ),
+                    category = factor(
+                        category,
+                        levels = unique(category),
                         ordered = TRUE
                     )
                 )
-
             
             self$height <- 1 + .2 * length(unique(self$data$resource_label))
             
@@ -305,20 +319,28 @@ NetworkSizeDot <- R6::R6Class(
 
             private$load_data()
 
+            categories <- self$data %>%
+                filter(category == resource_label) %>%
+                pull(resource_label) %>%
+                unique()
+
             self$data <- self$data %>%
-                filter(var %in% c('entities', 'interactions_0')) %>%
                 {`if`(
                     self$only_totals,
                     arrange(., dataset, desc(n)),
-                    arrange(., desc(n))
+                    arrange(., category, desc(n))
                 )} %>%
                 mutate(
                     resource_label = factor(
                         resource_label,
-                        levels = unique(resource_label),
+                        levels = c(
+                            categories,
+                            setdiff(unique(resource_label), categories)
+                        ),
                         ordered = TRUE
                     )
-                )
+                ) %>%
+                filter(var %in% c('entities', 'interactions_0'))
             
             self$height <- 1 + .2 * length(unique(self$data$resource_label))
             
@@ -445,17 +467,24 @@ NetworkDirectionsDot <- R6::R6Class(
             
             private$load_data()
 
+            categories <- self$data %>%
+                filter(category == resource_label) %>%
+                pull(resource_label) %>%
+                unique()
+
             self$data <- self$data %>%
-            filter(var %in% self$vars & !shared) %>%
             {`if`(
                 self$only_totals,
                     arrange(., dataset, desc(n)),
-                    arrange(., desc(n))
+                    arrange(., category, desc(n))
             )} %>%
             mutate(
                 resource_label = factor(
                     resource_label,
-                    levels = unique(resource_label),
+                    levels = c(
+                        categories,
+                        setdiff(unique(resource_label), categories)
+                    ),
                     ordered = TRUE
                 ),
                 var = factor(
@@ -464,6 +493,7 @@ NetworkDirectionsDot <- R6::R6Class(
                     ordered = TRUE
                 )
             ) %>%
+            filter(var %in% self$vars & !shared) %>%
             filter(n > 0)
             
             self$height <- 1 + .2 * length(unique(self$data$resource))

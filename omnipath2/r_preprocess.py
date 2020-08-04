@@ -965,6 +965,7 @@ class NetworkCoverage(omnipath2.table.TableBase):
             'fname_param': (network_dataset,),
             'header': [
                 'resource',
+                'data_model',
                 'resource_type',
                 'group',
                 'n_network',
@@ -986,22 +987,25 @@ class NetworkCoverage(omnipath2.table.TableBase):
 
         self.data = []
 
-        resources = self.network.get_resource_names()
+        resources = self.network.get_resources(via = False)
 
         proteins = dict(
             (
-                (resource, 'resource'),
-                self.network.get_protein_identifiers(resources = resource)
+                (resource.name, resource.data_model, 'resource'),
+                self.network.get_protein_identifiers(
+                    resources = resource,
+                    data_model = resource.data_model
+                )
             )
             for resource in resources
         )
-        proteins[('OmniPath', 'total')] = (
+        proteins[('OmniPath', 'all', 'total')] = (
             self.network.get_protein_identifiers()
         )
         proteins.update(
             dict(
                 (
-                    (data_model, 'data_model'),
+                    (data_model, data_model, 'data_model'),
                     self.network.get_protein_identifiers(
                         data_model = data_model
                     )
@@ -1023,10 +1027,11 @@ class NetworkCoverage(omnipath2.table.TableBase):
                 self.data.append([
                     (
                         res[0].capitalize().replace('_', ' ')
-                            if res[1] == 'data_model' else
+                            if res[2] == 'data_model' else
                         res[0]
                     ),
-                    res[1],
+                    res[1].capitalize().replace('_', ' '),
+                    res[2],
                     label,
                     len(in_network),
                     len(this_group),
