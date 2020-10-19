@@ -195,6 +195,8 @@ compile_intercell <- function(){
     invisible(NULL)
 
 }
+
+
 retrieve_networks <- function(){
 
     tf_target_all <- import_transcriptional_interactions(
@@ -351,7 +353,7 @@ textbook_benchmark <- function(){
     .intercell_resources <- sort(intercell_resources)
     cov_data <- NULL
 
-    icn_textbook <- 'cytokine_receptor_from_book.tsv' %>%
+    icn_textbook <- 'cytokine_receptor_book_translated.tsv' %>%
         .in_datadir() %>%
         read_tsv(col_types = cols())
 

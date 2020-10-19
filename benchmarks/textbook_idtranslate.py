@@ -24,19 +24,34 @@ import collections
 import itertools
 
 import pypath.utils.mapping as mapping
+import pypath.share.common as common
 
 
-infile = os.path.join('data', 'cytokine_receptor_from_book.tsv')
-outfile = os.path.join('data', 'cytokine_receptor_book_translated.tsv')
+datadir = 'data'
+infile = os.path.join(datadir, 'cytokine_receptor_from_book.tsv')
+outfile = os.path.join(datadir, 'cytokine_receptor_book_translated.tsv')
+
+
+nonstandard_names = {
+    'IL-14': 'P40222',
+}
+missing_receptors = {
+    'IL-18': 'Q13478',
+    'IL-2': {'P01589', 'P14784', 'P31785'},
+    'IL-20': {'Q6UXL0', 'Q9UHF4'},
+    'IL-4': 'P24394',
+    'CCL18': {'P51685', 'Q99527', 'Q9BZ71'},
+    'CXCL4': {'P49682', 'P25024'},
+}
 
 
 class TranslateTextbookTable(object):
 
 
-    def __init__(self, infile, outfile):
+    def __init__(self, infile = None, outfile = None):
 
-        self.infile = infile
-        self.outfile = outfile
+        self.infile = infile or globals()['infile']
+        self.outfile = outfile or globals()['outfile']
 
 
     def main(self):
@@ -72,7 +87,7 @@ class TranslateTextbookTable(object):
             self._raw_record._fields + (
                 'ligand_uniprot',
                 'receptor_uniprot',
-                'ligand_gensymbol',
+                'ligand_genesymbol',
                 'receptor_genesymbol',
                 'record_id',
             ),
@@ -95,10 +110,17 @@ class TranslateTextbookTable(object):
             record.name,
             record.synonyms,
         ) or empty
-        receptor_uniprots = cls.translate_one(
-            record.receptor_ensembl,
-            record.cytokine_receptor,
-        ) or empty
+        receptor_uniprots = (
+            cls.translate_one(
+                record.receptor_ensembl,
+                record.cytokine_receptor,
+            ) or
+            (
+                common.to_set(missing_receptors[record.name])
+                    if record.name in missing_receptors else
+                empty
+            )
+        )
 
         for u_lig, u_rec in itertools.product(
             ligand_uniprots,
@@ -114,7 +136,11 @@ class TranslateTextbookTable(object):
     @classmethod
     def translate_one(cls, ensembl, genesymbol, synonyms = None):
 
-        uniprots = mapping.map_name(ensembl, 'ensg', 'uniprot')
+        uniprots = mapping.map_name(ensembl, 'ensembl', 'uniprot')
+
+        if not uniprots and genesymbol in nonstandard_names:
+
+            uniprots = common.to_set(nonstandard_names[genesymbol])
 
         if not uniprots:
 
