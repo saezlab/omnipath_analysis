@@ -1037,3 +1037,23 @@ class NetworkCoverage(omnipath2.table.TableBase):
                     len(this_group),
                     len(in_network & this_group),
                 ])
+
+
+class NetworkConsistency(omnipath2.table.TableBase):
+
+
+    def __init__(self, network_dataset = 'omnipath', **kwargs):
+
+        param = {
+            'fname': 'network_consistency_tsv',
+            'fname_param': (network_dataset,),
+        }
+        param.update(kwargs)
+        self.network_dataset = network_dataset
+
+        omnipath2.table.TableBase.__init__(self, **param)
+
+
+    def load(self):
+
+        self.network = omnipath2.data.get_db(self.network_dataset)

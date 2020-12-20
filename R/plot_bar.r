@@ -198,14 +198,28 @@ StackedGroupedBarDot <- R6::R6Class(
                             aes(fill = !!self$fillvar),
                             position = `if`(self$log_y, 'dodge', 'stack')
                         ),
-                        geom_point(
-                            aes(
-                                color = !!self$fillvar,
-                                alpha = !!self$alphavar
-                            ),
-                            size = self$size,
-                            shape = self$shape,
-                            position = self$position
+                        do.call(
+                            geom_point,
+                            c(
+                                list(
+                                    aes(
+                                        color = !!self$fillvar,
+                                        alpha = !!self$alphavar,
+                                        shape = `if`(
+                                            self$shape > 0,
+                                            NULL,
+                                            !!self$fillvar
+                                        )
+                                    ),
+                                    size = self$size,
+                                    position = self$position
+                                ),
+                                `if`(
+                                    self$shape > 0,
+                                    list(shape = self$shape),
+                                    list()
+                                )
+                            )
                         )
                     )}
                 ) %>%
@@ -218,6 +232,17 @@ StackedGroupedBarDot <- R6::R6Class(
                         values = self$color_values,
                         labels = self$color_labels,
                         name = self$legend_title
+                    )}
+                ) %>%
+                `+`(
+                    {`if`(
+                        self$shape > 0,
+                        NULL,
+                        scale_shape_manual(
+                            values = omnipath2_settings$get('shapes'),
+                            labels = self$color_labels,
+                            name = self$legend_title
+                        )
                     )}
                 ) %>%
                 `+`(

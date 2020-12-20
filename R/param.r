@@ -78,6 +78,27 @@ get_default_param <- function(){
             '#7264B9',
             '#5B205F'
         ),
+        shapes = c(
+            '\U25CF', # filled circle
+            '\U25FC', # filled square
+            '\U25C6', # filled diamond
+            '\U25B2', # upwards triangle
+            '\U25BC', # downwards triangle
+            '\U25B6', # rightwards triangle
+            '\U25C0', # leftwards triangle
+            '\U25D0', # half circle left
+            '\U25D1', # half circle right
+            '\U25D2', # half circle lower
+            '\U25D3', # half circle upper
+            '\U25E9', # half square upper left
+            '\U25EA', # half square lower right
+            '\U25ED', # half triangle left
+            '\U25EE', # half triangle right
+            '\U25E7', # half square left
+            '\U25E8', # half square right
+            '\U25C9', # fisheye
+            '\U25C8'  # nested diamond
+        ),
         
         console_settings = list(
             width = 270,

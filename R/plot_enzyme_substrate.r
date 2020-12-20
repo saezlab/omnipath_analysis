@@ -507,16 +507,26 @@ EnzymeSubstrateModtypeDot <- R6::R6Class(
             
             self$plt <- ggplot(
                     self$enz_sub_by_resource,
-                    aes(y = sources, x = n_modtype, color = modification)
+                    aes(
+                        y = sources,
+                        x = n_modtype,
+                        color = modification,
+                        shape = modification
+                    )
                 ) +
-                geom_point(size = 4, alpha = .7, shape = 16) +
+                geom_point(size = 4, alpha = .7) +
                 scale_color_manual(
-                    guide = guide_legend(
-                        title = 'Modification type'
-                    ),
+                    name = 'Modification type',
                     values = omnipath2_settings$get(palette2)
                 ) +
-                scale_x_log10(labels = comma, expand = expansion(mult = c(0.1, 0.05))) +
+                scale_shape_manual(
+                    name = 'Modification type',
+                    values = omnipath2_settings$get(shapes)
+                ) +
+                scale_x_log10(
+                    labels = comma,
+                    expand = expansion(mult = c(0.1, 0.05))
+                ) +
                 ylab('Resources') +
                 xlab('Enzyme-PTM interactions')
             

@@ -64,7 +64,12 @@ NetworkCoverageDot <- R6::R6Class(
             
             self$plt <- ggplot(
                     self$data,
-                    aes(y = coverage_pct, x = resource_label, color = group)
+                    aes(
+                        y = coverage_pct,
+                        x = resource_label,
+                        color = group,
+                        shape = group
+                    )
                 ) +
                 geom_col(
                     data = self$data %>%
@@ -81,8 +86,11 @@ NetworkCoverageDot <- R6::R6Class(
                     size = 2.3,
                     alpha = .8,
                     position = position_dodge(width = .4),
-                    shape = 16,
                     stroke = 0
+                ) +
+                scale_shape_manual(
+                    name = 'Protein\ncategories',
+                    values = omnipath2_settings$get('shapes')
                 ) +
                 scale_y_continuous(
                     sec.axis = sec_axis(
@@ -91,9 +99,7 @@ NetworkCoverageDot <- R6::R6Class(
                     )
                 ) +
                 scale_color_manual(
-                    guide = guide_legend(
-                        title = 'Protein\ncategories'
-                    ),
+                    name = 'Protein\ncategories',
                     values = omnipath2_settings$get(palette2)
                 ) +
                 ylab('Coverage [%]') +
@@ -149,7 +155,9 @@ NetworkCoverageDot <- R6::R6Class(
                         arrange(., category, desc(n))
                 )} %>%
                 pull(resource_label) %>%
-                unique()
+                unique() %>%
+                sub('miRNA-', 'miRNA ', .) %>%
+                sub(' \\(total\\)', '', .)
             
             if(!self$only_totals){
 
@@ -166,6 +174,7 @@ NetworkCoverageDot <- R6::R6Class(
             }
 
             self$data <- self$data %>%
+                filter(resource_label != 'KEGG') %>%
                 rename(category = data_model) %>%
                 mutate(
                     resource_type = factor(
@@ -196,8 +205,9 @@ NetworkCoverageDot <- R6::R6Class(
                         levels = unique(category),
                         ordered = TRUE
                     )
-                )
-            
+                ) %>%
+                filter(!is.na(resource_label))
+
             self$height <- 1 + .2 * length(unique(self$data$resource_label))
             
             invisible(self)
@@ -330,6 +340,7 @@ NetworkSizeDot <- R6::R6Class(
                     arrange(., dataset, desc(n)),
                     arrange(., category, desc(n))
                 )} %>%
+                filter(resource_label != 'KEGG') %>%
                 mutate(
                     resource_label = factor(
                         resource_label,
@@ -425,7 +436,7 @@ NetworkDirectionsDot <- R6::R6Class(
                     self$vars
                 ),
                 legend_title = 'Interaction types',
-                shape = 16,
+                shape = -1,
                 size = 2.5,
                 position = position_dodge(width = .4)
             )
@@ -473,6 +484,7 @@ NetworkDirectionsDot <- R6::R6Class(
                 unique()
 
             self$data <- self$data %>%
+            filter(resource_label != 'KEGG') %>%
             {`if`(
                 self$only_totals,
                     arrange(., dataset, desc(n)),
@@ -481,9 +493,13 @@ NetworkDirectionsDot <- R6::R6Class(
             mutate(
                 resource_label = factor(
                     resource_label,
-                    levels = c(
-                        categories,
-                        setdiff(unique(resource_label), categories)
+                    levels = `if`(
+                        self$only_totals,
+                        unique(resource_label),
+                        c(
+                            categories,
+                            setdiff(unique(resource_label), categories)
+                        )
                     ),
                     ordered = TRUE
                 ),

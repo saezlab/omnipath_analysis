@@ -18,6 +18,7 @@
 #  Website: https://omnipathdb.org/
 #
 
+require(magrittr)
 require(dplyr)
 require(readr)
 require(stringr)
@@ -352,28 +353,173 @@ textbook_benchmark <- function(){
     dir.create(figdir, showWarnings = FALSE, recursive = TRUE)
     .intercell_resources <- sort(intercell_resources)
     cov_data <- NULL
+    totals <- NULL
 
     icn_textbook <- 'cytokine_receptor_book_translated.tsv' %>%
         .in_datadir() %>%
-        read_tsv(col_types = cols())
+        read_tsv(col_types = cols()) %>%
+        filter(ligand_uniprot != '' & receptor_uniprot != '') %>%
+        group_by(ligand_uniprot, receptor_uniprot) %>%
+        summarize_all(first) %>%
+        ungroup()
 
     for(resource in .intercell_resources){
 
         param <- list(resources = resource)
 
-        icn <- import_intercell_network(
-            network_param = param,
-            transmitter_param = param,
-            receiver_param = param
+        this_icn <- import_intercell_network(
+                interactions_param = param,
+                transmitter_param = param,
+                receiver_param = param
+            ) %>%
+            group_by(source, target) %>%
+            summarize_all(first) %>%
+            ungroup()
+
+        totals %<>% append(this_icn %>% nrow)
+
+        cov_data %<>%
+            append(
+                this_icn %>%
+                intercell_coverage(icn_textbook)
+            )
+
+    }
+
+    icn_total <- import_intercell_network(
+            interactions_param = list(
+                datasets = c('omnipath', 'ligrecextra', 'pathwayextra')
+            )
         ) %>%
-        select(source_genesymbol, target_genesymbol) %>%
-        inner_join()
+        group_by(source, target) %>%
+        summarize_all(first) %>%
+        ungroup()
 
+    totals %<>% append(icn_total %>% nrow)
 
+    cov_data %<>%
+        append(
+            icn_total %>%
+            intercell_coverage(icn_textbook)
+        )
 
+    coverages <- tibble(
+        resource = c(.intercell_resources, 'OmniPath'),
+        coverage = cov_data / nrow(icn_textbook) * 100,
+        size = totals
+    ) %>%
+    arrange(desc(coverage)) %>%
+    mutate(resource = factor(resource, levels = resource, ordered = TRUE))
 
+    plot_textbook_benchmark(coverages)
+    plot_textbook_benchmark_bar(coverges)
+
+    invisible(coverages)
 
 }
+
+
+plot_textbook_benchmark <- function(coverages){
+
+    cairo_pdf(
+        'textbook_coverage.pdf',
+        width = 3,
+        height = 3,
+        family = 'DINPro'
+    )
+
+        {
+            ggplot(coverages, aes(x = coverage, y = resource)) +
+            geom_point(size = 4, color = '#4268B3') +
+            geom_text(aes(
+                x = coverage - 10,
+                y = resource,
+                label = sprintf('%.1f%%', coverage)),
+                size = 2
+            ) +
+            scale_x_continuous(breaks = c(20, 40, 60, 80, 100)) +
+            expand_limits(x = c(18, 102)) +
+            xlab('Coverage [%]') +
+            ylab('Resources') +
+            ggtitle(paste0(
+                'Coverage of intercellular communi-\ncation resources ',
+                'on a textbook\nknowledge of 131 interactions'
+            )) +
+            theme_bw() +
+            theme(
+                plot.title = element_text(size = 8)
+            )
+        } %>% print()
+
+    dev.off()
+
+}
+
+
+plot_textbook_benchmark_bar <- function(coverages){
+
+    coverages %<>% mutate(
+            size = ifelse(resource == 'HPMR', 650, size)
+        ) %>%
+        arrange(desc(size)) %>%
+        mutate(
+            cov_label = sprintf('%i%%', round(coverage)),
+            resource = factor(
+                resource,
+                levels = unique(resource),
+                ordered = TRUE
+            )
+        )
+
+    cairo_pdf(
+        'textbook_coverage_bar.pdf',
+        width = .8,
+        height = 3,
+        family = 'DINPro'
+    )
+
+        {
+            ggplot(coverages, aes(x = coverage, y = resource)) +
+            geom_col(fill = '#4268B3') +
+            scale_x_continuous(breaks = c(0, 50, 100)) +
+            scale_y_discrete(
+                labels = coverages$cov_label,
+                position = 'right'
+            ) +
+            theme_minimal() +
+            theme(
+                plot.title = element_blank(),
+                text = element_text(
+                    family = 'HelveticaNeueLT Std Lt Cn',
+                    face = 'bold'
+                ),
+                axis.title = element_blank()
+            )
+        } %>% print()
+
+    dev.off()
+
+}
+
+
+intercell_coverage <- function(icn, icn_textbook){
+
+    icn %>%
+    select(source, target) %>%
+    inner_join(
+        icn_textbook,
+        by = c(
+            'source' = 'ligand_uniprot',
+            'target' = 'receptor_uniprot'
+        )
+    ) %>%
+    group_by(source, target) %>%
+    summarize_all(first) %>%
+    ungroup() %>%
+    nrow()
+
+}
+
 
 bmarkdata_main <- function(){
 

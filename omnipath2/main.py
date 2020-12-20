@@ -239,6 +239,7 @@ workflow = collections.OrderedDict(
                 network_dataset = (
                     'omnipath',
                     'curated',
+                    'tf_target',
                 ),
             ),
             name = 'Resources by entity table',
@@ -256,6 +257,7 @@ workflow = collections.OrderedDict(
             name = 'Network coverage on groups of proteins',
             param = ProductParam(
                 network_dataset = (
+                    'tf_target',
                     'omnipath',
                     'curated',
                 ),
